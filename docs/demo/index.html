@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The Wedding of Raka &amp; Ayu · Demo UndanganKita</title>
+  <meta name="description" content="Contoh undangan pernikahan digital dari UndanganKita.">
+  <meta property="og:title" content="The Wedding of Raka &amp; Ayu">
+  <meta property="og:description" content="Sabtu, 20 Februari 2027 · Jakarta — demo UndanganKita">
+  <meta name="theme-color" content="#6b7b5b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/invite.css">
+</head>
+<body class="locked" data-theme="sage">
+
+  <!-- Shared ornaments -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="divider" viewBox="0 0 200 30" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+      <path d="M6 15 H74"/>
+      <path d="M126 15 H194"/>
+      <path d="M100 3 C107 9 107 21 100 27 C93 21 93 9 100 3Z" fill="currentColor" fill-opacity=".25"/>
+      <path d="M96 15 C88 7 80 7 76 15 C80 23 88 23 96 15Z" fill="currentColor" fill-opacity=".15"/>
+      <path d="M104 15 C112 7 120 7 124 15 C120 23 112 23 104 15Z" fill="currentColor" fill-opacity=".15"/>
+      <circle cx="6" cy="15" r="1.6" fill="currentColor"/>
+      <circle cx="194" cy="15" r="1.6" fill="currentColor"/>
+    </symbol>
+    <symbol id="corner" viewBox="0 0 140 140" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+      <path d="M0 0 C28 22 52 52 70 96 C78 114 84 126 88 138"/>
+      <path d="M0 0 C34 8 72 10 136 4"/>
+      <path d="M22 18 C20 6 30 -2 40 0 C40 12 32 18 22 18Z" fill="currentColor" fill-opacity=".22"/>
+      <path d="M40 38 C48 28 62 28 68 34 C60 44 50 44 40 38Z" fill="currentColor" fill-opacity=".22"/>
+      <path d="M36 32 C24 34 16 46 18 54 C30 52 36 42 36 32Z" fill="currentColor" fill-opacity=".18"/>
+      <path d="M58 72 C68 64 80 66 84 72 C76 82 64 80 58 72Z" fill="currentColor" fill-opacity=".22"/>
+      <path d="M54 66 C42 70 38 82 40 90 C52 86 56 76 54 66Z" fill="currentColor" fill-opacity=".18"/>
+      <path d="M72 104 C80 98 90 100 92 106 C86 112 78 112 72 104Z" fill="currentColor" fill-opacity=".22"/>
+      <path d="M52 6 C58 16 70 20 78 18 C74 8 62 4 52 6Z" fill="currentColor" fill-opacity=".18"/>
+      <path d="M84 8 C92 18 104 20 110 16 C104 6 94 4 84 8Z" fill="currentColor" fill-opacity=".22"/>
+      <path d="M112 6 C118 12 126 14 132 10" />
+      <circle cx="88" cy="138" r="2.4" fill="currentColor"/>
+      <circle cx="136" cy="4" r="2.4" fill="currentColor"/>
+    </symbol>
+  </svg>
+
+  <div id="petals" class="petals" aria-hidden="true"></div>
+
+  <!-- ================= COVER ================= -->
+  <section id="cover" class="cover" aria-label="Cover">
+    <svg class="corner tl" aria-hidden="true"><use href="#corner"/></svg>
+    <svg class="corner tr" aria-hidden="true"><use href="#corner"/></svg>
+    <svg class="corner bl" aria-hidden="true"><use href="#corner"/></svg>
+    <svg class="corner br" aria-hidden="true"><use href="#corner"/></svg>
+
+    <div class="cover-inner">
+      <p class="eyebrow" data-i18n="coverEyebrow"></p>
+      <h1 class="script cover-names" data-bind="couple"></h1>
+      <p class="cover-date" data-bind="dateNumeric"></p>
+
+      <div class="envelope" id="envelope">
+        <div class="env-back"></div>
+        <div class="env-letter">
+          <span class="script" data-bind="initialsAmp"></span>
+          <small data-bind="dateNumeric"></small>
+        </div>
+        <div class="env-pocket"></div>
+        <div class="env-flap"></div>
+        <button type="button" class="seal" data-action="open" data-i18n-label="openInvitation">
+          <span data-bind="initials"></span>
+        </button>
+      </div>
+
+      <p class="cover-to" data-i18n="dear"></p>
+      <p class="guest-name" id="guestName"></p>
+      <button type="button" class="btn btn-primary btn-open" data-action="open">
+        <span class="btn-icon" data-icon="mail"></span>
+        <span data-i18n="openInvitation"></span>
+      </button>
+      <p class="cover-note" data-i18n="sorryTypo"></p>
+    </div>
+  </section>
+
+  <!-- ================= DESKTOP SIDE PANEL ================= -->
+  <aside class="side-panel" aria-hidden="true">
+    <div class="side-bg"></div>
+    <div class="side-content">
+      <p class="eyebrow" data-i18n="theWeddingOf"></p>
+      <h2 class="script" data-bind="couple"></h2>
+      <p class="side-date" data-bind="dateLong"></p>
+      <p class="hashtag" data-bind="hashtag"></p>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main id="main" class="main">
+
+    <section id="home" class="section hero">
+      <div class="hero-bg"></div>
+      <svg class="corner tl light" aria-hidden="true"><use href="#corner"/></svg>
+      <svg class="corner br light" aria-hidden="true"><use href="#corner"/></svg>
+      <div class="hero-content">
+        <p class="eyebrow reveal" data-i18n="theWeddingOf"></p>
+        <h2 class="script hero-names reveal" data-bind="couple"></h2>
+        <p class="hero-date reveal" data-bind="dateLong"></p>
+        <div class="countdown reveal" id="countdown">
+          <div><b id="cdD">0</b><span data-i18n="days"></span></div>
+          <div><b id="cdH">00</b><span data-i18n="hours"></span></div>
+          <div><b id="cdM">00</b><span data-i18n="minutes"></span></div>
+          <div><b id="cdS">00</b><span data-i18n="seconds"></span></div>
+        </div>
+        <p class="countdown-done reveal" id="countdownDone" hidden data-i18n="married"></p>
+        <div class="reveal">
+          <button type="button" class="btn btn-ghost" data-action="gcal" data-idx="0">
+            <span class="btn-icon" data-icon="calendar"></span>
+            <span data-i18n="saveTheDate"></span>
+          </button>
+        </div>
+      </div>
+      <a href="#quote" class="scroll-hint" aria-label="Scroll"><span></span></a>
+    </section>
+
+    <section id="quote" class="section quote-section">
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <blockquote class="reveal">
+        <p id="quoteText"></p>
+        <cite id="quoteSource"></cite>
+      </blockquote>
+    </section>
+
+    <section id="couple" class="section alt">
+      <h2 class="section-title reveal" data-i18n="coupleTitle"></h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <p class="lead reveal" id="openingText"></p>
+      <div id="coupleList" class="couple"></div>
+    </section>
+
+    <section id="events" class="section">
+      <h2 class="section-title reveal" data-i18n="eventsTitle"></h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <div id="eventList"></div>
+      <div id="livestream"></div>
+      <div id="dresscode"></div>
+    </section>
+
+    <section id="story" class="section alt">
+      <h2 class="section-title reveal" data-i18n="storyTitle"></h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <ol id="storyList" class="timeline"></ol>
+    </section>
+
+    <section id="gallery" class="section">
+      <h2 class="section-title reveal" data-i18n="galleryTitle"></h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <div id="galleryGrid" class="gallery"></div>
+    </section>
+
+    <section id="rsvp" class="section alt">
+      <h2 class="section-title reveal" data-i18n="rsvpTitle"></h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <p class="lead reveal" id="rsvpIntro"></p>
+
+      <form id="rsvpForm" class="card form reveal" novalidate>
+        <label class="field">
+          <span data-i18n="name"></span>
+          <input name="name" id="rsvpName" maxlength="80" autocomplete="name" required>
+        </label>
+        <fieldset class="field">
+          <legend data-i18n="attendance"></legend>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="attendance" value="yes"><span data-i18n="attend"></span></label>
+            <label class="choice"><input type="radio" name="attendance" value="maybe"><span data-i18n="maybe"></span></label>
+            <label class="choice"><input type="radio" name="attendance" value="no"><span data-i18n="notAttend"></span></label>
+          </div>
+        </fieldset>
+        <label class="field" id="guestsField">
+          <span data-i18n="guests"></span>
+          <select name="guests" id="rsvpGuests"></select>
+        </label>
+        <label class="field">
+          <span data-i18n="message"></span>
+          <textarea name="message" rows="4" maxlength="500" data-i18n-ph="messagePh"></textarea>
+        </label>
+        <p class="form-error" id="rsvpError" role="alert" hidden></p>
+        <button class="btn btn-primary btn-block" type="submit" id="rsvpSubmit" data-i18n="send"></button>
+        <button class="btn btn-ghost btn-block" type="button" data-action="wa-rsvp">
+          <span class="btn-icon" data-icon="whatsapp"></span>
+          <span data-i18n="viaWa"></span>
+        </button>
+      </form>
+
+      <div id="rsvpDone" class="card done" hidden>
+        <div class="done-icon"><span class="btn-icon" data-icon="check"></span></div>
+        <p class="done-title" id="doneTitle"></p>
+        <div id="pass" class="pass" hidden>
+          <p class="eyebrow" data-i18n="passTitle"></p>
+          <div id="passQr" class="pass-qr"></div>
+          <p class="pass-code" id="passCode"></p>
+          <p class="pass-name" id="passName"></p>
+          <p class="pass-text" data-i18n="passText"></p>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" data-action="rsvp-edit" data-i18n="editRsvp"></button>
+      </div>
+
+      <div class="wishes">
+        <h3 class="sub-title"><span data-i18n="wishesTitle"></span> <small id="wishesCount"></small></h3>
+        <ul id="wishesList" class="wishes-list"></ul>
+        <div class="center">
+          <button type="button" class="btn btn-ghost btn-sm" id="wishesMore" data-action="more" hidden data-i18n="loadMore"></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="gift" class="section">
+      <h2 class="section-title reveal" data-i18n="giftTitle"></h2>
+      <svg class="divider" aria-hidden="true"><use href="#divider"/></svg>
+      <p class="lead reveal" data-i18n="giftIntro"></p>
+      <div id="giftList" class="gift-list"></div>
+    </section>
+
+    <section id="closing" class="section closing alt">
+      <svg class="corner bl" aria-hidden="true"><use href="#corner"/></svg>
+      <svg class="corner br" aria-hidden="true"><use href="#corner"/></svg>
+      <p class="lead reveal" id="closingText"></p>
+      <p class="eyebrow reveal" data-i18n="weAre"></p>
+      <h2 class="script closing-names reveal" data-bind="couple"></h2>
+      <p class="hashtag reveal" data-bind="hashtag"></p>
+      <button type="button" class="btn btn-ghost reveal" data-action="share">
+        <span class="btn-icon" data-icon="share"></span>
+        <span data-i18n="share"></span>
+      </button>
+      <footer class="footer"><small data-i18n="footer"></small><a class="powered" id="poweredBy" href="/" target="_blank" rel="noopener"></a></footer>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navigation"></nav>
+
+  <div class="fabs">
+    <button type="button" class="fab" id="langBtn" data-action="lang" aria-label="Language">EN</button>
+    <button type="button" class="fab" id="musicBtn" data-action="music" aria-label="Music" aria-pressed="false">
+      <span class="btn-icon" data-icon="music"></span>
+    </button>
+  </div>
+
+  <audio id="bgm" loop preload="none"></audio>
+
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true">
+    <button type="button" class="lb-btn lb-close" data-action="lb-close" aria-label="Close">&times;</button>
+    <button type="button" class="lb-btn lb-prev" data-action="lb-prev" aria-label="Previous">&#8249;</button>
+    <img id="lbImg" alt="">
+    <button type="button" class="lb-btn lb-next" data-action="lb-next" aria-label="Next">&#8250;</button>
+    <p class="lb-count" id="lbCount"></p>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript><p style="padding:2rem;text-align:center">Aktifkan JavaScript untuk membuka undangan ini.</p></noscript>
+  <script id="invite-data" type="application/json">{"slug": "demo", "published": true, "preview": false, "staticDemo": true, "config": {"theme": "sage", "defaultLang": "id", "timeZone": "Asia/Jakarta", "timeZoneLabel": "WIB", "religion": "islam", "couple": {"groom": {"nickname": "Raka", "fullName": "Raka Aditya Pratama, S.T.", "parents": {"id": "Putra pertama dari Bapak Hendra Pratama \u0026 Ibu Sri Wahyuni", "en": "First son of Mr. Hendra Pratama \u0026 Mrs. Sri Wahyuni"}, "instagram": "raka.pratama", "photo": ""}, "bride": {"nickname": "Ayu", "fullName": "Ayu Lestari Putri, S.Ds.", "parents": {"id": "Putri kedua dari Bapak Bambang Sutrisno \u0026 Ibu Ratna Dewi", "en": "Second daughter of Mr. Bambang Sutrisno \u0026 Mrs. Ratna Dewi"}, "instagram": "ayu.lestari", "photo": ""}}, "brideFirst": false, "heroPhoto": "", "hashtag": "#RakaAyuSelamanya", "weddingDate": "2027-02-20T08:00:00+07:00", "opening": {"id": "Assalamu'alaikum Warahmatullahi Wabarakatuh. Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan pernikahan putra-putri kami:", "en": "With the blessing of God, we joyfully invite you to celebrate the marriage of:"}, "quote": {"text": {"id": "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang.", "en": "And among His signs is that He created for you mates from among yourselves, that you may find tranquility in them; and He placed between you affection and mercy."}, "source": "QS. Ar-Rum: 21"}, "events": [{"title": {"id": "Akad Nikah", "en": "Wedding Ceremony"}, "start": "2027-02-20T08:00:00+07:00", "end": "2027-02-20T10:00:00+07:00", "venue": "Masjid Agung Al-Azhar", "address": "Jl. Sisingamangaraja No. 1, Kebayoran Baru, Jakarta Selatan", "mapsQuery": "Masjid Agung Al-Azhar Jakarta", "mapsUrl": ""}, {"title": {"id": "Resepsi", "en": "Reception"}, "start": "2027-02-20T11:00:00+07:00", "end": "2027-02-20T14:00:00+07:00", "venue": "Balai Kartini", "address": "Jl. Jend. Gatot Subroto Kav. 37, Kuningan, Jakarta Selatan", "mapsQuery": "Balai Kartini Jakarta", "mapsUrl": ""}], "livestream": {"enabled": true, "platform": "YouTube Live", "url": "https://www.youtube.com/"}, "dressCode": {"enabled": true, "colors": ["#7d8b6a", "#c9d1b8", "#e9dfcc", "#b8955a"], "note": {"id": "Kami mengundang Anda mengenakan busana bernuansa sage, krem, atau emas.", "en": "We kindly invite you to dress in shades of sage, cream, or gold."}}, "story": [{"year": "2019", "title": {"id": "Pertama Bertemu", "en": "First Meeting"}, "text": {"id": "Kami pertama kali bertemu di sebuah acara kampus di Bandung. Siapa sangka obrolan singkat itu menjadi awal segalanya.", "en": "We first met at a campus event in Bandung. Who knew that short chat would be the beginning of everything."}}, {"year": "2021", "title": {"id": "Menjalin Kasih", "en": "Falling in Love"}, "text": {"id": "Setelah dua tahun bersahabat, kami memutuskan untuk melangkah bersama.", "en": "After two years of friendship, we decided to walk the path together."}}, {"year": "2026", "title": {"id": "Lamaran", "en": "The Proposal"}, "text": {"id": "Dengan restu kedua keluarga, kami resmi bertunangan di hari yang penuh haru.", "en": "With the blessing of both families, we were officially engaged on a heartfelt day."}}], "gallery": [], "rsvp": {"enabled": true, "deadline": "2027-02-10", "defaultPax": 2, "whatsapp": ""}, "gifts": {"enabled": true, "accounts": [{"provider": "BCA", "number": "1234567890", "holder": "Raka Aditya Pratama"}, {"provider": "GoPay", "number": "081234567890", "holder": "Ayu Lestari Putri"}], "qrisImage": "", "address": {"recipient": "Ayu Lestari Putri", "phone": "081234567890", "text": "Jl. Melati No. 12, Kebayoran Baru, Jakarta Selatan 12160"}}, "music": {"url": "", "builtIn": true}, "closing": {"id": "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Wassalamu'alaikum Warahmatullahi Wabarakatuh.", "en": "It would be an honour and a joy for us if you could attend and give us your blessing."}}, "guest": null, "appName": "UndanganKita", "homeUrl": "../", "sampleWishes": [{"id": "w1", "name": "Dimas \u0026 Sari", "attendance": "yes", "time": "2026-11-03T11:02:33+00:00", "message": "Selamat menempuh hidup baru! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah."}, {"id": "w2", "name": "Tante Lina", "attendance": "yes", "time": "2026-11-03T11:02:33+00:00", "message": "Bahagia sekali mendengar kabar ini. Semoga langgeng sampai kakek nenek ya!"}, {"id": "w3", "name": "Kevin", "attendance": "no", "time": "2026-11-03T11:02:33+00:00", "message": "Maaf belum bisa hadir, doa terbaik dari Singapura. Congrats both of you!"}]}</script>
+  <script src="../assets/qrcode.min.js"></script>
+  <script src="../assets/invite.js"></script>
+</body>
+</html>

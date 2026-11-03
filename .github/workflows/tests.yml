@@ -1,0 +1,23 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Start server
+        run: |
+          DATA_DIR="$RUNNER_TEMP/data" PORT=8000 python server.py > "$RUNNER_TEMP/server.log" 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/healthz && break; sleep 1; done
+      - name: API smoke test (incl. email flows via outbox)
+        run: python tests/smoke_test.py http://127.0.0.1:8000 "$RUNNER_TEMP/data"
+      - name: Server log
+        if: always()
+        run: cat "$RUNNER_TEMP/server.log"

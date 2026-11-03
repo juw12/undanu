@@ -1,0 +1,32 @@
+# One-click deploy on Render: https://render.com/deploy?repo=https://github.com/juw12/undangankita
+# A persistent disk keeps the SQLite database and uploaded photos across deploys
+# (Render disks require a paid instance; the free tier would lose data on restart).
+services:
+  - type: web
+    name: undangankita
+    runtime: docker
+    plan: starter
+    healthCheckPath: /healthz
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: DATA_DIR
+        value: /data
+      - key: SECURE_COOKIES
+        value: "1"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: APP_NAME
+        value: UndanganKita
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false

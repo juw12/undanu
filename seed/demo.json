@@ -1,0 +1,159 @@
+{
+  "theme": "sage",
+  "defaultLang": "id",
+  "timeZone": "Asia/Jakarta",
+  "timeZoneLabel": "WIB",
+  "religion": "islam",
+  "couple": {
+    "groom": {
+      "nickname": "Raka",
+      "fullName": "Raka Aditya Pratama, S.T.",
+      "parents": {
+        "id": "Putra pertama dari Bapak Hendra Pratama & Ibu Sri Wahyuni",
+        "en": "First son of Mr. Hendra Pratama & Mrs. Sri Wahyuni"
+      },
+      "instagram": "raka.pratama",
+      "photo": ""
+    },
+    "bride": {
+      "nickname": "Ayu",
+      "fullName": "Ayu Lestari Putri, S.Ds.",
+      "parents": {
+        "id": "Putri kedua dari Bapak Bambang Sutrisno & Ibu Ratna Dewi",
+        "en": "Second daughter of Mr. Bambang Sutrisno & Mrs. Ratna Dewi"
+      },
+      "instagram": "ayu.lestari",
+      "photo": ""
+    }
+  },
+  "brideFirst": false,
+  "heroPhoto": "",
+  "hashtag": "#RakaAyuSelamanya",
+  "weddingDate": "2027-02-20T08:00:00+07:00",
+  "opening": {
+    "id": "Assalamu'alaikum Warahmatullahi Wabarakatuh. Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan pernikahan putra-putri kami:",
+    "en": "With the blessing of God, we joyfully invite you to celebrate the marriage of:"
+  },
+  "quote": {
+    "text": {
+      "id": "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang.",
+      "en": "And among His signs is that He created for you mates from among yourselves, that you may find tranquility in them; and He placed between you affection and mercy."
+    },
+    "source": "QS. Ar-Rum: 21"
+  },
+  "events": [
+    {
+      "title": {
+        "id": "Akad Nikah",
+        "en": "Wedding Ceremony"
+      },
+      "start": "2027-02-20T08:00:00+07:00",
+      "end": "2027-02-20T10:00:00+07:00",
+      "venue": "Masjid Agung Al-Azhar",
+      "address": "Jl. Sisingamangaraja No. 1, Kebayoran Baru, Jakarta Selatan",
+      "mapsQuery": "Masjid Agung Al-Azhar Jakarta",
+      "mapsUrl": ""
+    },
+    {
+      "title": {
+        "id": "Resepsi",
+        "en": "Reception"
+      },
+      "start": "2027-02-20T11:00:00+07:00",
+      "end": "2027-02-20T14:00:00+07:00",
+      "venue": "Balai Kartini",
+      "address": "Jl. Jend. Gatot Subroto Kav. 37, Kuningan, Jakarta Selatan",
+      "mapsQuery": "Balai Kartini Jakarta",
+      "mapsUrl": ""
+    }
+  ],
+  "livestream": {
+    "enabled": true,
+    "platform": "YouTube Live",
+    "url": "https://www.youtube.com/"
+  },
+  "dressCode": {
+    "enabled": true,
+    "colors": [
+      "#7d8b6a",
+      "#c9d1b8",
+      "#e9dfcc",
+      "#b8955a"
+    ],
+    "note": {
+      "id": "Kami mengundang Anda mengenakan busana bernuansa sage, krem, atau emas.",
+      "en": "We kindly invite you to dress in shades of sage, cream, or gold."
+    }
+  },
+  "story": [
+    {
+      "year": "2019",
+      "title": {
+        "id": "Pertama Bertemu",
+        "en": "First Meeting"
+      },
+      "text": {
+        "id": "Kami pertama kali bertemu di sebuah acara kampus di Bandung. Siapa sangka obrolan singkat itu menjadi awal segalanya.",
+        "en": "We first met at a campus event in Bandung. Who knew that short chat would be the beginning of everything."
+      }
+    },
+    {
+      "year": "2021",
+      "title": {
+        "id": "Menjalin Kasih",
+        "en": "Falling in Love"
+      },
+      "text": {
+        "id": "Setelah dua tahun bersahabat, kami memutuskan untuk melangkah bersama.",
+        "en": "After two years of friendship, we decided to walk the path together."
+      }
+    },
+    {
+      "year": "2026",
+      "title": {
+        "id": "Lamaran",
+        "en": "The Proposal"
+      },
+      "text": {
+        "id": "Dengan restu kedua keluarga, kami resmi bertunangan di hari yang penuh haru.",
+        "en": "With the blessing of both families, we were officially engaged on a heartfelt day."
+      }
+    }
+  ],
+  "gallery": [],
+  "rsvp": {
+    "enabled": true,
+    "deadline": "2027-02-10",
+    "defaultPax": 2,
+    "whatsapp": ""
+  },
+  "gifts": {
+    "enabled": true,
+    "accounts": [
+      {
+        "provider": "BCA",
+        "number": "1234567890",
+        "holder": "Raka Aditya Pratama"
+      },
+      {
+        "provider": "GoPay",
+        "number": "081234567890",
+        "holder": "Ayu Lestari Putri"
+      }
+    ],
+    "qrisImage": "",
+    "address": {
+      "recipient": "Ayu Lestari Putri",
+      "phone": "081234567890",
+      "text": "Jl. Melati No. 12, Kebayoran Baru, Jakarta Selatan 12160"
+    }
+  },
+  "music": {
+    "url": "",
+    "builtIn": true
+  },
+  "closing": {
+    "id": "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Wassalamu'alaikum Warahmatullahi Wabarakatuh.",
+    "en": "It would be an honour and a joy for us if you could attend and give us your blessing."
+  }
+}
