@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
 DOCS = ROOT / "docs"
-REPO_URL = "https://github.com/juw12/undangankita"
+REPO_URL = "https://github.com/juw12/undanu"
 
 
 def replace_all(text, replacements, label):
@@ -70,16 +70,16 @@ def build_demo():
         "staticDemo": True,
         "config": config,
         "guest": None,
-        "appName": "UndanganKita",
+        "appName": "Undanu",
         "homeUrl": "../",
         "sampleWishes": sample_wishes,
     }
     data_json = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     meta = "\n  ".join([
-        "<title>The Wedding of Raka &amp; Ayu · Demo UndanganKita</title>",
-        '<meta name="description" content="Contoh undangan pernikahan digital dari UndanganKita.">',
+        "<title>The Wedding of Raka &amp; Ayu · Demo Undanu</title>",
+        '<meta name="description" content="Contoh undangan pernikahan digital dari Undanu.">',
         '<meta property="og:title" content="The Wedding of Raka &amp; Ayu">',
-        '<meta property="og:description" content="Sabtu, 20 Februari 2027 · Jakarta — demo UndanganKita">',
+        '<meta property="og:description" content="Sabtu, 20 Februari 2027 · Jakarta — demo Undanu">',
     ])
     html = (PUBLIC / "invite.html").read_text(encoding="utf-8")
     html = replace_all(html, [

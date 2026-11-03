@@ -1,9 +1,9 @@
-# One-click deploy on Render: https://render.com/deploy?repo=https://github.com/juw12/undangankita
+# One-click deploy on Render: https://render.com/deploy?repo=https://github.com/juw12/undanu
 # A persistent disk keeps the SQLite database and uploaded photos across deploys
 # (Render disks require a paid instance; the free tier would lose data on restart).
 services:
   - type: web
-    name: undangankita
+    name: undanu
     runtime: docker
     plan: starter
     healthCheckPath: /healthz
@@ -19,7 +19,7 @@ services:
       - key: TRUST_PROXY
         value: "1"
       - key: APP_NAME
-        value: UndanganKita
+        value: Undanu
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

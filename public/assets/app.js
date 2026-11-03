@@ -12,7 +12,7 @@
 
   const state = {
     user: null,
-    appName: 'UndanganKita',
+    appName: 'Undanu',
     view: null,        // { onClick, onInput, onChange, onSubmit, cleanup }
   };
 

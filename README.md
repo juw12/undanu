@@ -1,14 +1,14 @@
-# UndanganKita 💌
+# Undanu 💌
 
 Digital wedding invitations for Indonesia, with RSVP and a guest book. Couples sign up, design an
 envelope-style invitation with a live phone preview, send each guest a personal link on WhatsApp,
 see who opened it and who's coming, and check guests in with a QR e-pass on the wedding day.
 
-**Live demo (static):** https://juw12.github.io/undangankita/ ·
-[demo invitation](https://juw12.github.io/undangankita/demo/?to=Bapak%20Budi%20%26%20Keluarga)
+**Live demo (static):** https://juw12.github.io/undanu/ ·
+[demo invitation](https://juw12.github.io/undanu/demo/?to=Bapak%20Budi%20%26%20Keluarga)
 
-[![tests](https://github.com/juw12/undangankita/actions/workflows/tests.yml/badge.svg)](https://github.com/juw12/undangankita/actions/workflows/tests.yml)
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/juw12/undangankita)
+[![tests](https://github.com/juw12/undanu/actions/workflows/tests.yml/badge.svg)](https://github.com/juw12/undanu/actions/workflows/tests.yml)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/juw12/undanu)
 
 **Stack:** Python 3.9+ standard library only (`http.server`, `sqlite3`, `smtplib`) and vanilla JS.
 Nothing to `pip install`, no build step.
@@ -30,7 +30,7 @@ Nothing to `pip install`, no build step.
   or **donation mode** (in lieu of gifts) where guests transfer to your accounts/QRIS, with an optional "donations go to…" note.
   Rename the section (Tanda Kasih, Amplop Digital, Angpao, Dana Punia, … or your own). Guests can confirm what they sent,
   and the **Hadiah** tab totals it
-- **Reviews:** couples can rate UndanganKita; approved reviews appear on the landing page (moderated by `ADMIN_EMAILS`)
+- **Reviews:** couples can rate Undanu; approved reviews appear on the landing page (moderated by `ADMIN_EMAILS`)
 - Publish/draft toggle and custom link (`/i/your-names`)
 - **Guests:** add one, paste many, or import CSV; per-guest max guests and group; personal links (`?g=CODE`);
   one-click WhatsApp send with an editable template
@@ -78,10 +78,10 @@ GitHub Pages only hosts the static demo. The real app needs a host that runs Pyt
 - **Railway / Fly.io:** deploy from the `Dockerfile`, attach a volume at `/data`, and set `SECURE_COOKIES=1` and `TRUST_PROXY=1`.
 - **VPS:**
   ```bash
-  docker build -t undangankita .
-  docker run -d -p 8000:8000 -v undangan_data:/data -e SECURE_COOKIES=1 -e TRUST_PROXY=1 undangankita
+  docker build -t undanu .
+  docker run -d -p 8000:8000 -v undangan_data:/data -e SECURE_COOKIES=1 -e TRUST_PROXY=1 undanu
   ```
-  Put Caddy in front for HTTPS: `undangankita.id { reverse_proxy localhost:8000 }`.
+  Put Caddy in front for HTTPS: `undanu.id { reverse_proxy localhost:8000 }`.
 
 | Variable | Purpose |
 |---|---|
@@ -89,7 +89,7 @@ GitHub Pages only hosts the static demo. The real app needs a host that runs Pyt
 | `DATA_DIR` | Folder for `app.db`, `uploads/` and `outbox/` (must be persistent) |
 | `SECURE_COOKIES=1` | Set when served over HTTPS (Secure cookies + HSTS) |
 | `TRUST_PROXY=1` | Set behind a reverse proxy/PaaS so client IP and https are detected |
-| `BASE_URL` | Optional public URL, e.g. `https://undangankita.id` (used in emails/CSV links) |
+| `BASE_URL` | Optional public URL, e.g. `https://undanu.id` (used in emails/CSV links) |
 | `APP_NAME` | Brand name |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_SSL=1` | Outgoing email |
 | `ADMIN_EMAILS` | Comma-separated accounts that can moderate reviews at `/app#/admin` |

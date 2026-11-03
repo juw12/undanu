@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-UndanganKita — digital wedding invitation platform (backend).
+Undanu — digital wedding invitation platform (backend).
 
 Zero dependencies: Python 3.9+ standard library only (http.server + sqlite3).
 
@@ -9,7 +9,7 @@ Zero dependencies: Python 3.9+ standard library only (http.server + sqlite3).
 Environment variables:
     PORT=8000              HOST=0.0.0.0
     DATA_DIR=./data        (SQLite database + uploaded photos; mount a persistent disk here)
-    APP_NAME=UndanganKita
+    APP_NAME=Undanu
     BASE_URL=https://...   (optional; used for absolute links in CSV / link previews)
     SECURE_COOKIES=1       (set when served over HTTPS)
     TRUST_PROXY=1          (set when behind a reverse proxy / PaaS load balancer)
@@ -54,7 +54,7 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", ROOT / "data")).resolve()
 UPLOAD_DIR = DATA_DIR / "uploads"
 DB_PATH = DATA_DIR / "app.db"
 
-APP_NAME = os.environ.get("APP_NAME", "UndanganKita")
+APP_NAME = os.environ.get("APP_NAME", "Undanu")
 BASE_URL = os.environ.get("BASE_URL", "").rstrip("/")
 SECURE_COOKIES = os.environ.get("SECURE_COOKIES") == "1"
 TRUST_PROXY = os.environ.get("TRUST_PROXY") == "1"
@@ -1565,7 +1565,7 @@ atau belum dipublikasikan.</p><a class="btn btn-primary" href="/">Ke beranda</a>
 # HTTP handler
 # --------------------------------------------------------------------------- #
 class Handler(BaseHTTPRequestHandler):
-    server_version = "UndanganKita"
+    server_version = "Undanu"
     sys_version = ""
     protocol_version = "HTTP/1.1"
 

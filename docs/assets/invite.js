@@ -434,7 +434,7 @@
     $('#guestName').textContent = guest.name || t('defaultGuest');
     const powered = $('#poweredBy');
     if (powered) {
-      powered.textContent = t('poweredBy', { app: DATA.appName || 'UndanganKita' });
+      powered.textContent = t('poweredBy', { app: DATA.appName || 'Undanu' });
       powered.href = DATA.homeUrl || '/';
     }
   }
@@ -1198,7 +1198,7 @@
   function downloadIcs(ev) {
     const icsText = (s) => String(s).replace(/\\/g, '\\\\').replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n');
     const lines = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//UndanganKita//ID', 'CALSCALE:GREGORIAN',
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Undanu//ID', 'CALSCALE:GREGORIAN',
       'BEGIN:VEVENT',
       `UID:${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}@undangan`,
       `DTSTAMP:${toCalDate(new Date().toISOString())}`,
