@@ -90,6 +90,34 @@
       poweredBy: 'Buat undanganmu sendiri di {app}',
       previewBanner: 'PRATINJAU — undangan belum dipublikasikan',
       navHome: 'Beranda', navCouple: 'Mempelai', navEvents: 'Acara', navGallery: 'Galeri', navRsvp: 'RSVP', navGift: 'Hadiah',
+      videoTitle: 'Video',
+      watchHere: 'Putar di sini',
+      liveNow: 'Sedang berlangsung — tonton sekarang!',
+      songRequest: 'Request lagu untuk acara (opsional)',
+      songPh: 'Judul lagu – penyanyi',
+      shareTitle: 'Bagikan undangan',
+      storyShort: 'Story IG',
+      copyLink: 'Salin link',
+      moreApps: 'Aplikasi lain…',
+      close: 'Tutup',
+      storyMaking: 'Membuat gambar story…',
+      storyReady: 'Gambar tersimpan — unggah ke Instagram Story ✨',
+      like: 'Suka',
+      coupleReply: 'Balasan mempelai',
+      giftConfirmTitle: 'Konfirmasi Tanda Kasih',
+      donationConfirm: 'Konfirmasi Donasi',
+      giftConfirmText: 'Sudah mengirim? Beri tahu kami agar kami bisa mengucapkan terima kasih secara langsung.',
+      giftConfirmBtn: 'Isi konfirmasi',
+      giftMethod: 'Dikirim melalui',
+      giftAmount: 'Nominal (opsional)',
+      giftMessage: 'Pesan (opsional)',
+      giftOther: 'Lainnya',
+      giftPhysical: 'Kado fisik',
+      giftSubmit: 'Kirim konfirmasi',
+      giftSent: 'Terima kasih! Konfirmasi Anda sudah kami terima. 🙏',
+      donationTitle: 'Donasi',
+      donationIntro: 'Sebagai pengganti kado, kami mengajak Anda berbagi kebaikan melalui donasi berikut:',
+      donateNow: 'Donasi sekarang',
       waRsvp: 'Halo, saya *{name}* ingin mengonfirmasi kehadiran di pernikahan {couple}:\n\nKehadiran: *{att}*\nJumlah tamu: {n}\n\nUcapan: {msg}'
     },
     en: {
@@ -163,6 +191,34 @@
       poweredBy: 'Create your own invitation at {app}',
       previewBanner: 'PREVIEW — this invitation is not published yet',
       navHome: 'Home', navCouple: 'Couple', navEvents: 'Events', navGallery: 'Gallery', navRsvp: 'RSVP', navGift: 'Gift',
+      videoTitle: 'Video',
+      watchHere: 'Play here',
+      liveNow: 'Happening now — watch live!',
+      songRequest: 'Request a song for the party (optional)',
+      songPh: 'Song title – artist',
+      shareTitle: 'Share invitation',
+      storyShort: 'IG Story',
+      copyLink: 'Copy link',
+      moreApps: 'More apps…',
+      close: 'Close',
+      storyMaking: 'Creating story image…',
+      storyReady: 'Image saved — post it to your Instagram Story ✨',
+      like: 'Like',
+      coupleReply: 'Reply from the couple',
+      giftConfirmTitle: 'Gift Confirmation',
+      donationConfirm: 'Donation Confirmation',
+      giftConfirmText: 'Already sent something? Let us know so we can thank you personally.',
+      giftConfirmBtn: 'Confirm',
+      giftMethod: 'Sent via',
+      giftAmount: 'Amount (optional)',
+      giftMessage: 'Message (optional)',
+      giftOther: 'Other',
+      giftPhysical: 'Physical gift',
+      giftSubmit: 'Send confirmation',
+      giftSent: 'Thank you! We have received your confirmation. 🙏',
+      donationTitle: 'Donation',
+      donationIntro: 'In lieu of gifts, we invite you to share kindness through this donation:',
+      donateNow: 'Donate now',
       waRsvp: 'Hello, this is *{name}* confirming my RSVP for the wedding of {couple}:\n\nAttendance: *{att}*\nGuests: {n}\n\nWishes: {msg}'
     }
   };
@@ -186,6 +242,7 @@
     whatsapp: '<path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/><path d="M8.5 9.5c.5 2.5 3 5 5.5 5.5l1.2-1.2 1.8.8-.4 1.6c-3.8.4-8.2-4-7.8-7.8l1.6-.4.8 1.8z"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
     shirt: '<path d="M20.4 6.6 16 3a4 4 0 0 1-8 0L3.6 6.6a1 1 0 0 0-.2 1.3l2 3a1 1 0 0 0 1.3.3L8 10.5V21h8V10.5l1.3.7a1 1 0 0 0 1.3-.3l2-3a1 1 0 0 0-.2-1.3z"/>',
+    tiktok: '<path d="M9 12a4 4 0 1 0 4 4V3c.6 2.5 2.5 4.5 5.5 4.8"/>',
     qr: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 17h4v4h-4"/>'
   };
   const icon = (name) =>
@@ -204,7 +261,7 @@
 
   function safeUrl(value) {
     const text = String(value || '').trim();
-    if (/^\/uploads\/\d+\/[A-Za-z0-9_-]+\.(jpg|png|webp|gif|mp3)$/.test(text)) {
+    if (/^\/uploads\/\d+\/[A-Za-z0-9_-]+\.(jpg|png|webp|gif|mp3|mp4|webm|mov)$/.test(text)) {
       return text;
     }
     if (/^https?:\/\/[^\s"'<>]+$/i.test(text)) {
@@ -336,6 +393,8 @@
     document.documentElement.lang = state.lang;
     applyStaticText();
     renderBindings();
+    renderSymbol();
+    renderHeroMedia();
     renderQuote();
     renderCouple();
     renderEvents();
@@ -351,6 +410,7 @@
     updateCountdown();
     $('#langBtn').textContent = state.lang === 'id' ? 'EN' : 'ID';
     $('#musicBtn').hidden = !hasMusic();
+    $('#musicBtn').title = musicUrl() ? '' : (SONGS[songId()]?.title || '');
     observeReveals();
   }
 
@@ -393,6 +453,64 @@
     });
   }
 
+  const SYMBOLS = {
+    islam: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+    kristen: 'cross',
+    katolik: 'cross',
+    hindu: 'ॐ',
+    buddha: '☸',
+    konghucu: '囍'
+  };
+  const CROSS_SVG = '<svg viewBox="0 0 24 34" width="20" height="28" fill="currentColor" aria-hidden="true"><rect x="10" y="0" width="4" height="34" rx="1"/><rect x="3" y="8" width="18" height="4" rx="1"/></svg>';
+
+  function renderSymbol() {
+    const symbol = SYMBOLS[C.religion] || '';
+    const show = Boolean(symbol) && C.showSymbol !== false;
+    $$('[data-symbol]').forEach((el) => {
+      el.hidden = !show;
+      el.classList.toggle('arabic', C.religion === 'islam');
+      el.innerHTML = !show ? '' : symbol === 'cross' ? CROSS_SVG : `<span>${esc(symbol)}</span>`;
+    });
+  }
+
+  let slideTimer = null;
+  function renderHeroMedia() {
+    const home = $('#home');
+    home.querySelector('.hero-media')?.remove();
+    home.classList.remove('has-media');
+    clearInterval(slideTimer);
+    const mode = C.heroMode || 'photo';
+    const heroVideo = safeUrl(C.heroVideo);
+    const poster = safeUrl(C.heroPhoto);
+    let media = null;
+    if (mode === 'video' && heroVideo) {
+      media = document.createElement('div');
+      media.className = 'hero-media';
+      media.innerHTML = `<video autoplay muted loop playsinline preload="auto" ${poster ? `poster="${esc(poster)}"` : ''} src="${esc(heroVideo)}"></video>`;
+    } else if (mode === 'slideshow') {
+      const photos = Array.from(new Set([poster, ...galleryItems().map((item) => item.src)].filter(Boolean))).slice(0, 6);
+      if (photos.length >= 2) {
+        media = document.createElement('div');
+        media.className = 'hero-media slides';
+        media.innerHTML = photos.map((src, i) => `<img src="${esc(src)}" alt="" class="${i === 0 ? 'active' : ''}">`).join('');
+        if (!reduceMotion) {
+          let index = 0;
+          slideTimer = setInterval(() => {
+            const slides = media.querySelectorAll('img');
+            slides[index].classList.remove('active');
+            index = (index + 1) % slides.length;
+            slides[index].classList.add('active');
+          }, 5000);
+        }
+      }
+    }
+    if (media) {
+      home.prepend(media);
+      home.classList.add('has-media');
+      media.querySelector('video')?.play().catch(() => {});
+    }
+  }
+
   function renderQuote() {
     const text = L(C.quote?.text);
     $('#quote').hidden = !text;
@@ -406,9 +524,12 @@
       ? `<img src="${esc(photoUrl)}" alt="${esc(person.fullName)}" loading="lazy">`
       : `<span class="monogram">${esc(initial(person))}</span>`;
     const handle = String(person.instagram || '').replace(/[^A-Za-z0-9._]/g, '');
-    const instagram = handle
-      ? `<a class="ig" href="https://instagram.com/${encodeURIComponent(handle)}" target="_blank" rel="noopener">${icon('instagram')} @${esc(handle)}</a>`
-      : '';
+    const tiktokHandle = String(person.tiktok || '').replace(/[^A-Za-z0-9._]/g, '');
+    const socials = [
+      handle ? `<a class="ig" href="https://instagram.com/${encodeURIComponent(handle)}" target="_blank" rel="noopener">${icon('instagram')} @${esc(handle)}</a>` : '',
+      tiktokHandle ? `<a class="ig" href="https://www.tiktok.com/@${encodeURIComponent(tiktokHandle)}" target="_blank" rel="noopener">${icon('tiktok')} @${esc(tiktokHandle)}</a>` : ''
+    ].join('');
+    const instagram = socials ? `<div class="socials">${socials}</div>` : '';
     return `
       <article class="person reveal">
         <div class="portrait">${photo}</div>
@@ -463,15 +584,62 @@
     }).join('');
   }
 
+  function embedUrl(url) {
+    const youtube = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|live\/|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(url || '');
+    if (youtube) {
+      return `https://www.youtube-nocookie.com/embed/${youtube[1]}?rel=0&playsinline=1`;
+    }
+    const vimeo = /vimeo\.com\/(?:video\/)?(\d+)/.exec(url || '');
+    return vimeo ? `https://player.vimeo.com/video/${vimeo[1]}` : '';
+  }
+
+  const iframePlayer = (src) => `<div class="video-frame"><iframe src="${esc(src)}" title="Video" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`;
+
+  function liveWindow() {
+    const list = events().filter((ev) => validDate(ev.start));
+    if (!list.length) {
+      return null;
+    }
+    const starts = list.map((ev) => new Date(ev.start).getTime());
+    const ends = list.map((ev) => (validDate(ev.end) ? new Date(ev.end).getTime() : new Date(ev.start).getTime() + 3 * 3600e3));
+    return [Math.min(...starts) - 30 * 60e3, Math.max(...ends) + 30 * 60e3];
+  }
+
+  function isLive() {
+    const range = liveWindow();
+    const now = Date.now();
+    return Boolean(C.livestream?.enabled && safeUrl(C.livestream?.url) && range && now >= range[0] && now <= range[1]);
+  }
+
   function renderLivestream() {
     const ls = C.livestream;
     const url = safeUrl(ls?.url);
-    $('#livestream').innerHTML = ls && ls.enabled && url ? `
-      <div class="card info-card reveal">
-        <h3>${icon('video')} ${esc(t('livestreamTitle'))}</h3>
-        <p>${esc(t('livestreamText'))} <strong>${esc(ls.platform || '')}</strong>.</p>
-        <a class="btn btn-primary btn-sm" href="${esc(url)}" target="_blank" rel="noopener">${icon('video')} ${esc(t('watch'))}</a>
-      </div>` : '';
+    state.liveRendered = isLive();
+    if (!ls || !ls.enabled || !url) {
+      $('#livestream').innerHTML = '';
+      return;
+    }
+    const embed = embedUrl(url);
+    const live = state.liveRendered;
+    $('#livestream').innerHTML = `
+      <div class="card info-card reveal" id="liveCard">
+        <h3>${icon('video')} ${esc(t('livestreamTitle'))} ${live ? '<span class="live-badge">LIVE</span>' : ''}</h3>
+        <p>${live ? esc(t('liveNow')) : `${esc(t('livestreamText'))} <strong>${esc(ls.platform || '')}</strong>.`}</p>
+        <div id="livePlayer">${embed && live ? iframePlayer(embed) : ''}</div>
+        <div class="actions">
+          ${embed && !live ? `<button type="button" class="btn btn-ghost btn-sm" data-action="embed-live">▶ ${esc(t('watchHere'))}</button>` : ''}
+          <a class="btn btn-primary btn-sm" href="${esc(url)}" target="_blank" rel="noopener">${icon('video')} ${esc(t('watch'))}</a>
+        </div>
+      </div>`;
+  }
+
+  function updateLiveState() {
+    const live = isLive();
+    $('#livePill').hidden = !live;
+    if (live !== state.liveRendered) {
+      renderLivestream();
+      revealVisibleNow();
+    }
   }
 
   function renderDressCode() {
@@ -529,15 +697,51 @@
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
 
+  const isVideoUrl = (url) => /\.(mp4|webm|mov)$/i.test(url || '');
+
+  function galleryItems() {
+    return (Array.isArray(C.gallery) ? C.gallery : []).map((item) => {
+      if (item && typeof item === 'object') {
+        return { src: safeUrl(item.src), video: safeUrl(item.video) };
+      }
+      const url = safeUrl(item);
+      return isVideoUrl(url) ? { src: '', video: url } : { src: url, video: '' };
+    }).filter((item) => item.src || item.video);
+  }
+
+  function renderVideo() {
+    const video = C.video || {};
+    const url = safeUrl(video.url);
+    const box = $('#videoBox');
+    if (!video.enabled || !url) {
+      box.innerHTML = '';
+      return false;
+    }
+    const embed = embedUrl(url);
+    const player = embed
+      ? iframePlayer(embed)
+      : `<div class="video-frame"><video controls playsinline preload="metadata" src="${esc(url)}"></video></div>`;
+    box.innerHTML = `<h3 class="sub-title reveal">${esc(L(video.title) || t('videoTitle'))}</h3><div class="reveal">${player}</div>`;
+    return true;
+  }
+
   function renderGallery() {
-    const photos = (Array.isArray(C.gallery) ? C.gallery : []).map(safeUrl).filter(Boolean);
-    const sources = photos.length ? photos : (DATA.preview ? Array.from({ length: 4 }, (_, i) => placeholderImage(i)) : []);
-    $('#gallery').hidden = !sources.length;
-    state.galleryItems = sources;
-    $('#galleryGrid').innerHTML = sources.map((src, i) => `
-      <button type="button" class="reveal" data-action="lightbox" data-idx="${i}" aria-label="${esc(t('photo'))} ${i + 1}">
-        <img src="${esc(src)}" alt="${esc(t('photo'))} ${i + 1}" loading="lazy">
-      </button>`).join('');
+    let items = galleryItems();
+    if (!items.length && DATA.preview) {
+      items = Array.from({ length: 4 }, (_, i) => ({ src: placeholderImage(i), video: '' }));
+    }
+    const hasVideo = renderVideo();
+    $('#gallery').hidden = !items.length && !hasVideo;
+    state.galleryItems = items;
+    $('#galleryGrid').innerHTML = items.map((item, i) => {
+      const media = item.src
+        ? `<img src="${esc(item.src)}" alt="${esc(t('photo'))} ${i + 1}" loading="lazy">`
+        : `<video src="${esc(item.video)}#t=0.1" preload="metadata" muted playsinline></video>`;
+      const badge = item.src && item.video
+        ? '<span class="media-badge">LIVE</span>'
+        : (!item.src ? '<span class="media-badge play">▶</span>' : '');
+      return `<button type="button" class="reveal" data-action="lightbox" data-idx="${i}" aria-label="${esc(t('photo'))} ${i + 1}">${media}${badge}</button>`;
+    }).join('');
   }
 
   function rsvpEnabled() {
@@ -558,6 +762,7 @@
     select.innerHTML = Array.from({ length: guest.pax }, (_, i) => `<option value="${i + 1}">${i + 1} ${esc(t('person'))}</option>`).join('');
     select.value = Number(current) <= guest.pax ? current : '1';
     $('[data-action="wa-rsvp"]').hidden = !String(C.rsvp?.whatsapp || '').replace(/\D/g, '');
+    $('#songField').hidden = !C.rsvp?.songRequests;
     if (!rsvpEnabled()) {
       $('#rsvpForm').hidden = true;
       $('#rsvpDone').hidden = !state.rsvp;
@@ -577,8 +782,40 @@
     const accounts = Array.isArray(gifts.accounts) ? gifts.accounts.filter((a) => a && a.number) : [];
     const qrisUrl = safeUrl(gifts.qrisImage);
     const addr = gifts.address && gifts.address.text ? gifts.address : null;
-    const hasContent = accounts.length || qrisUrl || addr;
+    const charity = gifts.mode === 'charity';
+    const charityUrl = safeUrl(gifts.charity?.url);
+    const charityCard = charity && gifts.charity?.name ? `
+      <div class="card gift-extra reveal">
+        <span class="gift-icon">${icon('heart')}</span>
+        <h3>${esc(gifts.charity.name)}</h3>
+        <p>${esc(L(gifts.charity.description))}</p>
+        ${charityUrl ? `<a class="btn btn-primary btn-sm" href="${esc(charityUrl)}" target="_blank" rel="noopener">${esc(t('donateNow'))}</a>` : ''}
+      </div>` : '';
+    const hasContent = accounts.length || qrisUrl || addr || charityCard;
     $('#gift').hidden = gifts.enabled === false || !hasContent;
+    $('#gift .section-title').textContent = charity ? t('donationTitle') : t('giftTitle');
+    $('#gift .lead').textContent = charity ? t('donationIntro') : t('giftIntro');
+    const methodOptions = [
+      ...accounts.map((acc) => acc.provider).filter(Boolean),
+      ...(qrisUrl ? ['QRIS'] : []),
+      ...(addr ? [t('giftPhysical')] : []),
+      t('giftOther')
+    ];
+    const confirmCard = gifts.confirmations === false ? '' : `
+      <div class="card gift-extra gift-confirm reveal">
+        <h3>${esc(charity ? t('donationConfirm') : t('giftConfirmTitle'))}</h3>
+        <p>${esc(t('giftConfirmText'))}</p>
+        <button type="button" class="btn btn-ghost btn-sm" data-action="gift-toggle" id="giftToggle">${esc(t('giftConfirmBtn'))}</button>
+        <form id="giftForm" class="form gift-form" hidden novalidate>
+          <label class="field"><span>${esc(t('name'))}</span><input name="name" maxlength="80" value="${esc(guest.name)}" required></label>
+          <label class="field"><span>${esc(t('giftMethod'))}</span><select name="method">${methodOptions.map((m) => `<option>${esc(m)}</option>`).join('')}</select></label>
+          <label class="field"><span>${esc(t('giftAmount'))}</span><input name="amount" inputmode="numeric" placeholder="Rp"></label>
+          <label class="field"><span>${esc(t('giftMessage'))}</span><textarea name="message" rows="2" maxlength="300"></textarea></label>
+          <p class="form-error" id="giftError" hidden></p>
+          <button class="btn btn-primary btn-block" type="submit">${esc(t('giftSubmit'))}</button>
+        </form>
+        <p class="gift-done" id="giftDone" hidden>${esc(t('giftSent'))}</p>
+      </div>`;
     const prefix = t('holderPrefix');
     const cards = accounts.map((acc) => `
       <div class="bank-card reveal">
@@ -603,11 +840,16 @@
         <p><strong>${esc(addr.recipient)}</strong>${addr.phone ? ' · ' + esc(addr.phone) : ''}<br>${esc(addr.text)}</p>
         <button type="button" class="btn btn-ghost btn-sm" data-action="copy" data-copy="${esc(`${addr.recipient || ''}${addr.phone ? ' (' + addr.phone + ')' : ''}\n${addr.text}`)}">${icon('copy')} ${esc(t('copyAddress'))}</button>
       </div>` : '';
-    $('#giftList').innerHTML = cards + qris + address;
+    $('#giftList').innerHTML = charityCard + cards + qris + address + confirmCard;
   }
 
   function renderClosing() {
     $('#closingText').textContent = L(C.closing);
+    const tag = String(C.hashtag || '').replace(/^#/, '').replace(/[^\p{L}\p{N}_]/gu, '');
+    const el = $('.closing .hashtag');
+    if (el && tag) {
+      el.innerHTML = `<a href="https://www.instagram.com/explore/tags/${encodeURIComponent(tag)}/" target="_blank" rel="noopener">#${esc(tag)}</a>`;
+    }
   }
 
   function renderNav() {
@@ -664,10 +906,80 @@
             ${w.attendance ? `<span class="badge ${esc(w.attendance)}">${esc(attendanceLabel(w.attendance))}</span>` : ''}
           </div>
           <p>${esc(w.message)}</p>
-          <time datetime="${esc(w.time)}">${esc(timeAgo(w.time))}</time>
+          <div class="wish-foot">
+            <time datetime="${esc(w.time)}">${esc(timeAgo(w.time))}</time>
+            <button type="button" class="like ${likedWishes.has(String(w.id)) ? 'on' : ''}" data-action="like" data-id="${esc(w.id)}" aria-label="${esc(t('like'))}">♥ <span>${Number(w.likes) || 0}</span></button>
+          </div>
+          ${w.reply ? `<div class="wish-reply"><b>${esc(t('coupleReply'))}</b><p>${esc(w.reply)}</p></div>` : ''}
         </div>
       </li>`).join('');
     $('#wishesMore').hidden = list.length >= state.wishesTotal;
+  }
+
+  const likedWishes = new Set(loadJSON(`liked_${SLUG}`, []).map(String));
+
+  function voterId() {
+    let voter = loadJSON('inv_voter');
+    if (!voter) {
+      voter = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join('');
+      saveJSON('inv_voter', voter);
+    }
+    return voter;
+  }
+
+  async function likeWish(id) {
+    if (likedWishes.has(id)) {
+      return;
+    }
+    likedWishes.add(id);
+    saveJSON(`liked_${SLUG}`, Array.from(likedWishes));
+    const wish = state.wishes.find((w) => String(w.id) === id);
+    if (!wish) {
+      return;
+    }
+    wish.likes = (Number(wish.likes) || 0) + 1;
+    renderWishes();
+    if (STATIC_DEMO) {
+      return;
+    }
+    try {
+      const result = await api(`/api/public/${SLUG}/wishes/${encodeURIComponent(id)}/like`, {
+        method: 'POST',
+        body: JSON.stringify({ voter: voterId() })
+      });
+      wish.likes = result.likes;
+      renderWishes();
+    } catch {
+      /* keep optimistic count */
+    }
+  }
+
+  async function submitGift(form) {
+    const data = Object.fromEntries(new FormData(form));
+    const body = {
+      name: String(data.name || '').trim(),
+      method: data.method,
+      amount: parseInt(String(data.amount || '').replace(/\D/g, ''), 10) || 0,
+      message: String(data.message || '').trim(),
+      guestCode: guest.code || undefined
+    };
+    const errorBox = $('#giftError');
+    if (!body.name) {
+      errorBox.textContent = t('required');
+      errorBox.hidden = false;
+      return;
+    }
+    try {
+      if (!STATIC_DEMO) {
+        await api(`/api/public/${SLUG}/gift`, { method: 'POST', body: JSON.stringify(body) });
+      }
+      form.hidden = true;
+      $('#giftToggle').hidden = true;
+      $('#giftDone').hidden = false;
+    } catch (err) {
+      errorBox.textContent = err.message || t('sendFailed');
+      errorBox.hidden = false;
+    }
   }
 
   async function loadWishes({ append = false } = {}) {
@@ -704,7 +1016,8 @@
       name,
       attendance,
       guests: attendance === 'no' ? 0 : clamp(parseInt(data.get('guests'), 10) || 1, 1, guest.pax),
-      message: String(data.get('message') || '').trim().slice(0, 500)
+      message: String(data.get('message') || '').trim().slice(0, 500),
+      song: String(data.get('song') || '').trim().slice(0, 120)
     };
   }
 
@@ -793,6 +1106,7 @@
       }
       form.elements.guests.value = String(Math.max(1, saved.guests || 1));
       form.elements.message.value = saved.message || '';
+      form.elements.song.value = saved.song || '';
       $('#guestsField').hidden = saved.attendance === 'no';
     }
     $('#rsvpDone').hidden = true;
@@ -912,12 +1226,77 @@
   /* ------------------------------------------------------------------ */
   /* Music: uploaded audio, or built-in WebAudio music box (Canon in D) */
   /* ------------------------------------------------------------------ */
+  // Built-in song library: public-domain melodies and an original gamelan-style pattern.
+  const ELISE = (() => {
+    const m1 = [[76], [75], [76], [71], [74], [72]];
+    const m2 = [[69, 45], [52], [57], [60], [64], [69]];
+    const m3 = [[71, 40], [52], [56], [64], [68], [71]];
+    const m4 = [[72, 45], [52], [57], [64], [76], [75]];
+    const m7 = [[71, 40], [52], [56], [64], [72], [71]];
+    const m8 = [[69, 45], [52], [57], [], [], []];
+    return [[76], [75], ...m1, ...m2, ...m3, ...m4, ...m1, ...m2, ...m7, ...m8];
+  })();
+  const JOY = (() => {
+    const phrase = (ending) => [[76, 2], [76, 2], [77, 2], [79, 2], [79, 2], [77, 2], [76, 2], [74, 2],
+      [72, 2], [72, 2], [74, 2], [76, 2], ...ending];
+    const melody = [...phrase([[76, 3], [74, 1], [74, 4]]), ...phrase([[74, 3], [72, 1], [72, 4]])];
+    const steps = [];
+    melody.forEach(([note, length]) => {
+      steps.push([note]);
+      for (let i = 1; i < length; i += 1) {
+        steps.push([]);
+      }
+    });
+    const bass = [48, 43, 48, 43, 48, 43, 48, 48];
+    return steps.map((notes, i) => (i % 4 === 0 ? [...notes, bass[Math.floor(i / 8) % bass.length]] : notes));
+  })();
+  const GAMELAN_SCALE = [62, 64, 67, 69, 71, 74];
+  const GAMELAN_CORE = [2, 3, 2, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3, 2, 0];
+  const SONGS = {
+    canon: { title: 'Canon in D — Pachelbel', step: 0.32 },
+    elise: {
+      title: 'Für Elise — Beethoven',
+      step: 0.19,
+      notes: (n) => ELISE[n % ELISE.length].map((m) => [m, m < 60 ? 0.12 : 0.2, m < 60 ? 1.4 : 1.1])
+    },
+    joy: {
+      title: 'Ode to Joy — Beethoven',
+      step: 0.24,
+      notes: (n) => JOY[n % JOY.length].map((m) => [m, m < 60 ? 0.16 : 0.2, m < 60 ? 2 : 1.4])
+    },
+    gamelan: {
+      title: 'Gamelan Lembut',
+      step: 0.3,
+      metal: true,
+      notes: (n) => {
+        const beat = n % 16;
+        const core = GAMELAN_SCALE[GAMELAN_CORE[beat]];
+        const out = [[core, 0.18, 2.2]];
+        if (n % 2 === 1) {
+          out.push([GAMELAN_SCALE[(GAMELAN_CORE[beat] + 2) % GAMELAN_SCALE.length] + 12, 0.08, 1.2]);
+        }
+        if (beat % 4 === 0) {
+          out.push([57, 0.12, 2.5]);
+        }
+        if (beat === 0) {
+          out.push([38, 0.35, 5]);
+        }
+        return out;
+      }
+    }
+  };
+  const songId = () => {
+    const preset = C.music?.preset || (C.music?.builtIn === false ? 'none' : 'canon');
+    return SONGS[preset] ? preset : 'none';
+  };
+
   const MusicBox = (() => {
     let ctx = null;
     let out = null;
     let timer = null;
     let nextTime = 0;
     let step = 0;
+    let song = SONGS.canon;
     const NOTE = 0.32;
     const chords = [
       [62, 66, 69], [57, 61, 64], [59, 62, 66], [54, 57, 61],
@@ -951,11 +1330,12 @@
       const overtone = ctx.createOscillator();
       const gain = ctx.createGain();
       const overtoneGain = ctx.createGain();
-      osc.type = 'triangle';
+      osc.type = song.metal ? 'sine' : 'triangle';
       overtone.type = 'sine';
       osc.frequency.value = freq(midi);
-      overtone.frequency.value = freq(midi + 12);
-      overtoneGain.gain.value = 0.25;
+      // Gamelan bars ring with an inharmonic partial; the music box uses the octave.
+      overtone.frequency.value = song.metal ? freq(midi) * 2.76 : freq(midi + 12);
+      overtoneGain.gain.value = song.metal ? 0.35 : 0.25;
       osc.connect(gain);
       overtone.connect(overtoneGain);
       overtoneGain.connect(gain);
@@ -970,6 +1350,14 @@
     }
 
     function schedule() {
+      if (song.notes) {
+        while (nextTime < ctx.currentTime + 0.6) {
+          song.notes(step).forEach(([midi, volume, length]) => pluck(midi, nextTime, volume, length));
+          nextTime += song.step;
+          step += 1;
+        }
+        return;
+      }
       while (nextTime < ctx.currentTime + 0.6) {
         const chordIndex = Math.floor(step / 8) % chords.length;
         const chord = chords[chordIndex];
@@ -988,9 +1376,13 @@
     }
 
     return {
-      start() {
+      start(id) {
         if (!ctx) {
           init();
+        }
+        if (SONGS[id] !== song) {
+          song = SONGS[id] || SONGS.canon;
+          step = 0;
         }
         ctx.resume();
         out.gain.cancelScheduledValues(ctx.currentTime);
@@ -1013,7 +1405,7 @@
 
   const audio = $('#bgm');
   const musicUrl = () => safeUrl(C.music?.url);
-  const hasMusic = () => Boolean(musicUrl()) || C.music?.builtIn !== false;
+  const hasMusic = () => Boolean(musicUrl()) || songId() !== 'none';
 
   function setMusicUi(on) {
     state.musicOn = on;
@@ -1030,9 +1422,9 @@
         audio.volume = 0.7;
       }
       audio.play().then(() => setMusicUi(true)).catch(() => setMusicUi(false));
-    } else if (C.music?.builtIn !== false) {
+    } else if (songId() !== 'none') {
       try {
-        MusicBox.start();
+        MusicBox.start(songId());
         setMusicUi(true);
       } catch {
         setMusicUi(false);
@@ -1186,7 +1578,30 @@
 
   function updateLightbox() {
     const items = state.galleryItems;
-    $('#lbImg').src = items[state.lightboxIndex];
+    const item = items[state.lightboxIndex];
+    const img = $('#lbImg');
+    const video = $('#lbVideo');
+    video.pause();
+    if (item.video) {
+      const motion = Boolean(item.src);
+      img.hidden = true;
+      video.hidden = false;
+      video.muted = motion;
+      video.loop = motion;
+      video.controls = !motion;
+      if (item.src) {
+        video.poster = item.src;
+      } else {
+        video.removeAttribute('poster');
+      }
+      video.src = item.video;
+      video.play().catch(() => {});
+    } else {
+      video.hidden = true;
+      video.removeAttribute('src');
+      img.hidden = false;
+      img.src = item.src;
+    }
     $('#lbCount').textContent = `${state.lightboxIndex + 1} / ${items.length}`;
   }
 
@@ -1198,6 +1613,7 @@
 
   function closeLightbox() {
     $('#lightbox').hidden = true;
+    $('#lbVideo').pause();
   }
 
   function copyText(text) {
@@ -1230,18 +1646,150 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
   }
 
-  async function share() {
-    const data = { title: document.title, text: t('shareText', { couple: coupleNames() }), url: shareUrl() };
-    if (navigator.share) {
+  function openShareSheet() {
+    $('#nativeShare').hidden = !navigator.share;
+    $('#shareSheet').hidden = false;
+  }
+
+  function closeShareSheet() {
+    $('#shareSheet').hidden = true;
+  }
+
+  async function handleShare(kind) {
+    const url = shareUrl();
+    const message = t('shareText', { couple: coupleNames() });
+    const enc = encodeURIComponent;
+    const targets = {
+      wa: `https://wa.me/?text=${enc(`${message}\n${url}`)}`,
+      fb: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
+      x: `https://twitter.com/intent/tweet?text=${enc(message)}&url=${enc(url)}`,
+      tg: `https://t.me/share/url?url=${enc(url)}&text=${enc(message)}`
+    };
+    if (targets[kind]) {
+      window.open(targets[kind], '_blank', 'noopener');
+    } else if (kind === 'copy') {
+      await copyText(url);
+      toast(t('linkCopied'));
+    } else if (kind === 'native') {
       try {
-        await navigator.share(data);
+        await navigator.share({ title: document.title, text: message, url });
+      } catch {
+        /* cancelled */
+      }
+    } else if (kind === 'story') {
+      await shareStory();
+    }
+    closeShareSheet();
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  async function storyImage() {
+    try {
+      await Promise.all([
+        document.fonts.load('170px "Great Vibes"'),
+        document.fonts.load('500 54px "Cormorant Garamond"'),
+        document.fonts.load('400 34px "Jost"')
+      ]);
+    } catch {
+      /* fall back to system fonts */
+    }
+    const width = 1080;
+    const height = 1920;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const g = canvas.getContext('2d');
+    const primary = cssVar('--primary') || '#6b7b5b';
+    const dark = cssVar('--primary-dark') || '#4a573e';
+    const accent = cssVar('--accent') || '#b8955a';
+    const gradient = g.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, primary);
+    gradient.addColorStop(1, dark);
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, width, height);
+    const photo = safeUrl(C.heroPhoto);
+    if (photo) {
+      try {
+        const img = await loadImage(photo);
+        const scale = Math.max(width / img.width, height / img.height);
+        g.drawImage(img, (width - img.width * scale) / 2, (height - img.height * scale) / 2, img.width * scale, img.height * scale);
+        g.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        g.fillRect(0, 0, width, height);
+      } catch {
+        /* keep gradient */
+      }
+    }
+    g.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+    g.lineWidth = 3;
+    g.strokeRect(60, 60, width - 120, height - 120);
+    g.strokeRect(78, 78, width - 156, height - 156);
+    const [first, second] = orderedCouple();
+    g.textAlign = 'center';
+    g.fillStyle = '#ffffff';
+    g.font = '400 34px Jost, sans-serif';
+    if ('letterSpacing' in g) {
+      g.letterSpacing = '10px';
+    }
+    g.fillText(t('theWeddingOf').toUpperCase(), width / 2, 700);
+    if ('letterSpacing' in g) {
+      g.letterSpacing = '0px';
+    }
+    g.font = '170px "Great Vibes", cursive';
+    g.fillText(nick(first), width / 2, 900);
+    g.fillStyle = accent;
+    g.font = '110px "Great Vibes", cursive';
+    g.fillText('&', width / 2, 1015);
+    g.fillStyle = '#ffffff';
+    g.font = '170px "Great Vibes", cursive';
+    g.fillText(nick(second), width / 2, 1175);
+    g.font = '500 54px "Cormorant Garamond", serif';
+    g.fillText(fmtLongDate(C.weddingDate), width / 2, 1310);
+    const venue = events()[0]?.venue;
+    if (venue) {
+      g.font = '400 38px Jost, sans-serif';
+      g.fillText(venue, width / 2, 1380);
+    }
+    if (C.hashtag) {
+      g.fillStyle = accent;
+      g.font = '500 44px Jost, sans-serif';
+      g.fillText(C.hashtag, width / 2, 1500);
+    }
+    g.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    g.font = '400 30px Jost, sans-serif';
+    g.fillText(shareUrl().replace(/^https?:\/\//, ''), width / 2, 1770);
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  }
+
+  async function shareStory() {
+    toast(t('storyMaking'));
+    const blob = await storyImage();
+    const file = new File([blob], `undangan-${SLUG}.png`, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: document.title });
       } catch {
         /* cancelled */
       }
       return;
     }
-    await copyText(shareUrl());
-    toast(t('linkCopied'));
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(link.href);
+      link.remove();
+    }, 1000);
+    toast(t('storyReady'));
   }
 
   function toggleLang() {
@@ -1257,6 +1805,15 @@
   document.addEventListener('click', (e) => {
     if (e.target === $('#lightbox')) {
       closeLightbox();
+      return;
+    }
+    if (e.target === $('#shareSheet')) {
+      closeShareSheet();
+      return;
+    }
+    const shareButton = e.target.closest('[data-share]');
+    if (shareButton) {
+      handleShare(shareButton.dataset.share);
       return;
     }
     const el = e.target.closest('[data-action]');
@@ -1310,8 +1867,26 @@
         }
         break;
       case 'share':
-        share();
+        openShareSheet();
         break;
+      case 'close-sheet':
+        closeShareSheet();
+        break;
+      case 'like':
+        likeWish(String(el.dataset.id));
+        break;
+      case 'gift-toggle':
+        $('#giftForm').hidden = !$('#giftForm').hidden;
+        break;
+      case 'embed-live': {
+        const embed = embedUrl(safeUrl(C.livestream?.url));
+        if (embed) {
+          $('#livePlayer').innerHTML = iframePlayer(embed);
+          el.remove();
+          stopMusic();
+        }
+        break;
+      }
       case 'wa-rsvp':
         whatsappRsvp();
         break;
@@ -1335,6 +1910,20 @@
       stepLightbox(1);
     }
   });
+
+  document.addEventListener('submit', (e) => {
+    if (e.target.id === 'giftForm') {
+      e.preventDefault();
+      submitGift(e.target);
+    }
+  });
+
+  // Pause background music when a guest plays a video with sound.
+  document.addEventListener('play', (e) => {
+    if (e.target.tagName === 'VIDEO' && !e.target.muted && state.musicOn) {
+      stopMusic();
+    }
+  }, true);
 
   let touchStartX = 0;
   $('#lightbox').addEventListener('touchstart', (e) => {
@@ -1376,7 +1965,11 @@
     if (DATA.guest && !DATA.preview && !STATIC_DEMO) {
       api(`/api/public/${SLUG}/open`, { method: 'POST', body: JSON.stringify({ guestCode: DATA.guest.code }) }).catch(() => {});
     }
-    setInterval(updateCountdown, 1000);
+    setInterval(() => {
+      updateCountdown();
+      updateLiveState();
+    }, 1000);
+    updateLiveState();
     if (params.get('open') === '1') {
       openInvitation({ instant: true });
       revealVisibleNow();

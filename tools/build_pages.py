@@ -38,7 +38,8 @@ def build_landing():
          f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy">Deploy sendiri</a>', 1),
         ('<a class="btn btn-primary btn-lg" href="/app#/register">Daftar gratis</a>',
          f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy">Lihat cara deploy</a>', 1),
-        ('href="/i/demo', 'href="demo/', 7),
+        ('href="/i/demo', 'href="demo/', 9),
+        ('src="/assets/landing.js"', 'src="assets/landing.js"', 1),
         ('src="/i/demo', 'src="demo/', 1),
         ('href="/"', 'href="./"', 1),
     ], "landing")
@@ -54,7 +55,8 @@ def build_demo():
     config = json.loads((ROOT / "seed" / "demo.json").read_text(encoding="utf-8"))
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
     sample_wishes = [
-        {"id": "w1", "name": "Dimas & Sari", "attendance": "yes", "time": stamp,
+        {"id": "w1", "name": "Dimas & Sari", "attendance": "yes", "time": stamp, "likes": 12,
+         "reply": "Aamiin, terima kasih banyak Dimas & Sari! Sampai jumpa di hari H 🤍",
          "message": "Selamat menempuh hidup baru! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah."},
         {"id": "w2", "name": "Tante Lina", "attendance": "yes", "time": stamp,
          "message": "Bahagia sekali mendengar kabar ini. Semoga langgeng sampai kakek nenek ya!"},
@@ -93,7 +95,7 @@ def build_demo():
 def main():
     shutil.rmtree(DOCS, ignore_errors=True)
     (DOCS / "assets").mkdir(parents=True)
-    for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js"):
+    for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js", "landing.js"):
         shutil.copy2(PUBLIC / "assets" / name, DOCS / "assets" / name)
     build_landing()
     build_demo()

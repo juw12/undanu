@@ -6,6 +6,7 @@
   const religions = {
     islam: {
       label: 'Islam',
+      symbol: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
       ceremony: { id: 'Akad Nikah', en: 'Wedding Ceremony (Akad)' },
       opening: {
         id: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan pernikahan putra-putri kami:",
@@ -25,6 +26,7 @@
     },
     kristen: {
       label: 'Kristen',
+      symbol: 'cross',
       ceremony: { id: 'Pemberkatan Nikah', en: 'Holy Matrimony' },
       opening: {
         id: 'Salam sejahtera dalam kasih Tuhan Yesus Kristus. Dengan penuh sukacita dan atas berkat Tuhan, kami bermaksud mengundang Bapak/Ibu/Saudara/i dalam pernikahan kami:',
@@ -44,6 +46,7 @@
     },
     katolik: {
       label: 'Katolik',
+      symbol: 'cross',
       ceremony: { id: 'Sakramen Pernikahan', en: 'Holy Matrimony' },
       opening: {
         id: 'Salam damai dalam Kristus. Atas berkat rahmat Tuhan, kami bermaksud menyelenggarakan Sakramen Pernikahan putra-putri kami:',
@@ -63,6 +66,7 @@
     },
     hindu: {
       label: 'Hindu',
+      symbol: 'ॐ',
       ceremony: { id: 'Upacara Pawiwahan', en: 'Wedding Ceremony' },
       opening: {
         id: 'Om Swastyastu. Atas Asung Kertha Wara Nugraha Ida Sang Hyang Widhi Wasa, kami bermaksud mengundang Bapak/Ibu/Saudara/i pada upacara pernikahan putra-putri kami:',
@@ -82,6 +86,7 @@
     },
     buddha: {
       label: 'Buddha',
+      symbol: '☸',
       ceremony: { id: 'Pemberkatan Pernikahan', en: 'Wedding Blessing' },
       opening: {
         id: 'Namo Buddhaya. Dengan berkah Tiratana, kami bermaksud mengundang Bapak/Ibu/Saudara/i pada pernikahan putra-putri kami:',
@@ -99,8 +104,49 @@
         en: 'It would be an honour and a joy for us if you could attend. May all beings be happy.'
       }
     },
+    konghucu: {
+      label: 'Khonghucu',
+      symbol: '囍',
+      ceremony: { id: 'Upacara Li Yuan', en: 'Li Yuan Wedding Blessing' },
+      opening: {
+        id: 'Wei De Dong Tian. Dengan rahmat Tian Yang Maha Esa, kami bermaksud mengundang Bapak/Ibu/Saudara/i pada upacara pernikahan putra-putri kami:',
+        en: 'Wei De Dong Tian. By the grace of Tian, we joyfully invite you to the wedding of:'
+      },
+      quote: {
+        text: {
+          id: 'Rukun dan harmonis dengan istri dan anak, laksana alunan kecapi dan harpa yang dimainkan bersama.',
+          en: 'Happy union with wife and children is like the music of lutes and harps.'
+        },
+        source: 'Zhong Yong XV'
+      },
+      closing: {
+        id: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Shanzai.',
+        en: 'It would be an honour and a joy for us if you could attend and give us your blessing. Shanzai.'
+      }
+    },
+    kepercayaan: {
+      label: 'Penghayat Kepercayaan',
+      symbol: '',
+      ceremony: { id: 'Upacara Perkawinan', en: 'Wedding Ceremony' },
+      opening: {
+        id: 'Salam Rahayu. Atas asung kerahayuan dari Tuhan Yang Maha Esa, kami bermaksud mengundang Bapak/Ibu/Saudara/i dalam rangkaian upacara pernikahan putra-putri kami:',
+        en: 'Salam Rahayu. By the blessing of the One Almighty God, we joyfully invite you to the wedding of:'
+      },
+      quote: {
+        text: {
+          id: 'Witing tresna jalaran saka kulina — cinta tumbuh karena terbiasa bersama.',
+          en: 'Witing tresna jalaran saka kulina — love grows from being together.'
+        },
+        source: 'Pepatah Jawa'
+      },
+      closing: {
+        id: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Rahayu.',
+        en: 'It would be an honour and a joy for us if you could attend and give us your blessing. Rahayu.'
+      }
+    },
     umum: {
       label: 'Umum / Universal',
+      symbol: '',
       ceremony: { id: 'Upacara Pernikahan', en: 'Wedding Ceremony' },
       opening: {
         id: 'Dengan penuh sukacita, kami mengundang Bapak/Ibu/Saudara/i untuk merayakan pernikahan kami:',
@@ -125,13 +171,23 @@
     { id: 'navy', label: 'Navy', colors: ['#2a3b5c', '#c2a36b', '#f3f1ec'] },
     { id: 'terracotta', label: 'Terracotta', colors: ['#a85d3e', '#6f7f5c', '#f7efe6'] },
     { id: 'blush', label: 'Blush', colors: ['#b07c80', '#b59a64', '#faf3f1'] },
-    { id: 'noir', label: 'Noir', colors: ['#15161a', '#c9a96e', '#2a2c32'] }
+    { id: 'noir', label: 'Noir', colors: ['#15161a', '#c9a96e', '#2a2c32'] },
+    { id: 'crimson', label: 'Crimson', colors: ['#9e1b26', '#d4a24c', '#fbf3e6'] },
+    { id: 'emerald', label: 'Emerald', colors: ['#14594a', '#c9a45c', '#f2f5ef'] }
   ];
 
   const timeZones = [
     { id: 'Asia/Jakarta', label: 'WIB — Jakarta, Sumatra, Jawa, Kalbar, Kalteng', offset: '+07:00', short: 'WIB' },
     { id: 'Asia/Makassar', label: 'WITA — Bali, NTB, NTT, Sulawesi, Kalsel, Kaltim', offset: '+08:00', short: 'WITA' },
     { id: 'Asia/Jayapura', label: 'WIT — Maluku, Papua', offset: '+09:00', short: 'WIT' }
+  ];
+
+  const songs = [
+    { id: 'canon', label: 'Canon in D — Pachelbel (music box)' },
+    { id: 'elise', label: 'Für Elise — Beethoven' },
+    { id: 'joy', label: 'Ode to Joy — Beethoven' },
+    { id: 'gamelan', label: 'Gamelan Lembut (instrumental orisinal)' },
+    { id: 'none', label: 'Tanpa musik bawaan' }
   ];
 
   function clone(value) {
@@ -151,11 +207,14 @@
       timeZoneLabel: tz.short,
       religion,
       couple: {
-        groom: { nickname: groom, fullName: groom, parents: { id: 'Putra dari Bapak ... & Ibu ...', en: '' }, instagram: '', photo: '' },
-        bride: { nickname: bride, fullName: bride, parents: { id: 'Putri dari Bapak ... & Ibu ...', en: '' }, instagram: '', photo: '' }
+        groom: { nickname: groom, fullName: groom, parents: { id: 'Putra dari Bapak ... & Ibu ...', en: '' }, instagram: '', tiktok: '', photo: '' },
+        bride: { nickname: bride, fullName: bride, parents: { id: 'Putri dari Bapak ... & Ibu ...', en: '' }, instagram: '', tiktok: '', photo: '' }
       },
       brideFirst: false,
+      showSymbol: true,
       heroPhoto: '',
+      heroMode: 'photo',
+      heroVideo: '',
       hashtag: `#${groom}${bride}`.replace(/\s+/g, ''),
       weddingDate: date ? `${date.slice(0, 16)}:00${tz.offset}` : '',
       opening: clone(preset.opening),
@@ -173,12 +232,17 @@
         }
       ],
       livestream: { enabled: false, platform: 'YouTube Live', url: '' },
+      video: { enabled: false, title: { id: 'Video Pre-wedding', en: 'Pre-wedding Video' }, url: '' },
       dressCode: { enabled: false, colors: ['#7d8b6a', '#e9dfcc', '#b8955a'], note: { id: '', en: '' } },
       story: [],
       gallery: [],
-      rsvp: { enabled: true, deadline, defaultPax: 2, whatsapp: '' },
-      gifts: { enabled: true, accounts: [], qrisImage: '', address: { recipient: '', phone: '', text: '' } },
-      music: { url: '', builtIn: true },
+      rsvp: { enabled: true, deadline, defaultPax: 2, whatsapp: '', songRequests: true },
+      gifts: {
+        enabled: true, mode: 'gift', confirmations: true, accounts: [], qrisImage: '',
+        address: { recipient: '', phone: '', text: '' },
+        charity: { name: '', description: { id: '', en: '' }, url: '' }
+      },
+      music: { url: '', preset: 'canon' },
       closing: clone(preset.closing),
       admin: { waTemplate: '', waReminder: '', notifyEmail: false }
     };
@@ -215,5 +279,5 @@
     'Terima kasih banyak!'
   ].join('\n');
 
-  window.PRESETS = { religions, themes, timeZones, newConfig, defaultWaTemplate, defaultWaReminder };
+  window.PRESETS = { religions, themes, timeZones, songs, newConfig, defaultWaTemplate, defaultWaReminder };
 })();

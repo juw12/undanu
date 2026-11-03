@@ -13,6 +13,7 @@ Environment variables:
     BASE_URL=https://...   (optional; used for absolute links in CSV / link previews)
     SECURE_COOKIES=1       (set when served over HTTPS)
     TRUST_PROXY=1          (set when behind a reverse proxy / PaaS load balancer)
+    ADMIN_EMAILS=a@x.com,b@y.com   (accounts allowed to moderate platform reviews)
     SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SMTP_SSL=1
                            (outgoing email for password reset + RSVP notifications;
                             when SMTP_HOST is empty, emails are written to DATA_DIR/outbox/)
@@ -58,6 +59,7 @@ BASE_URL = os.environ.get("BASE_URL", "").rstrip("/")
 SECURE_COOKIES = os.environ.get("SECURE_COOKIES") == "1"
 TRUST_PROXY = os.environ.get("TRUST_PROXY") == "1"
 
+ADMIN_EMAILS = {e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "").split(",") if e.strip()}
 SMTP_HOST = os.environ.get("SMTP_HOST", "")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
@@ -73,17 +75,20 @@ MAX_JSON_BYTES = 512 * 1024
 MAX_CONFIG_BYTES = 200 * 1024
 MAX_IMAGE_BYTES = 6 * 1024 * 1024
 MAX_AUDIO_BYTES = 12 * 1024 * 1024
-MAX_UPLOADS_PER_INVITATION = 80
+MAX_VIDEO_BYTES = 40 * 1024 * 1024
+MAX_UPLOAD_TOTAL_BYTES = 400 * 1024 * 1024      # per invitation
+MAX_UPLOADS_PER_INVITATION = 120
+RANGE_CHUNK_BYTES = 4 * 1024 * 1024
 MAX_GUESTS_PER_INVITATION = 5000
 MAX_INVITATIONS_PER_USER = 10
 
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$")
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,190}\.[^@\s]{2,}$")
-UPLOAD_URL_RE = re.compile(r"^/uploads/\d+/[A-Za-z0-9_-]{8,64}\.(?:jpg|png|webp|gif|mp3)$")
+UPLOAD_URL_RE = re.compile(r"^/uploads/\d+/[A-Za-z0-9_-]{8,64}\.(?:jpg|png|webp|gif|mp3|mp4|webm|mov)$")
 HEX_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{3,8}$")
 RESERVED_SLUGS = {
     "app", "api", "admin", "assets", "uploads", "login", "register", "demo-admin",
-    "static", "healthz", "www", "help", "support", "i",
+    "static", "healthz", "www", "help", "support", "i", "reviews", "live",
 }
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 ATTENDANCE = ("yes", "no", "maybe")
@@ -101,6 +106,9 @@ CONTENT_TYPES = {
     ".gif": "image/gif",
     ".ico": "image/x-icon",
     ".mp3": "audio/mpeg",
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".mov": "video/quicktime",
     ".txt": "text/plain; charset=utf-8",
     ".webmanifest": "application/manifest+json",
 }
@@ -111,9 +119,10 @@ CSP = (
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
     "font-src 'self' https://fonts.gstatic.com; "
     "img-src 'self' data: blob: https:; "
-    "media-src 'self' https:; "
+    "media-src 'self' https: blob:; "
     "connect-src 'self'; "
-    "frame-src 'self' https://www.google.com https://maps.google.com; "
+    "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube-nocookie.com "
+    "https://www.youtube.com https://player.vimeo.com; "
     "frame-ancestors 'self'; "
     "base-uri 'self'; form-action 'self'"
 )
@@ -178,6 +187,33 @@ CREATE TABLE IF NOT EXISTS uploads (
     size INTEGER NOT NULL,
     created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS gifts (
+    id INTEGER PRIMARY KEY,
+    invitation_id INTEGER NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+    guest_id INTEGER REFERENCES guests(id) ON DELETE SET NULL,
+    name TEXT NOT NULL,
+    method TEXT NOT NULL DEFAULT '',
+    amount INTEGER NOT NULL DEFAULT 0,
+    message TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS wish_likes (
+    rsvp_id INTEGER NOT NULL REFERENCES rsvps(id) ON DELETE CASCADE,
+    voter TEXT NOT NULL,
+    PRIMARY KEY (rsvp_id, voter)
+);
+CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    couple TEXT NOT NULL DEFAULT '',
+    rating INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    approved INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_gifts_invitation ON gifts(invitation_id);
 CREATE TABLE IF NOT EXISTS password_resets (
     token_hash TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -193,6 +229,9 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 MIGRATIONS = [
     ("guests", "opened_at", "TEXT"),
     ("guests", "open_count", "INTEGER NOT NULL DEFAULT 0"),
+    ("rsvps", "likes", "INTEGER NOT NULL DEFAULT 0"),
+    ("rsvps", "reply", "TEXT NOT NULL DEFAULT ''"),
+    ("rsvps", "song", "TEXT NOT NULL DEFAULT ''"),
 ]
 
 
@@ -352,7 +391,7 @@ def json_response(data, status=200, headers=None) -> Response:
 # --------------------------------------------------------------------------- #
 # Validation / sanitising
 # --------------------------------------------------------------------------- #
-URL_KEYS = {"photo", "heroPhoto", "qrisImage", "url", "mapsUrl"}
+URL_KEYS = {"photo", "heroPhoto", "heroVideo", "qrisImage", "url", "mapsUrl"}
 
 
 def safe_url(value) -> str:
@@ -379,14 +418,24 @@ def sanitize_config(value, key: str | None = None, depth: int = 0):
     if isinstance(value, list):
         items = value[:120]
         if key == "gallery":
-            return [u for u in (safe_url(x) for x in items) if u]
+            cleaned_items = []
+            for item in items:
+                if isinstance(item, dict):
+                    entry = {"src": safe_url(item.get("src")), "video": safe_url(item.get("video"))}
+                    if entry["src"] or entry["video"]:
+                        cleaned_items.append(entry)
+                else:
+                    url = safe_url(item)
+                    if url:
+                        cleaned_items.append(url)
+            return cleaned_items
         if key == "colors":
             return [c for c in (str(x).strip() for x in items) if HEX_COLOR_RE.match(c)][:8]
         return [sanitize_config(x, key, depth + 1) for x in items]
     if isinstance(value, str):
         if key in URL_KEYS:
             return safe_url(value)
-        if key == "instagram":
+        if key in ("instagram", "tiktok"):
             return re.sub(r"[^A-Za-z0-9._]", "", value)[:40]
         if key == "whatsapp":
             return re.sub(r"\D", "", value)[:20]
@@ -459,6 +508,13 @@ def sniff_upload(data: bytes):
         return "gif", "image"
     if data[:3] == b"ID3" or (len(data) > 1 and data[0] == 0xFF and (data[1] & 0xE0) == 0xE0):
         return "mp3", "audio"
+    if len(data) > 12 and data[4:8] == b"ftyp":
+        brand = data[8:12]
+        if brand in (b"heic", b"heix", b"mif1", b"msf1", b"avif"):
+            return None, None          # still images in an ISO container; not supported
+        return ("mov" if brand == b"qt  " else "mp4"), "video"
+    if data[:4] == b"\x1a\x45\xdf\xa3":
+        return "webm", "video"
     return None, None
 
 
@@ -636,7 +692,10 @@ def me(req: Request):
     user = req.user
     if not user:
         return {"user": None, "appName": APP_NAME}
-    return {"user": {"id": user["id"], "email": user["email"], "name": user["name"]}, "appName": APP_NAME}
+    return {
+        "user": {"id": user["id"], "email": user["email"], "name": user["name"], "isAdmin": is_admin(user)},
+        "appName": APP_NAME,
+    }
 
 
 @route("POST", r"/api/auth/password")
@@ -746,7 +805,12 @@ def invitation_stats(conn, invitation_id: int) -> dict:
            FROM rsvps WHERE invitation_id = ?""",
         (invitation_id,),
     ).fetchone()
+    gifts = conn.execute(
+        "SELECT COUNT(*) AS total, COALESCE(SUM(amount), 0) AS amount FROM gifts WHERE invitation_id = ?",
+        (invitation_id,),
+    ).fetchone()
     return {
+        "gifts": gifts["total"], "giftAmount": gifts["amount"],
         "guests": g["total"], "sent": g["sent"], "opened": g["opened"],
         "checkedIn": g["checked_in"], "checkedInPax": g["checked_in_pax"],
         "responses": r["total"], "yes": r["yes"], "no": r["no"], "maybe": r["maybe"],
@@ -866,12 +930,17 @@ def upload_file(req: Request, invitation_id):
     used = req.conn.execute("SELECT COUNT(*) FROM uploads WHERE invitation_id = ?", (row["id"],)).fetchone()[0]
     if used >= MAX_UPLOADS_PER_INVITATION:
         raise ApiError(400, f"Batas {MAX_UPLOADS_PER_INVITATION} file per undangan tercapai.")
-    data = req.raw_body(MAX_AUDIO_BYTES)
+    data = req.raw_body(MAX_VIDEO_BYTES)
     ext, kind = sniff_upload(data)
     if not ext:
-        raise ApiError(400, "Format file tidak didukung (JPG, PNG, WEBP, GIF, atau MP3).")
+        raise ApiError(400, "Format file tidak didukung (JPG, PNG, WEBP, GIF, MP3, MP4, WEBM, atau MOV).")
     if kind == "image" and len(data) > MAX_IMAGE_BYTES:
         raise ApiError(413, "Ukuran foto maksimal 6 MB.")
+    if kind == "audio" and len(data) > MAX_AUDIO_BYTES:
+        raise ApiError(413, "Ukuran lagu maksimal 12 MB.")
+    used_bytes = req.conn.execute("SELECT COALESCE(SUM(size), 0) FROM uploads WHERE invitation_id = ?", (row["id"],)).fetchone()[0]
+    if used_bytes + len(data) > MAX_UPLOAD_TOTAL_BYTES:
+        raise ApiError(400, "Kuota penyimpanan undangan ini (400 MB) sudah penuh. Hapus file lama atau pakai link YouTube untuk video.")
     folder = UPLOAD_DIR / str(row["id"])
     folder.mkdir(parents=True, exist_ok=True)
     filename = f"{secrets.token_urlsafe(12)}.{ext}"
@@ -909,7 +978,7 @@ def guest_payload(row) -> dict:
 
 
 GUEST_SELECT = """
-    SELECT g.*, r.attendance, r.guests AS rsvp_guests, r.message, r.updated_at AS rsvp_at
+    SELECT g.*, r.attendance, r.guests AS rsvp_guests, r.message, r.song, r.updated_at AS rsvp_at
     FROM guests g LEFT JOIN rsvps r ON r.guest_id = g.id
 """
 
@@ -1037,6 +1106,7 @@ def list_rsvps(req: Request, invitation_id):
                 "id": r["id"], "name": r["name"], "invitedAs": r["invited_as"], "code": r["code"],
                 "group": r["grp"], "pax": r["pax"], "source": r["source"], "attendance": r["attendance"],
                 "guests": r["guests"], "message": r["message"], "hidden": bool(r["hidden"]),
+                "song": r["song"], "likes": r["likes"], "reply": r["reply"],
                 "createdAt": r["created_at"], "updatedAt": r["updated_at"],
             }
             for r in rows
@@ -1049,9 +1119,16 @@ def list_rsvps(req: Request, invitation_id):
 def update_rsvp(req: Request, invitation_id, rsvp_id):
     row = req.own_invitation(invitation_id)
     data = req.json()
+    current = req.conn.execute(
+        "SELECT hidden, reply FROM rsvps WHERE id = ? AND invitation_id = ?", (int(rsvp_id), row["id"])
+    ).fetchone()
+    if not current:
+        raise ApiError(404, "RSVP tidak ditemukan.")
+    hidden = (1 if data["hidden"] else 0) if "hidden" in data else current["hidden"]
+    reply = clean_text(data["reply"], 500) if "reply" in data else current["reply"]
     req.conn.execute(
-        "UPDATE rsvps SET hidden = ? WHERE id = ? AND invitation_id = ?",
-        (1 if data.get("hidden") else 0, int(rsvp_id), row["id"]),
+        "UPDATE rsvps SET hidden = ?, reply = ? WHERE id = ? AND invitation_id = ?",
+        (hidden, reply, int(rsvp_id), row["id"]),
     )
     return {"ok": True}
 
@@ -1071,7 +1148,7 @@ def export_csv(req: Request, invitation_id):
     buffer = io.StringIO()
     writer = csv.writer(buffer)
     writer.writerow(["Nama", "Grup", "WhatsApp", "Kode", "Link", "Maks Tamu", "Status RSVP",
-                     "Jumlah Hadir", "Ucapan", "Undangan Dikirim", "Dibuka", "Check-in", "Jumlah Check-in", "Sumber"])
+                     "Jumlah Hadir", "Ucapan", "Request Lagu", "Undangan Dikirim", "Dibuka", "Check-in", "Jumlah Check-in", "Sumber"])
     base = f"{req.base_url()}/i/{row['slug']}?g="
 
     def cell(value):
@@ -1081,7 +1158,7 @@ def export_csv(req: Request, invitation_id):
     for g in rows:
         writer.writerow([cell(v) for v in [
             g["name"], g["grp"], g["phone"], g["code"], base + g["code"], g["pax"],
-            labels.get(g["attendance"], "Belum"), g["rsvp_guests"] or 0, g["message"] or "",
+            labels.get(g["attendance"], "Belum"), g["rsvp_guests"] or 0, g["message"] or "", g["song"] or "",
             g["sent_at"] or "", g["opened_at"] or "", g["checked_in_at"] or "", g["checked_in_count"],
             "Daftar tamu" if g["source"] == "list" else "Link umum",
         ]])
@@ -1117,6 +1194,7 @@ def public_guest(conn, invitation_id: int, code: str | None):
             "attendance": guest["attendance"],
             "guests": guest["rsvp_guests"],
             "message": guest["message"],
+            "song": guest["song"],
         } if guest["attendance"] else None,
     }
 
@@ -1175,16 +1253,17 @@ def public_rsvp(req: Request, slug):
         guest = req.conn.execute("SELECT * FROM guests WHERE id = ?", (cursor.lastrowid,)).fetchone()
 
     count = 0 if attendance == "no" else clamp_int(data.get("guests"), 1, guest["pax"], 1)
+    song = clean_text(data.get("song"), 120) if config.get("rsvp", {}).get("songRequests") else ""
     req.conn.execute(
-        """INSERT INTO rsvps (invitation_id, guest_id, name, attendance, guests, message, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """INSERT INTO rsvps (invitation_id, guest_id, name, attendance, guests, message, song, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(guest_id) DO UPDATE SET
                name = excluded.name, attendance = excluded.attendance, guests = excluded.guests,
-               message = excluded.message, updated_at = excluded.updated_at""",
-        (row["id"], guest["id"], name, attendance, count, message, stamp, stamp),
+               message = excluded.message, song = excluded.song, updated_at = excluded.updated_at""",
+        (row["id"], guest["id"], name, attendance, count, message, song, stamp, stamp),
     )
     if config.get("admin", {}).get("notifyEmail"):
-        notify_owner_of_rsvp(req, row, config, name, attendance, count, message)
+        notify_owner_of_rsvp(req, row, config, name, attendance, count, message + (f" 🎵 {song}" if song else ""))
     return {"ok": True, "code": guest["code"], "name": name, "attendance": attendance, "guests": count}
 
 
@@ -1235,16 +1314,177 @@ def public_wishes(req: Request, slug):
     where = "invitation_id = ? AND hidden = 0 AND message <> ''"
     total = req.conn.execute(f"SELECT COUNT(*) FROM rsvps WHERE {where}", (row["id"],)).fetchone()[0]
     rows = req.conn.execute(
-        f"SELECT id, name, attendance, message, updated_at FROM rsvps WHERE {where} ORDER BY updated_at DESC LIMIT ? OFFSET ?",
+        f"SELECT id, name, attendance, message, likes, reply, updated_at FROM rsvps WHERE {where} "
+        "ORDER BY updated_at DESC LIMIT ? OFFSET ?",
         (row["id"], limit, offset),
     ).fetchall()
     return {
         "total": total,
         "wishes": [
-            {"id": r["id"], "name": r["name"], "attendance": r["attendance"], "message": r["message"], "time": r["updated_at"]}
+            {"id": r["id"], "name": r["name"], "attendance": r["attendance"], "message": r["message"],
+             "likes": r["likes"], "reply": r["reply"], "time": r["updated_at"]}
             for r in rows
         ],
     }
+
+
+@route("POST", r"/api/public/([a-z0-9-]+)/wishes/(\d+)/like")
+def public_like_wish(req: Request, slug, rsvp_id):
+    row, _ = load_public_invitation(req, slug)
+    if not row:
+        raise ApiError(404, "Undangan tidak ditemukan.")
+    if not LIMITER.allow(f"like:{req.ip}", 60, 600):
+        raise ApiError(429, "Terlalu banyak. Coba lagi nanti.")
+    voter = re.sub(r"[^A-Za-z0-9_-]", "", str(req.json().get("voter") or ""))[:40]
+    if len(voter) < 8:
+        raise ApiError(400, "Permintaan tidak valid.")
+    wish = req.conn.execute(
+        "SELECT id FROM rsvps WHERE id = ? AND invitation_id = ? AND hidden = 0", (int(rsvp_id), row["id"])
+    ).fetchone()
+    if not wish:
+        raise ApiError(404, "Ucapan tidak ditemukan.")
+    inserted = req.conn.execute(
+        "INSERT OR IGNORE INTO wish_likes (rsvp_id, voter) VALUES (?, ?)", (wish["id"], voter)
+    ).rowcount
+    if inserted:
+        req.conn.execute("UPDATE rsvps SET likes = likes + 1 WHERE id = ?", (wish["id"],))
+    likes = req.conn.execute("SELECT likes FROM rsvps WHERE id = ?", (wish["id"],)).fetchone()[0]
+    return {"likes": likes, "counted": bool(inserted)}
+
+
+@route("POST", r"/api/public/([a-z0-9-]+)/gift")
+def public_gift(req: Request, slug):
+    row, _ = load_public_invitation(req, slug)
+    if not row:
+        raise ApiError(404, "Undangan tidak ditemukan.")
+    config = json.loads(row["config"])
+    if config.get("gifts", {}).get("confirmations") is False:
+        raise ApiError(400, "Konfirmasi hadiah tidak diaktifkan.")
+    if not LIMITER.allow(f"gift:{req.ip}:{row['id']}", 10, 3600):
+        raise ApiError(429, "Terlalu banyak percobaan. Coba lagi nanti.")
+    data = req.json()
+    name = clean_text(data.get("name"), 80)
+    if not name:
+        raise ApiError(400, "Mohon isi nama Anda.")
+    code = re.sub(r"[^A-Z0-9]", "", str(data.get("guestCode") or "").upper())[:12]
+    guest = req.conn.execute(
+        "SELECT id FROM guests WHERE invitation_id = ? AND code = ?", (row["id"], code)
+    ).fetchone() if code else None
+    req.conn.execute(
+        "INSERT INTO gifts (invitation_id, guest_id, name, method, amount, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (row["id"], guest["id"] if guest else None, name, clean_text(data.get("method"), 60),
+         clamp_int(data.get("amount"), 0, 1_000_000_000, 0), clean_text(data.get("message"), 300), now_iso()),
+    )
+    return {"ok": True}
+
+
+@route("GET", r"/api/invitations/(\d+)/gifts")
+def list_gifts(req: Request, invitation_id):
+    row = req.own_invitation(invitation_id)
+    rows = req.conn.execute(
+        """SELECT gi.*, g.name AS invited_as, g.grp FROM gifts gi LEFT JOIN guests g ON g.id = gi.guest_id
+           WHERE gi.invitation_id = ? ORDER BY gi.id DESC""",
+        (row["id"],),
+    ).fetchall()
+    return {
+        "gifts": [
+            {"id": r["id"], "name": r["name"], "invitedAs": r["invited_as"], "group": r["grp"], "method": r["method"],
+             "amount": r["amount"], "message": r["message"], "createdAt": r["created_at"]}
+            for r in rows
+        ],
+        "stats": invitation_stats(req.conn, row["id"]),
+    }
+
+
+@route("DELETE", r"/api/invitations/(\d+)/gifts/(\d+)")
+def delete_gift(req: Request, invitation_id, gift_id):
+    row = req.own_invitation(invitation_id)
+    req.conn.execute("DELETE FROM gifts WHERE id = ? AND invitation_id = ?", (int(gift_id), row["id"]))
+    return {"ok": True}
+
+
+# ----- Platform reviews ---------------------------------------------------------
+def is_admin(user) -> bool:
+    return bool(user) and user["email"].lower() in ADMIN_EMAILS
+
+
+def review_payload(r) -> dict:
+    return {"id": r["id"], "name": r["name"], "couple": r["couple"], "rating": r["rating"], "text": r["text"],
+            "approved": bool(r["approved"]), "updatedAt": r["updated_at"]}
+
+
+@route("GET", r"/api/reviews/mine")
+def my_review(req: Request):
+    user = req.require_user()
+    r = req.conn.execute("SELECT * FROM reviews WHERE user_id = ?", (user["id"],)).fetchone()
+    return {"review": review_payload(r) if r else None}
+
+
+@route("POST", r"/api/reviews")
+def save_review(req: Request):
+    user = req.require_user()
+    if not LIMITER.allow(f"review:{user['id']}", 10, 3600):
+        raise ApiError(429, "Terlalu banyak. Coba lagi nanti.")
+    data = req.json()
+    rating = clamp_int(data.get("rating"), 0, 5, 0)
+    text = clean_text(data.get("text"), 600)
+    name = clean_text(data.get("name"), 60) or user["name"]
+    if rating < 1 or len(text) < 10:
+        raise ApiError(400, "Pilih bintang dan tulis ulasan minimal 10 karakter.")
+    stamp = now_iso()
+    req.conn.execute(
+        """INSERT INTO reviews (user_id, name, couple, rating, text, approved, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 0, ?, ?)
+           ON CONFLICT(user_id) DO UPDATE SET name = excluded.name, couple = excluded.couple, rating = excluded.rating,
+               text = excluded.text, approved = 0, updated_at = excluded.updated_at""",
+        (user["id"], name, clean_text(data.get("couple"), 60), rating, text, stamp, stamp),
+    )
+    r = req.conn.execute("SELECT * FROM reviews WHERE user_id = ?", (user["id"],)).fetchone()
+    return {"review": review_payload(r)}
+
+
+@route("GET", r"/api/reviews/public")
+def public_reviews(req: Request):
+    rows = req.conn.execute(
+        "SELECT * FROM reviews WHERE approved = 1 ORDER BY updated_at DESC LIMIT 12"
+    ).fetchall()
+    summary = req.conn.execute(
+        "SELECT COUNT(*) AS total, COALESCE(AVG(rating), 0) AS average FROM reviews WHERE approved = 1"
+    ).fetchone()
+    return {
+        "reviews": [{k: v for k, v in review_payload(r).items() if k != "approved"} for r in rows],
+        "total": summary["total"],
+        "average": round(summary["average"], 1),
+    }
+
+
+def require_admin(req: Request):
+    user = req.require_user()
+    if not is_admin(user):
+        raise ApiError(403, "Khusus admin.")
+    return user
+
+
+@route("GET", r"/api/admin/reviews")
+def admin_reviews(req: Request):
+    require_admin(req)
+    rows = req.conn.execute("SELECT * FROM reviews ORDER BY approved ASC, updated_at DESC").fetchall()
+    return {"reviews": [review_payload(r) for r in rows]}
+
+
+@route("PUT", r"/api/admin/reviews/(\d+)")
+def admin_update_review(req: Request, review_id):
+    require_admin(req)
+    approved = 1 if req.json().get("approved") else 0
+    req.conn.execute("UPDATE reviews SET approved = ? WHERE id = ?", (approved, int(review_id)))
+    return {"ok": True}
+
+
+@route("DELETE", r"/api/admin/reviews/(\d+)")
+def admin_delete_review(req: Request, review_id):
+    require_admin(req)
+    req.conn.execute("DELETE FROM reviews WHERE id = ?", (int(review_id),))
+    return {"ok": True}
 
 
 # --------------------------------------------------------------------------- #
@@ -1404,9 +1644,9 @@ class Handler(BaseHTTPRequestHandler):
         # Drain unread request bodies so keep-alive connections stay in sync.
         if req._body is None and method in ("POST", "PUT", "DELETE"):
             length = int(self.headers.get("Content-Length") or 0)
-            if 0 < length <= MAX_AUDIO_BYTES:
+            if 0 < length <= MAX_VIDEO_BYTES:
                 self.rfile.read(length)
-            elif length > MAX_AUDIO_BYTES:
+            elif length > MAX_VIDEO_BYTES:
                 self.close_connection = True
         self.send(response, head)
 
@@ -1435,14 +1675,14 @@ class Handler(BaseHTTPRequestHandler):
             return self.static_file(PUBLIC_DIR / path.lstrip("/"), PUBLIC_DIR / "assets", "public, max-age=300")
         if path.startswith("/uploads/"):
             return self.static_file(UPLOAD_DIR / path[len("/uploads/"):], UPLOAD_DIR,
-                                    "public, max-age=31536000, immutable")
+                                    "public, max-age=31536000, immutable", self.headers.get("Range"))
         match = re.match(r"^/i/([a-z0-9-]{3,40})/?$", path)
         if match:
             return render_invite_page(req, match.group(1))
         return not_found_page()
 
     @staticmethod
-    def static_file(target: Path, base: Path, cache: str = "no-cache") -> Response:
+    def static_file(target: Path, base: Path, cache: str = "no-cache", range_header: str | None = None) -> Response:
         try:
             resolved = target.resolve()
             base_resolved = base.resolve()
@@ -1453,7 +1693,26 @@ class Handler(BaseHTTPRequestHandler):
         if not resolved.is_file():
             return not_found_page()
         content_type = CONTENT_TYPES.get(resolved.suffix.lower(), "application/octet-stream")
-        return Response(200, resolved.read_bytes(), content_type, [("Cache-Control", cache)])
+        size = resolved.stat().st_size
+        match = re.match(r"^bytes=(\d*)-(\d*)$", (range_header or "").strip())
+        if match and (match.group(1) or match.group(2)):
+            first, last = match.groups()
+            if first:
+                start = int(first)
+                end = int(last) if last else min(size - 1, start + RANGE_CHUNK_BYTES - 1)
+            else:
+                start = max(0, size - int(last))
+                end = size - 1
+            end = min(end, size - 1)
+            if start > end or start >= size:
+                return Response(416, b"", content_type, [("Content-Range", f"bytes */{size}")])
+            with open(resolved, "rb") as fh:
+                fh.seek(start)
+                chunk = fh.read(end - start + 1)
+            return Response(206, chunk, content_type, [
+                ("Cache-Control", cache), ("Accept-Ranges", "bytes"), ("Content-Range", f"bytes {start}-{end}/{size}"),
+            ])
+        return Response(200, resolved.read_bytes(), content_type, [("Cache-Control", cache), ("Accept-Ranges", "bytes")])
 
 
 # --------------------------------------------------------------------------- #

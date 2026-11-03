@@ -17,24 +17,35 @@ Nothing to `pip install`, no build step.
 
 **For couples (dashboard)**
 - Account with email/password, **password reset by email**, change password, delete account (removes all data)
-- Create invitations from religion templates (Islam, Kristen, Katolik, Hindu, Buddha, Umum), 5 themes
-- Form editor with **live phone preview** and autosave: cover photo, couple, events and maps, love story,
-  gallery (compressed in the browser), live stream, dress code, RSVP settings, bank/e-wallet/QRIS gifts,
-  music upload or built-in music box
+- Templates for **every religion recognised in Indonesia** — Islam, Kristen, Katolik, Hindu, Buddha, Konghucu —
+  plus Penghayat Kepercayaan and a neutral one: greeting, quote/scripture, closing, and an optional cover symbol
+  (Bismillah, cross, ॐ, ☸, 囍). Switch religion any time from the editor. 7 colour themes
+- Form editor with **live phone preview** and autosave: couple (Instagram/TikTok), events and maps, love story,
+  dress code, RSVP settings, music upload or built-in tunes (Canon in D, Für Elise, Ode to Joy, gamelan)
+- **Motion & video:** cover as photo, slideshow, or looping background video; gallery mixes photos, videos and
+  **Android motion photos** (the embedded clip is extracted in the browser); pre-wedding video from YouTube,
+  Vimeo, or an upload (MP4/MOV/WEBM up to 40 MB, streamed with HTTP range requests)
+- **Live streaming:** YouTube/Vimeo embed or any link, with an automatic **LIVE** badge during the event
+- **Gifts & donations:** bank/e-wallet/QRIS cards, physical-gift address, or a **charity mode** that asks guests
+  to donate to a cause instead; guests can confirm what they sent, and the **Hadiah** tab totals it
+- **Reviews:** couples can rate UndanganKita; approved reviews appear on the landing page (moderated by `ADMIN_EMAILS`)
 - Publish/draft toggle and custom link (`/i/your-names`)
 - **Guests:** add one, paste many, or import CSV; per-guest max guests and group; personal links (`?g=CODE`);
   one-click WhatsApp send with an editable template
 - **Delivery tracking:** see who was sent the link and **who actually opened it** (link-preview bots aren't counted);
   filters for "sent, not opened" and "opened, no reply"; a **WhatsApp reminder** template for guests who haven't replied
-- **RSVP dashboard:** attending/maybe/declined, head count, catering estimate, hide inappropriate wishes,
-  CSV export, optional **email notification for each new RSVP**
+- **RSVP dashboard:** attending/maybe/declined, head count, catering estimate, **song requests**, reply to or
+  hide wishes, CSV export, optional **email notification for each new RSVP**
 - **Wedding-day check-in:** scan the guest's QR e-pass with a phone camera, type the code, or search by name;
   live arrival counter
 
 **For guests (invitation page)**
 - Envelope cover with the guest's name, Bahasa Indonesia / English, countdown, Google Calendar/.ics,
-  maps, gallery, wishes wall, copy-to-clipboard gift cards
-- RSVP saved to the server (guests can change their answer) and a QR e-pass if attending
+  maps, gallery with lightbox (photos + videos), copy-to-clipboard gift cards and gift confirmation
+- RSVP saved to the server (guests can change their answer), optional song request, and a QR e-pass if attending
+- **Wishes wall** with likes (one per device) and the couple's replies
+- **Share sheet:** WhatsApp, Facebook, X, Telegram, copy link, native share, and a generated
+  **Instagram Story image** (1080×1920); hashtag links to Instagram
 - WhatsApp link previews (title, date, guest name, cover photo) rendered on the server
 
 ## Run locally
@@ -52,7 +63,7 @@ On Windows you can also double-click `start.bat`.
 Tests (with the server running):
 
 ```bash
-python tests/smoke_test.py http://localhost:8000 ./data     # 58 API checks incl. email flows
+python tests/smoke_test.py http://localhost:8000 ./data     # 74 API checks incl. email, video, gifts, reviews
 ```
 
 ## Deploy
@@ -79,6 +90,7 @@ GitHub Pages only hosts the static demo. The real app needs a host that runs Pyt
 | `BASE_URL` | Optional public URL, e.g. `https://undangankita.id` (used in emails/CSV links) |
 | `APP_NAME` | Brand name |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_SSL=1` | Outgoing email |
+| `ADMIN_EMAILS` | Comma-separated accounts that can moderate reviews at `/app#/admin` |
 
 **Email with Gmail:** turn on 2-step verification, create an [App Password](https://myaccount.google.com/apppasswords), then set
 `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER=you@gmail.com`, `SMTP_PASSWORD=<app password>`, `SMTP_FROM=you@gmail.com`.
@@ -94,14 +106,15 @@ To rebuild the GitHub Pages demo after changing the invitation design: `python t
 - Reset tokens are random, stored hashed, single-use, and expire after 1 hour; the forgot-password
   endpoint gives the same response for unknown emails
 - CSRF: mutating requests require `X-Requested-With: fetch` and a same-origin `Origin`
-- Uploads are checked by file signature (JPG/PNG/WEBP/GIF/MP3), size-limited, and stored under random names
+- Uploads are checked by file signature (JPG/PNG/WEBP/GIF/MP3/MP4/MOV/WEBM; HEIC rejected), size-limited
+  (6 MB images, 12 MB audio, 40 MB videos, 400 MB per invitation), and stored under random names
 - Config URLs restricted to `http(s)` or the app's `/uploads/`; strict Content-Security-Policy; invitations are `noindex`
 - CSV export guards against spreadsheet formula injection; rate limits on auth, RSVP, uploads, and open tracking
 
 ## Roadmap
-- Payments (Midtrans/Xendit) for premium themes
+- Payments (Midtrans/Xendit) for premium themes and verified digital gifts (today, gift amounts are self-reported by guests)
 - Co-owner access so both partners and family can manage guests
-- Platform admin console
+- iPhone Live Photos: only the still is kept unless the MOV is uploaded separately
 - Camera QR scanning uses the browser `BarcodeDetector` API (Chrome/Edge on Android/desktop over HTTPS);
   on iPhone, type the code or search by name
 

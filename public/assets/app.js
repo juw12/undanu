@@ -48,7 +48,9 @@
     refresh: '<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/>',
     logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
-    arrowLeft: '<path d="M19 12H5M12 19l-7-7 7-7"/>'
+    arrowLeft: '<path d="M19 12H5M12 19l-7-7 7-7"/>',
+    star: '<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'
   };
   const icon = (name) =>
     `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -290,6 +292,32 @@
     return blob && blob.size < file.size * 1.5 ? blob : file;
   }
 
+  const MAX_VIDEO_MB = 40;
+  const isVideoFile = (file) => (file.type || '').startsWith('video/') || /\.(mp4|mov|webm)$/i.test(file.name || '');
+
+  // Android "motion photos" (Google/Samsung) are JPEGs with an MP4 appended after the image data.
+  async function splitMotionPhoto(file) {
+    if (!/jpe?g/i.test(file.type || '') && !/\.jpe?g$/i.test(file.name || '')) {
+      return null;
+    }
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const brands = ['mp42', 'isom', 'mp41', 'avc1', 'qt  '];
+    for (let i = 1024; i < bytes.length - 12; i += 1) {
+      if (bytes[i] === 0x66 && bytes[i + 1] === 0x74 && bytes[i + 2] === 0x79 && bytes[i + 3] === 0x70) {
+        const brand = String.fromCharCode(bytes[i + 4], bytes[i + 5], bytes[i + 6], bytes[i + 7]);
+        const boxSize = ((bytes[i - 4] << 24) | (bytes[i - 3] << 16) | (bytes[i - 2] << 8) | bytes[i - 1]) >>> 0;
+        if (brands.includes(brand) && boxSize >= 16 && boxSize <= 64) {
+          const start = i - 4;
+          return {
+            image: file.slice(0, start, 'image/jpeg'),
+            video: new Blob([file.slice(start)], { type: 'video/mp4' })
+          };
+        }
+      }
+    }
+    return null;
+  }
+
   async function uploadFile(invitationId, blob) {
     const data = await api(`/api/invitations/${invitationId}/upload`, {
       method: 'POST',
@@ -382,6 +410,7 @@
           <span class="spacer"></span>
           ${user ? `
             <a class="btn btn-ghost btn-sm" href="#/">Undangan Saya</a>
+            ${user.isAdmin ? `<a class="btn btn-ghost btn-sm" href="#/admin">${icon('shield')} Admin</a>` : ''}
             <a class="btn btn-ghost btn-sm btn-icon" href="#/account" title="Akun">${icon('settings')}</a>
             <span class="user-chip"><span class="avatar-sm">${esc(initials(user.name))}</span></span>
           ` : ''}
@@ -399,6 +428,7 @@
       ['edit', 'Editor', 'edit'],
       ['guests', 'Tamu & Kirim', 'users'],
       ['rsvp', 'RSVP & Ucapan', 'mail'],
+      ['gifts', 'Hadiah', 'gift'],
       ['checkin', 'Check-in', 'scan']
     ];
     return `
@@ -427,7 +457,9 @@
     [/^#\/inv\/(\d+)\/edit$/, (m) => viewEditor(Number(m[1]))],
     [/^#\/inv\/(\d+)\/guests$/, (m) => viewGuests(Number(m[1]))],
     [/^#\/inv\/(\d+)\/rsvp$/, (m) => viewRsvps(Number(m[1]))],
-    [/^#\/inv\/(\d+)\/checkin$/, (m) => viewCheckin(Number(m[1]))]
+    [/^#\/inv\/(\d+)\/checkin$/, (m) => viewCheckin(Number(m[1]))],
+    [/^#\/inv\/(\d+)\/gifts$/, (m) => viewGifts(Number(m[1]))],
+    [/^#\/admin$/, () => viewAdmin()]
   ];
 
   async function router() {
@@ -712,7 +744,11 @@
           <h2 style="color:var(--text)">Belum ada undangan</h2>
           <p>Buat undangan pertama Anda — cukup isi nama dan tanggal, sisanya bisa diatur nanti.</p>
           <button class="btn btn-primary btn-lg" data-act="new">${icon('plus')} Buat Undangan</button>
-        </div>`}`);
+        </div>`}
+      <div id="reviewCard" style="margin-top:1.4rem"></div>`);
+    if (invitations.length) {
+      renderReviewCard(invitations[0]);
+    }
 
     state.view = {
       onClick(e) {
@@ -723,6 +759,175 @@
         }
         if (e.target.closest('[data-act="new"]')) {
           openCreateModal();
+        }
+        if (e.target.closest('[data-act="review"]')) {
+          openReviewModal(invitations[0]);
+        }
+      }
+    };
+  }
+
+  let myReview = null;
+
+  async function renderReviewCard() {
+    const slot = $('#reviewCard');
+    if (!slot) {
+      return;
+    }
+    myReview = (await api('/api/reviews/mine').catch(() => ({ review: null }))).review;
+    const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+    slot.innerHTML = myReview ? `
+      <div class="card review-cta">
+        <div><b>Ulasan Anda</b> <span class="stars">${stars(myReview.rating)}</span>
+          <span class="badge ${myReview.approved ? 'live' : 'draft'}">${myReview.approved ? 'Tampil di beranda' : 'Menunggu persetujuan'}</span>
+          <p class="muted small" style="margin:.3rem 0 0">“${esc(myReview.text)}”</p></div>
+        <button class="btn btn-ghost btn-sm" data-act="review">${icon('edit')} Ubah</button>
+      </div>` : `
+      <div class="card review-cta">
+        <div><b>⭐ Puas dengan ${esc(state.appName)}?</b>
+          <p class="muted small" style="margin:.2rem 0 0">Ceritakan pengalaman Anda. Ulasan terpilih tampil di halaman utama.</p></div>
+        <button class="btn btn-primary btn-sm" data-act="review">${icon('star')} Tulis ulasan</button>
+      </div>`;
+  }
+
+  function openReviewModal(firstInvitation) {
+    let rating = myReview?.rating || 5;
+    const coupleDefault = firstInvitation ? `${firstInvitation.groom} & ${firstInvitation.bride}` : '';
+    modal({
+      title: 'Ulasan untuk ' + state.appName,
+      body: `
+        <form id="reviewForm">
+          <div class="star-input" id="starInput">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n} bintang">★</button>`).join('')}</div>
+          <div class="row row-2">
+            <label class="field"><span>Nama tampil</span><input name="name" maxlength="60" value="${esc(myReview?.name || state.user.name)}"></label>
+            <label class="field"><span>Pasangan (opsional)</span><input name="couple" maxlength="60" value="${esc(myReview?.couple || coupleDefault)}"></label>
+          </div>
+          <label class="field"><span>Ulasan</span><textarea name="text" rows="4" maxlength="600" placeholder="Apa yang paling membantu? Bagaimana respon tamu?">${esc(myReview?.text || '')}</textarea></label>
+          <p class="form-error" id="reviewError" hidden></p>
+        </form>`,
+      foot: '<button class="btn btn-ghost" data-close>Batal</button><button class="btn btn-primary" data-save-review>Kirim ulasan</button>',
+      onMount(el, close) {
+        const paint = () => $$('[data-star]', el).forEach((b) => b.classList.toggle('on', Number(b.dataset.star) <= rating));
+        paint();
+        el.querySelector('#starInput').addEventListener('click', (e) => {
+          const star = e.target.closest('[data-star]');
+          if (star) {
+            rating = Number(star.dataset.star);
+            paint();
+          }
+        });
+        el.querySelector('[data-save-review]').addEventListener('click', async () => {
+          const form = el.querySelector('#reviewForm');
+          try {
+            await api('/api/reviews', { method: 'POST', body: { rating, name: form.name.value, couple: form.couple.value, text: form.text.value } });
+            close();
+            toast('Terima kasih atas ulasannya! 🙏');
+            renderReviewCard();
+          } catch (err) {
+            const box = el.querySelector('#reviewError');
+            box.textContent = err.message;
+            box.hidden = false;
+          }
+        });
+      }
+    });
+  }
+
+  async function viewAdmin() {
+    if (!state.user.isAdmin) {
+      location.hash = '#/';
+      return;
+    }
+    shell('<div class="spinner"></div>');
+    let { reviews } = await api('/api/admin/reviews');
+    const render = () => {
+      $('#adminList').innerHTML = reviews.length ? reviews.map((r) => `
+        <div class="rsvp-item" data-id="${r.id}">
+          <span class="avatar-sm">${esc(initials(r.name))}</span>
+          <div>
+            <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+              <strong>${esc(r.name)}</strong>${r.couple ? `<span class="muted small">${esc(r.couple)}</span>` : ''}
+              <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+              <span class="badge ${r.approved ? 'live' : 'draft'}">${r.approved ? 'Tampil' : 'Menunggu'}</span>
+            </div>
+            <p class="msg">${esc(r.text)}</p>
+            <div class="meta"><span>${esc(relTime(r.updatedAt))}</span></div>
+          </div>
+          <div style="display:flex;gap:.3rem">
+            <button class="btn ${r.approved ? 'btn-ghost' : 'btn-primary'} btn-sm" data-act="approve">${r.approved ? 'Sembunyikan' : 'Setujui'}</button>
+            <button class="btn btn-ghost btn-sm btn-icon" data-act="delete" title="Hapus">${icon('trash')}</button>
+          </div>
+        </div>`).join('') : '<div class="card empty-state"><p>Belum ada ulasan.</p></div>';
+    };
+    shell(`
+      <div class="page-head"><div><h1>Admin · Ulasan</h1><p>Ulasan yang disetujui tampil di halaman utama.</p></div></div>
+      <div class="rsvp-list" id="adminList"></div>`);
+    render();
+    state.view = {
+      async onClick(e) {
+        const btn = e.target.closest('[data-act]');
+        const item = btn?.closest('[data-id]');
+        if (!btn || !item) {
+          return;
+        }
+        const review = reviews.find((r) => r.id === Number(item.dataset.id));
+        if (btn.dataset.act === 'approve') {
+          await api(`/api/admin/reviews/${review.id}`, { method: 'PUT', body: { approved: !review.approved } });
+          review.approved = !review.approved;
+          render();
+        } else if (btn.dataset.act === 'delete' && await confirmDialog('Hapus ulasan ini?', { okText: 'Hapus', danger: true })) {
+          await api(`/api/admin/reviews/${review.id}`, { method: 'DELETE' });
+          reviews = reviews.filter((r) => r.id !== review.id);
+          render();
+        }
+      }
+    };
+  }
+
+  async function viewGifts(id) {
+    shell('<div class="spinner"></div>');
+    const [inv, data] = await Promise.all([api(`/api/invitations/${id}`), api(`/api/invitations/${id}/gifts`)]);
+    let gifts = data.gifts;
+    let stats = data.stats;
+    const rupiah = (n) => `Rp ${Number(n || 0).toLocaleString('id-ID')}`;
+    const charity = inv.config.gifts?.mode === 'charity';
+    shell(`${invHeader(inv, 'gifts')}<div id="giftStats"></div><div id="giftTable"></div>`);
+    const render = () => {
+      $('#giftStats').innerHTML = `
+        <div class="stats">
+          <div class="stat accent"><b>${stats.gifts}</b><span>Konfirmasi ${charity ? 'donasi' : 'hadiah'}</span></div>
+          <div class="stat"><b>${rupiah(stats.giftAmount)}</b><span>Total nominal yang diisi tamu</span></div>
+        </div>
+        <p class="muted small" style="margin:-.4rem 0 1rem">Nominal diisi sukarela oleh tamu. Cocokkan dengan mutasi rekening Anda.
+          ${inv.config.gifts?.confirmations === false ? '<b>Konfirmasi saat ini dinonaktifkan di Editor.</b>' : ''}</p>`;
+      $('#giftTable').innerHTML = gifts.length ? `
+        <div class="table-wrap"><table>
+          <thead><tr><th>Dari</th><th>Melalui</th><th>Nominal</th><th>Pesan</th><th>Waktu</th><th></th></tr></thead>
+          <tbody>${gifts.map((g) => `
+            <tr data-id="${g.id}">
+              <td><div class="name">${esc(g.name)}</div>${g.invitedAs && g.invitedAs !== g.name ? `<div class="sub">Diundang sebagai: ${esc(g.invitedAs)}</div>` : ''}</td>
+              <td>${esc(g.method || '—')}</td>
+              <td>${g.amount ? rupiah(g.amount) : '—'}</td>
+              <td class="sub">${esc(g.message || '')}</td>
+              <td class="sub">${esc(relTime(g.createdAt))}</td>
+              <td><button class="btn btn-ghost btn-sm btn-icon" data-act="delete" title="Hapus">${icon('trash')}</button></td>
+            </tr>`).join('')}</tbody>
+        </table></div>` : `<div class="card empty-state"><div class="big">🎁</div><p>Belum ada konfirmasi. Tamu bisa mengisinya dari bagian ${charity ? 'Donasi' : 'Tanda Kasih'} di undangan.</p></div>`;
+    };
+    render();
+    state.view = {
+      async onClick(e) {
+        const btn = e.target.closest('[data-act="delete"]');
+        if (!btn) {
+          return;
+        }
+        const gift = gifts.find((g) => g.id === Number(btn.closest('[data-id]').dataset.id));
+        if (await confirmDialog(`Hapus konfirmasi dari ${gift.name}?`, { okText: 'Hapus', danger: true })) {
+          await api(`/api/invitations/${id}/gifts/${gift.id}`, { method: 'DELETE' });
+          const fresh = await api(`/api/invitations/${id}/gifts`);
+          gifts = fresh.gifts;
+          stats = fresh.stats;
+          render();
         }
       }
     };
@@ -838,6 +1043,10 @@
   /* Editor                                                             */
   /* ------------------------------------------------------------------ */
   function ensureDefaults(config) {
+    if (config.music && config.music.preset === undefined) {
+      config.music.preset = config.music.builtIn === false ? 'none' : 'canon';
+      delete config.music.builtIn;
+    }
     const defaults = P.newConfig({ groom: '', bride: '', date: '', religion: config.religion || 'islam' });
     const fill = (target, source) => {
       Object.entries(source).forEach(([key, value]) => {
@@ -925,6 +1134,17 @@
               </div>${hint ? `<small class="hint">${hint}</small>` : ''}</div>
             </div></div>`;
       },
+      video: (path, label, { hint = '' } = {}) => {
+        const url = val(path);
+        return `
+          <div class="field"><span class="label">${label}</span>
+            ${url ? `<video class="field-video" controls muted playsinline preload="metadata" src="${esc(url)}"></video>` : ''}
+            <div class="upload-actions">
+              <button type="button" class="btn btn-soft btn-sm" data-act="upload" data-path="${path}" data-kind="video">${icon('video')} ${url ? 'Ganti video' : 'Unggah video'}</button>
+              ${url ? `<button type="button" class="btn btn-ghost btn-sm" data-act="clear" data-path="${path}">Hapus</button>` : ''}
+            </div>${hint ? `<small class="hint">${hint}</small>` : ''}
+          </div>`;
+      },
       audio: (path, label) => {
         const url = val(path);
         return `
@@ -987,14 +1207,21 @@
         </div>
       </div>`).join('');
 
-    const gallery = config.gallery.map((url, i) => `
-      <div class="gallery-item" style="background-image:url('${esc(url)}')">
+    const gallery = config.gallery.map((item, i) => {
+      const isVideo = (u) => /\.(mp4|webm|mov)$/i.test(u || '');
+      const src = typeof item === 'string' ? (isVideo(item) ? '' : item) : (item.src || '');
+      const video = typeof item === 'string' ? (isVideo(item) ? item : '') : (item.video || '');
+      return `
+      <div class="gallery-item" ${src ? `style="background-image:url('${esc(src)}')"` : ''}>
+        ${!src && video ? `<video src="${esc(video)}#t=0.1" muted preload="metadata"></video>` : ''}
+        ${video ? `<span class="gi-badge">${src ? 'LIVE' : '▶ VIDEO'}</span>` : ''}
         <div class="gi-actions">
           <button type="button" data-act="move" data-list="gallery" data-index="${i}" data-dir="-1" title="Geser kiri">‹</button>
           <button type="button" data-act="remove" data-list="gallery" data-index="${i}" title="Hapus">✕</button>
           <button type="button" data-act="move" data-list="gallery" data-index="${i}" data-dir="1" title="Geser kanan">›</button>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     const colors = config.dressCode.colors.map((c, i) => `
       <span class="color-chip"><input type="color" data-path="dressCode.colors.${i}" value="${esc(c)}"><button type="button" data-act="remove" data-list="dressCode.colors" data-index="${i}" title="Hapus">×</button></span>`).join('');
@@ -1009,23 +1236,30 @@
       section('look', 'palette', 'Tampilan & Musik', 'Tema, foto sampul, bahasa, musik', `
         <div class="field"><span class="label">Tema warna</span>${themePickerHtml(config.theme)}</div>
         ${f.image('heroPhoto', 'Foto sampul (hero)', { hint: 'Foto portrait terbaik. Otomatis dikompres.' })}
+        ${f.select('heroMode', 'Gaya sampul (motion)', [
+          ['photo', 'Foto dengan efek zoom lembut'],
+          ['slideshow', 'Slideshow bergerak (foto sampul + galeri)'],
+          ['video', 'Video latar (loop, tanpa suara)']
+        ])}
+        ${config.heroMode === 'video' ? f.video('heroVideo', 'Video latar sampul', { hint: `MP4/MOV/WEBM maks. ${MAX_VIDEO_MB} MB. Ideal 10–20 detik, portrait.` }) : ''}
+        ${f.toggle('showSymbol', 'Tampilkan simbol / kaligrafi agama di sampul')}
         <div class="row row-2">
           ${f.select('defaultLang', 'Bahasa awal undangan', [['id', 'Bahasa Indonesia'], ['en', 'English']])}
           <div class="field" style="padding-top:1.4rem">${f.toggle('brideFirst', 'Tampilkan mempelai wanita lebih dulu')}</div>
         </div>
         <div class="sub-head">Musik latar</div>
-        ${f.audio('music.url', 'Lagu (MP3)')}
-        ${f.toggle('music.builtIn', 'Jika tidak unggah lagu, pakai musik box bawaan (Canon in D)')}
+        ${f.audio('music.url', 'Lagu sendiri (MP3)')}
+        ${f.select('music.preset', 'Musik bawaan (dipakai jika tidak mengunggah lagu)', P.songs.map((s) => [s.id, s.label]))}
       `, true),
       section('couple', 'heart', 'Mempelai', 'Nama, orang tua, foto, Instagram', `
         <div class="sub-head">Mempelai pria</div>
         <div class="row row-2">${f.text(groom('nickname'), 'Nama panggilan', { max: 30 })}${f.text(groom('fullName'), 'Nama lengkap & gelar', { max: 120 })}</div>
         ${f.i18n(groom('parents'), 'Keterangan orang tua', { multiline: true, rows: 2, placeholder: 'Putra pertama dari Bapak ... & Ibu ...' })}
-        <div class="row row-2">${f.image(groom('photo'), 'Foto')}${f.text(groom('instagram'), 'Instagram (tanpa @)', { max: 40 })}</div>
+        <div class="row row-2">${f.image(groom('photo'), 'Foto')}<div>${f.text(groom('instagram'), 'Instagram (tanpa @)', { max: 40 })}${f.text(groom('tiktok'), 'TikTok (tanpa @)', { max: 40 })}</div></div>
         <div class="sub-head">Mempelai wanita</div>
         <div class="row row-2">${f.text(bride('nickname'), 'Nama panggilan', { max: 30 })}${f.text(bride('fullName'), 'Nama lengkap & gelar', { max: 120 })}</div>
         ${f.i18n(bride('parents'), 'Keterangan orang tua', { multiline: true, rows: 2, placeholder: 'Putri kedua dari Bapak ... & Ibu ...' })}
-        <div class="row row-2">${f.image(bride('photo'), 'Foto')}${f.text(bride('instagram'), 'Instagram (tanpa @)', { max: 40 })}</div>
+        <div class="row row-2">${f.image(bride('photo'), 'Foto')}<div>${f.text(bride('instagram'), 'Instagram (tanpa @)', { max: 40 })}${f.text(bride('tiktok'), 'TikTok (tanpa @)', { max: 40 })}</div></div>
       `),
       section('events', 'calendar', 'Tanggal & Acara', 'Akad/pemberkatan, resepsi, lokasi & peta', `
         <div class="row row-2">
@@ -1050,14 +1284,24 @@
         ${story || '<p class="muted small">Belum ada cerita. Bagian ini tidak tampil jika kosong.</p>'}
         <button type="button" class="btn btn-soft" data-act="add" data-list="story">${icon('plus')} Tambah cerita</button>
       `),
-      section('gallery', 'image', 'Galeri Foto', `${config.gallery.length} foto`, `
+      section('gallery', 'image', 'Galeri Foto & Video', `${config.gallery.length} item`, `
         <div class="gallery-grid">${gallery}</div>
-        <button type="button" class="btn btn-soft" data-act="gallery-add">${icon('upload')} Tambah foto</button>
-        <small class="hint">Bisa pilih banyak sekaligus. Foto otomatis dikompres agar ringan dibuka di HP (maks. 30 foto).</small>
+        <button type="button" class="btn btn-soft" data-act="gallery-add">${icon('upload')} Tambah foto / video</button>
+        <small class="hint">Pilih banyak sekaligus. Foto dikompres otomatis; video MP4/MOV/WEBM maks. ${MAX_VIDEO_MB} MB;
+          <b>motion photo</b> Android (Google/Samsung) tetap bergerak. Maks. 40 item.</small>
       `),
-      section('extras', 'video', 'Live Streaming & Dress Code', 'Opsional', `
+      section('extras', 'video', 'Video, Live Streaming & Dress Code', 'Video pre-wedding, siaran langsung', `
+        <div class="sub-head">Video pre-wedding / cerita</div>
+        ${f.toggle('video.enabled', 'Tampilkan video')}
+        ${f.i18n('video.title', 'Judul video', { placeholder: 'Video Pre-wedding' })}
+        ${f.text('video.url', 'Link YouTube / Vimeo, atau unggah video', { placeholder: 'https://youtu.be/...', max: 600 })}
+        <div class="upload-actions" style="margin:-.5rem 0 1rem">
+          <button type="button" class="btn btn-soft btn-sm" data-act="upload" data-path="video.url" data-kind="video">${icon('upload')} Unggah video (maks. ${MAX_VIDEO_MB} MB)</button>
+        </div>
+        <div class="sub-head">Live streaming</div>
         ${f.toggle('livestream.enabled', 'Tampilkan live streaming')}
-        <div class="row row-2">${f.text('livestream.platform', 'Platform', { placeholder: 'YouTube Live / Instagram Live / Zoom' })}${f.text('livestream.url', 'Link', { placeholder: 'https://...', max: 600 })}</div>
+        <div class="row row-2">${f.text('livestream.platform', 'Platform', { placeholder: 'YouTube Live / Instagram Live / Zoom / TikTok Live' })}${f.text('livestream.url', 'Link', { placeholder: 'https://youtube.com/live/...', max: 600 })}</div>
+        <small class="hint" style="margin:-.5rem 0 1rem">Link YouTube atau Vimeo diputar langsung di undangan, dan tanda 🔴 LIVE muncul otomatis selama acara berlangsung.</small>
         <div class="sub-head">Dress code</div>
         ${f.toggle('dressCode.enabled', 'Tampilkan dress code')}
         <div class="field"><span class="label">Warna</span><div class="colors-row">${colors}
@@ -1071,10 +1315,17 @@
           ${f.number('rsvp.defaultPax', 'Maks. tamu per undangan (default)', { hint: 'Bisa diatur per tamu di menu Tamu.' })}
         </div>
         ${f.text('rsvp.whatsapp', 'No. WhatsApp untuk konfirmasi alternatif (opsional)', { placeholder: '6281234567890', hint: 'Jika diisi, tamu juga bisa konfirmasi via WhatsApp.' })}
+        ${f.toggle('rsvp.songRequests', 'Tamu bisa request lagu untuk acara')}
         ${f.toggle('admin.notifyEmail', 'Kirim email ke saya setiap ada RSVP baru')}
       `),
       section('gifts', 'gift', 'Amplop Digital & Kado', 'Rekening, e-wallet, QRIS, alamat', `
         ${f.toggle('gifts.enabled', 'Tampilkan bagian hadiah')}
+        ${f.select('gifts.mode', 'Jenis', [['gift', 'Amplop digital & kado'], ['charity', 'Donasi amal (pengganti kado)']])}
+        ${config.gifts.mode === 'charity' ? `
+          ${f.text('gifts.charity.name', 'Nama lembaga / program donasi', { placeholder: 'mis. Panti Asuhan Kasih Bunda', max: 120 })}
+          ${f.i18n('gifts.charity.description', 'Keterangan donasi', { multiline: true, rows: 2 })}
+          ${f.text('gifts.charity.url', 'Link donasi (opsional)', { placeholder: 'https://kitabisa.com/...', max: 600 })}` : ''}
+        ${f.toggle('gifts.confirmations', 'Tamu bisa konfirmasi hadiah / donasi yang sudah dikirim')}
         ${accounts}
         <button type="button" class="btn btn-soft" data-act="add" data-list="gifts.accounts">${icon('plus')} Tambah rekening / e-wallet</button>
         <div class="sub-head">QRIS</div>
@@ -1187,12 +1438,17 @@
     }
 
     async function handleUpload(path, kind) {
-      const [file] = await pickFile(kind === 'audio' ? 'audio/mpeg,.mp3' : 'image/*');
+      const accept = { audio: 'audio/mpeg,.mp3', video: 'video/mp4,video/webm,video/quicktime,.mp4,.mov,.webm' }[kind] || 'image/*';
+      const [file] = await pickFile(accept);
       if (!file) {
         return;
       }
       if (kind === 'audio' && file.size > 12 * 1024 * 1024) {
         toast('Ukuran MP3 maksimal 12 MB', 'error');
+        return;
+      }
+      if (kind === 'video' && file.size > MAX_VIDEO_MB * 1024 * 1024) {
+        toast(`Video maksimal ${MAX_VIDEO_MB} MB. Untuk video panjang, gunakan link YouTube.`, 'error');
         return;
       }
       pendingUploads += 1;
@@ -1212,26 +1468,42 @@
     }
 
     async function addGalleryPhotos() {
-      const files = await pickFile('image/*', true);
+      const files = await pickFile('image/*,video/mp4,video/webm,video/quicktime,.mov', true);
       if (!files.length) {
         return;
       }
-      const room = 30 - config.gallery.length;
+      const room = 40 - config.gallery.length;
       if (room <= 0) {
-        toast('Maksimal 30 foto', 'error');
+        toast('Maksimal 40 item galeri', 'error');
         return;
       }
       const selected = files.slice(0, room);
+      let motionCount = 0;
       pendingUploads += 1;
       try {
         for (let i = 0; i < selected.length; i += 1) {
-          toast(`Mengunggah foto ${i + 1}/${selected.length}…`);
-          const blob = await compressImage(selected[i]);
-          const url = await uploadFile(id, blob);
-          config.gallery.push(url);
+          const file = selected[i];
+          toast(`Mengunggah ${i + 1}/${selected.length}…`);
+          if (isVideoFile(file)) {
+            if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+              toast(`${file.name}: video maksimal ${MAX_VIDEO_MB} MB, dilewati`, 'error');
+              continue;
+            }
+            config.gallery.push(await uploadFile(id, file));
+          } else {
+            const motion = await splitMotionPhoto(file);
+            if (motion) {
+              const stillUrl = await uploadFile(id, await compressImage(motion.image));
+              const videoUrl = await uploadFile(id, motion.video);
+              config.gallery.push({ src: stillUrl, video: videoUrl });
+              motionCount += 1;
+            } else {
+              config.gallery.push(await uploadFile(id, await compressImage(file)));
+            }
+          }
           changed({ rerender: true });
         }
-        toast(`${selected.length} foto ditambahkan`);
+        toast(`${selected.length} item ditambahkan${motionCount ? ` (${motionCount} motion photo)` : ''}`);
       } catch (err) {
         toast(err.message, 'error');
       } finally {
@@ -1334,7 +1606,7 @@
         if (el.dataset.path === 'events.0.start' && !config.weddingDate) {
           config.weddingDate = value;
         }
-        changed();
+        changed({ rerender: ['heroMode', 'gifts.mode'].includes(el.dataset.path) });
       },
       onChange(e) {
         const el = e.target;
@@ -1777,6 +2049,7 @@
           <button data-att="maybe">Ragu</button>
           <button data-att="no">Tidak</button>
           <button data-att="wishes">Ada ucapan</button>
+          <button data-att="songs">Request lagu</button>
         </div>
         <input class="search" id="rsvpSearch" placeholder="Cari nama atau ucapan…">
         <button class="btn btn-ghost" data-act="refresh">${icon('refresh')} Muat ulang</button>
@@ -1811,6 +2084,9 @@
         if (filters.attendance === 'wishes' && !r.message) {
           return false;
         }
+        if (filters.attendance === 'songs' && !r.song) {
+          return false;
+        }
         if (['yes', 'no', 'maybe'].includes(filters.attendance) && r.attendance !== filters.attendance) {
           return false;
         }
@@ -1826,7 +2102,14 @@
               ${r.hidden ? '<span class="badge">Disembunyikan</span>' : ''}
             </div>
             ${r.message ? `<p class="msg">${esc(r.message)}</p>` : ''}
+            ${r.song ? `<div class="song-req">🎵 ${esc(r.song)}</div>` : ''}
+            ${r.reply ? `<div class="reply-view"><b>Balasan Anda:</b> ${esc(r.reply)}</div>` : ''}
+            <div class="reply-edit" hidden>
+              <textarea rows="2" maxlength="500" placeholder="Tulis balasan untuk ${esc(r.name)}…">${esc(r.reply || '')}</textarea>
+              <button class="btn btn-primary btn-sm" data-act="save-reply">Simpan balasan</button>
+            </div>
             <div class="meta">
+              ${r.likes ? `<span>♥ ${r.likes}</span>` : ''}
               ${r.invitedAs && r.invitedAs !== r.name ? `<span>Diundang sebagai: ${esc(r.invitedAs)}</span>` : ''}
               ${r.group ? `<span>Grup: ${esc(r.group)}</span>` : ''}
               <span>${r.source === 'rsvp' ? 'Lewat link umum' : 'Link personal'}</span>
@@ -1834,6 +2117,7 @@
             </div>
           </div>
           <div class="acts" style="display:flex;gap:.3rem">
+            ${r.message ? `<button class="btn btn-ghost btn-sm" data-act="reply">${r.reply ? 'Ubah balasan' : 'Balas'}</button>` : ''}
             ${r.message ? `<button class="btn btn-ghost btn-sm" data-act="toggle-hide">${r.hidden ? 'Tampilkan' : 'Sembunyikan'}</button>` : ''}
             <button class="btn btn-ghost btn-sm btn-icon" data-act="delete" title="Hapus">${icon('trash')}</button>
           </div>
@@ -1885,6 +2169,22 @@
         }
         const item = btn.closest('[data-id]');
         const rsvp = rsvps.find((r) => r.id === Number(item.dataset.id));
+        if (btn.dataset.act === 'reply') {
+          const box = item.querySelector('.reply-edit');
+          box.hidden = !box.hidden;
+          if (!box.hidden) {
+            box.querySelector('textarea').focus();
+          }
+          return;
+        }
+        if (btn.dataset.act === 'save-reply') {
+          const reply = item.querySelector('.reply-edit textarea').value.trim();
+          await api(`/api/invitations/${id}/rsvps/${rsvp.id}`, { method: 'PUT', body: { reply } });
+          rsvp.reply = reply;
+          renderList();
+          toast(reply ? 'Balasan tampil di bawah ucapan tamu' : 'Balasan dihapus');
+          return;
+        }
         if (btn.dataset.act === 'toggle-hide') {
           await api(`/api/invitations/${id}/rsvps/${rsvp.id}`, { method: 'PUT', body: { hidden: !rsvp.hidden } });
           rsvp.hidden = !rsvp.hidden;

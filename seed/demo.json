@@ -13,7 +13,8 @@
         "en": "First son of Mr. Hendra Pratama & Mrs. Sri Wahyuni"
       },
       "instagram": "raka.pratama",
-      "photo": ""
+      "photo": "",
+      "tiktok": ""
     },
     "bride": {
       "nickname": "Ayu",
@@ -23,7 +24,8 @@
         "en": "Second daughter of Mr. Bambang Sutrisno & Mrs. Ratna Dewi"
       },
       "instagram": "ayu.lestari",
-      "photo": ""
+      "photo": "",
+      "tiktok": "ayu.lestari"
     }
   },
   "brideFirst": false,
@@ -125,7 +127,8 @@
     "enabled": true,
     "deadline": "2027-02-10",
     "defaultPax": 2,
-    "whatsapp": ""
+    "whatsapp": "",
+    "songRequests": true
   },
   "gifts": {
     "enabled": true,
@@ -146,14 +149,35 @@
       "recipient": "Ayu Lestari Putri",
       "phone": "081234567890",
       "text": "Jl. Melati No. 12, Kebayoran Baru, Jakarta Selatan 12160"
+    },
+    "mode": "gift",
+    "confirmations": true,
+    "charity": {
+      "name": "",
+      "description": {
+        "id": "",
+        "en": ""
+      },
+      "url": ""
     }
   },
   "music": {
     "url": "",
-    "builtIn": true
+    "preset": "canon"
   },
   "closing": {
     "id": "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Wassalamu'alaikum Warahmatullahi Wabarakatuh.",
     "en": "It would be an honour and a joy for us if you could attend and give us your blessing."
+  },
+  "showSymbol": true,
+  "heroMode": "photo",
+  "heroVideo": "",
+  "video": {
+    "enabled": false,
+    "title": {
+      "id": "Video Pre-wedding",
+      "en": "Pre-wedding Video"
+    },
+    "url": ""
   }
 }
