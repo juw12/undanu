@@ -1,4 +1,54 @@
-# Undanu 💌
+<!-- HERO:START -->
+<p align="center">
+  <a href="https://juw12.github.io/undanu/"><img src="docs/media/banner.jpg" alt="Undanu: Digital wedding invitations for Indonesia." width="100%"></a>
+</p>
+
+<p align="center">
+  <b>Digital wedding invitations for Indonesia.</b><br>
+  Design an envelope-style invitation, send each guest a personal WhatsApp link, and check guests in with a QR e-pass.
+</p>
+
+<p align="center">
+  <a href="https://juw12.github.io/undanu/"><b>Try it live</b></a> ·
+  <a href="#see-it-in-action">See it in action</a> ·
+  <a href="#highlights">Highlights</a> ·
+  <a href="https://github.com/juw12">More by juw12</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/juw12/undanu"><img src="https://img.shields.io/github/last-commit/juw12/undanu?label=updated&color=6b7d4f" alt="Last updated"></a>
+  <a href="https://juw12.github.io/undanu/"><img src="https://img.shields.io/badge/demo-live-2ea44f" alt="Live demo"></a>
+  <img src="https://img.shields.io/badge/Web-24292f" alt="Web">
+  <img src="https://img.shields.io/badge/Python_%2B_SQLite-24292f" alt="Python + SQLite">
+</p>
+
+<a id="highlights"></a>
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <b>Personal links</b><br>
+      Every guest gets their own WhatsApp link, so you can see who opened it and who is coming.
+    </td>
+    <td width="33%" valign="top">
+      <b>Every faith</b><br>
+      Templates for every religion in Indonesia, video covers and motion-photo galleries.
+    </td>
+    <td width="33%" valign="top">
+      <b>On the day</b><br>
+      QR e-pass check-in, wishes, song requests and gift confirmations.
+    </td>
+  </tr>
+</table>
+
+## See it in action
+
+<p align="center">
+  <a href="https://juw12.github.io/undanu/"><img src="docs/media/demo.png" alt="Undanu screenshot" width="820"></a><br>
+  <sub>Open the interactive demo at <a href="https://juw12.github.io/undanu/">juw12.github.io/undanu/</a></sub>
+</p>
+<!-- HERO:END -->
+
+## About
 
 Digital wedding invitations for Indonesia, with RSVP and a guest book. Couples sign up, design an
 envelope-style invitation with a live phone preview, send each guest a personal link on WhatsApp,
