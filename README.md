@@ -26,8 +26,10 @@ Nothing to `pip install`, no build step.
   **Android motion photos** (the embedded clip is extracted in the browser); pre-wedding video from YouTube,
   Vimeo, or an upload (MP4/MOV/WEBM up to 40 MB, streamed with HTTP range requests)
 - **Live streaming:** YouTube/Vimeo embed or any link, with an automatic **LIVE** badge during the event
-- **Gifts & donations:** bank/e-wallet/QRIS cards, physical-gift address, or a **charity mode** that asks guests
-  to donate to a cause instead; guests can confirm what they sent, and the **Hadiah** tab totals it
+- **Gifts & donations:** your own bank/e-wallet accounts (one-tap copy) and QRIS image, plus a physical-gift address;
+  or **donation mode** (in lieu of gifts) where guests transfer to your accounts/QRIS, with an optional "donations go to…" note.
+  Rename the section (Tanda Kasih, Amplop Digital, Angpao, Dana Punia, … or your own). Guests can confirm what they sent,
+  and the **Hadiah** tab totals it
 - **Reviews:** couples can rate UndanganKita; approved reviews appear on the landing page (moderated by `ADMIN_EMAILS`)
 - Publish/draft toggle and custom link (`/i/your-names`)
 - **Guests:** add one, paste many, or import CSV; per-guest max guests and group; personal links (`?g=CODE`);

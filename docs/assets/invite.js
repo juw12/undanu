@@ -106,6 +106,8 @@
       coupleReply: 'Balasan mempelai',
       giftConfirmTitle: 'Konfirmasi Tanda Kasih',
       donationConfirm: 'Konfirmasi Donasi',
+      donationFor: 'Seluruh donasi akan disalurkan ke',
+      charityInfo: 'Info lembaga',
       giftConfirmText: 'Sudah mengirim? Beri tahu kami agar kami bisa mengucapkan terima kasih secara langsung.',
       giftConfirmBtn: 'Isi konfirmasi',
       giftMethod: 'Dikirim melalui',
@@ -116,7 +118,7 @@
       giftSubmit: 'Kirim konfirmasi',
       giftSent: 'Terima kasih! Konfirmasi Anda sudah kami terima. 🙏',
       donationTitle: 'Donasi',
-      donationIntro: 'Sebagai pengganti kado, kami mengajak Anda berbagi kebaikan melalui donasi berikut:',
+      donationIntro: 'Sebagai pengganti kado, kami mengajak Anda berbagi kebaikan. Donasi dapat dikirim melalui:',
       donateNow: 'Donasi sekarang',
       waRsvp: 'Halo, saya *{name}* ingin mengonfirmasi kehadiran di pernikahan {couple}:\n\nKehadiran: *{att}*\nJumlah tamu: {n}\n\nUcapan: {msg}'
     },
@@ -207,6 +209,8 @@
       coupleReply: 'Reply from the couple',
       giftConfirmTitle: 'Gift Confirmation',
       donationConfirm: 'Donation Confirmation',
+      donationFor: 'All donations will go to',
+      charityInfo: 'About the cause',
       giftConfirmText: 'Already sent something? Let us know so we can thank you personally.',
       giftConfirmBtn: 'Confirm',
       giftMethod: 'Sent via',
@@ -217,7 +221,7 @@
       giftSubmit: 'Send confirmation',
       giftSent: 'Thank you! We have received your confirmation. 🙏',
       donationTitle: 'Donation',
-      donationIntro: 'In lieu of gifts, we invite you to share kindness through this donation:',
+      donationIntro: 'In lieu of gifts, we invite you to share kindness. Donations can be sent via:',
       donateNow: 'Donate now',
       waRsvp: 'Hello, this is *{name}* confirming my RSVP for the wedding of {couple}:\n\nAttendance: *{att}*\nGuests: {n}\n\nWishes: {msg}'
     }
@@ -777,6 +781,11 @@
     return /^\d+$/.test(digits) ? digits.replace(/(.{4})/g, '$1 ').trim() : String(number || '');
   }
 
+  function giftSectionTitle() {
+    const gifts = C.gifts || {};
+    return L(gifts.title) || (gifts.mode === 'charity' ? t('donationTitle') : t('giftTitle'));
+  }
+
   function renderGifts() {
     const gifts = C.gifts || {};
     const accounts = Array.isArray(gifts.accounts) ? gifts.accounts.filter((a) => a && a.number) : [];
@@ -784,21 +793,22 @@
     const addr = gifts.address && gifts.address.text ? gifts.address : null;
     const charity = gifts.mode === 'charity';
     const charityUrl = safeUrl(gifts.charity?.url);
-    const charityCard = charity && gifts.charity?.name ? `
+    const charityDesc = L(gifts.charity?.description);
+    const charityCard = charity && (gifts.charity?.name || charityDesc) ? `
       <div class="card gift-extra reveal">
         <span class="gift-icon">${icon('heart')}</span>
-        <h3>${esc(gifts.charity.name)}</h3>
-        <p>${esc(L(gifts.charity.description))}</p>
-        ${charityUrl ? `<a class="btn btn-primary btn-sm" href="${esc(charityUrl)}" target="_blank" rel="noopener">${esc(t('donateNow'))}</a>` : ''}
+        ${gifts.charity?.name ? `<small class="muted">${esc(t('donationFor'))}</small><h3>${esc(gifts.charity.name)}</h3>` : ''}
+        ${charityDesc ? `<p>${esc(charityDesc)}</p>` : ''}
+        ${charityUrl ? `<a class="btn btn-ghost btn-sm" href="${esc(charityUrl)}" target="_blank" rel="noopener">${esc(t('charityInfo'))}</a>` : ''}
       </div>` : '';
-    const hasContent = accounts.length || qrisUrl || addr || charityCard;
+    const hasContent = accounts.length || qrisUrl || (addr && !charity) || charityCard;
     $('#gift').hidden = gifts.enabled === false || !hasContent;
-    $('#gift .section-title').textContent = charity ? t('donationTitle') : t('giftTitle');
-    $('#gift .lead').textContent = charity ? t('donationIntro') : t('giftIntro');
+    $('#gift .section-title').textContent = giftSectionTitle();
+    $('#gift .lead').textContent = L(gifts.intro) || (charity ? t('donationIntro') : t('giftIntro'));
     const methodOptions = [
       ...accounts.map((acc) => acc.provider).filter(Boolean),
       ...(qrisUrl ? ['QRIS'] : []),
-      ...(addr ? [t('giftPhysical')] : []),
+      ...(addr && !charity ? [t('giftPhysical')] : []),
       t('giftOther')
     ];
     const confirmCard = gifts.confirmations === false ? '' : `
@@ -833,7 +843,7 @@
         <p>${esc(t('qrisText'))}</p>
         <img src="${esc(qrisUrl)}" alt="QRIS" loading="lazy">
       </div>` : '';
-    const address = addr ? `
+    const address = addr && !charity ? `
       <div class="card gift-extra reveal">
         <span class="gift-icon">${icon('gift')}</span>
         <h3>${esc(t('sendGiftTo'))}</h3>
@@ -852,6 +862,11 @@
     }
   }
 
+  function navLabel(id, key) {
+    const custom = id === 'gift' ? L((C.gifts || {}).title) : '';
+    return custom && custom.length <= 14 ? custom : t(key);
+  }
+
   function renderNav() {
     const items = [
       ['home', 'home', 'navHome'],
@@ -866,7 +881,7 @@
     });
     const active = $('#bottomNav a.active')?.getAttribute('href') || '#home';
     $('#bottomNav').innerHTML = items.map(([id, ic, label]) =>
-      `<a href="#${id}" class="${'#' + id === active ? 'active' : ''}">${icon(ic)}<span>${esc(t(label))}</span></a>`
+      `<a href="#${id}" class="${'#' + id === active ? 'active' : ''}">${icon(ic)}<span>${esc(navLabel(id, label))}</span></a>`
     ).join('');
   }
 

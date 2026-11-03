@@ -1318,21 +1318,29 @@
         ${f.toggle('rsvp.songRequests', 'Tamu bisa request lagu untuk acara')}
         ${f.toggle('admin.notifyEmail', 'Kirim email ke saya setiap ada RSVP baru')}
       `),
-      section('gifts', 'gift', 'Amplop Digital & Kado', 'Rekening, e-wallet, QRIS, alamat', `
-        ${f.toggle('gifts.enabled', 'Tampilkan bagian hadiah')}
-        ${f.select('gifts.mode', 'Jenis', [['gift', 'Amplop digital & kado'], ['charity', 'Donasi amal (pengganti kado)']])}
+      section('gifts', 'gift', 'Amplop Digital & Donasi', 'Rekening, e-wallet, QRIS, alamat kado', `
+        ${f.toggle('gifts.enabled', 'Tampilkan bagian ini di undangan')}
+        ${f.select('gifts.mode', 'Jenis', [['gift', 'Amplop digital & kado'], ['charity', 'Donasi (pengganti kado) — ke rekening / QRIS kami']])}
+        ${f.i18n('gifts.title', 'Nama bagian di undangan', { placeholder: config.gifts.mode === 'charity' ? 'Donasi' : 'Tanda Kasih' })}
+        <div class="title-chips" style="display:flex;flex-wrap:wrap;gap:.4rem;margin:-.5rem 0 1rem">
+          ${P.giftTitles.map((g) => `<button type="button" class="btn btn-ghost btn-sm" data-act="gift-title" data-id="${esc(g.id)}" data-en="${esc(g.en)}">${esc(g.id)}</button>`).join('')}
+        </div>
+        ${f.i18n('gifts.intro', 'Kalimat pengantar (opsional)', { multiline: true, rows: 2, placeholder: 'Kosongkan untuk memakai kalimat bawaan' })}
         ${config.gifts.mode === 'charity' ? `
-          ${f.text('gifts.charity.name', 'Nama lembaga / program donasi', { placeholder: 'mis. Panti Asuhan Kasih Bunda', max: 120 })}
-          ${f.i18n('gifts.charity.description', 'Keterangan donasi', { multiline: true, rows: 2 })}
-          ${f.text('gifts.charity.url', 'Link donasi (opsional)', { placeholder: 'https://kitabisa.com/...', max: 600 })}` : ''}
-        ${f.toggle('gifts.confirmations', 'Tamu bisa konfirmasi hadiah / donasi yang sudah dikirim')}
+          <small class="hint" style="display:block;margin:-.5rem 0 1rem">Tamu mentransfer donasi langsung ke rekening / e-wallet / QRIS Anda di bawah. Jika donasi akan disalurkan, isi tujuannya agar tamu tahu.</small>
+          ${f.text('gifts.charity.name', 'Disalurkan ke (opsional)', { placeholder: 'mis. Panti Asuhan Kasih Bunda', max: 120 })}
+          ${f.i18n('gifts.charity.description', 'Keterangan (opsional)', { multiline: true, rows: 2 })}
+          ${f.text('gifts.charity.url', 'Link info lembaga (opsional)', { placeholder: 'https://...', max: 600 })}` : ''}
+        ${f.toggle('gifts.confirmations', 'Tamu bisa konfirmasi transfer yang sudah dikirim')}
+        <div class="sub-head">Rekening & e-wallet Anda</div>
         ${accounts}
         <button type="button" class="btn btn-soft" data-act="add" data-list="gifts.accounts">${icon('plus')} Tambah rekening / e-wallet</button>
-        <div class="sub-head">QRIS</div>
-        ${f.image('gifts.qrisImage', 'Gambar QRIS', { hint: 'Screenshot QRIS dari aplikasi bank/e-wallet Anda.' })}
-        <div class="sub-head">Alamat kirim kado</div>
-        <div class="row row-2">${f.text('gifts.address.recipient', 'Nama penerima')}${f.text('gifts.address.phone', 'No. HP penerima')}</div>
-        ${f.textarea('gifts.address.text', 'Alamat', { rows: 2 })}
+        <div class="sub-head">QRIS Anda</div>
+        ${f.image('gifts.qrisImage', 'Gambar QRIS', { hint: 'Screenshot / unduh QRIS dari aplikasi bank atau e-wallet Anda. Tamu bisa scan atau simpan gambarnya.' })}
+        ${config.gifts.mode === 'charity' ? '' : `
+          <div class="sub-head">Alamat kirim kado</div>
+          <div class="row row-2">${f.text('gifts.address.recipient', 'Nama penerima')}${f.text('gifts.address.phone', 'No. HP penerima')}</div>
+          ${f.textarea('gifts.address.text', 'Alamat', { rows: 2 })}`}
       `)
     ].join('');
   }
@@ -1675,6 +1683,9 @@
           changed({ rerender: true });
         } else if (act === 'gallery-add') {
           addGalleryPhotos();
+        } else if (act === 'gift-title') {
+          config.gifts.title = { id: btn.dataset.id, en: btn.dataset.en };
+          changed({ rerender: true });
         } else if (act === 'color-add') {
           if (config.dressCode.colors.length < 8) {
             config.dressCode.colors.push('#c9b38a');

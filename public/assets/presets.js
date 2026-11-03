@@ -238,7 +238,8 @@
       gallery: [],
       rsvp: { enabled: true, deadline, defaultPax: 2, whatsapp: '', songRequests: true },
       gifts: {
-        enabled: true, mode: 'gift', confirmations: true, accounts: [], qrisImage: '',
+        enabled: true, mode: 'gift', title: { id: '', en: '' }, intro: { id: '', en: '' },
+        confirmations: true, accounts: [], qrisImage: '',
         address: { recipient: '', phone: '', text: '' },
         charity: { name: '', description: { id: '', en: '' }, url: '' }
       },
@@ -279,5 +280,17 @@
     'Terima kasih banyak!'
   ].join('\n');
 
-  window.PRESETS = { religions, themes, timeZones, songs, newConfig, defaultWaTemplate, defaultWaReminder };
+  // One-tap names for the gift/donation section (the couple can also type their own).
+  const giftTitles = [
+    { id: 'Tanda Kasih', en: 'Wedding Gift' },
+    { id: 'Amplop Digital', en: 'Digital Envelope' },
+    { id: 'Kado Pernikahan', en: 'Wedding Gift' },
+    { id: 'Wedding Gift', en: 'Wedding Gift' },
+    { id: 'Berbagi Kebahagiaan', en: 'Share the Joy' },
+    { id: 'Donasi', en: 'Donation' },
+    { id: 'Angpao', en: 'Angpao' },
+    { id: 'Dana Punia', en: 'Dana Punia' }
+  ];
+
+  window.PRESETS = { religions, themes, timeZones, songs, giftTitles, newConfig, defaultWaTemplate, defaultWaReminder };
 })();
