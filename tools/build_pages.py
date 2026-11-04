@@ -123,8 +123,15 @@ def build_demos():
 
 
 def main():
-    shutil.rmtree(DOCS, ignore_errors=True)
-    (DOCS / "assets").mkdir(parents=True)
+    # Rebuild everything except docs/media (README images are maintained by hand).
+    for child in DOCS.glob("*") if DOCS.exists() else []:
+        if child.name == "media":
+            continue
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+    (DOCS / "assets").mkdir(parents=True, exist_ok=True)
     for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js", "landing.js"):
         shutil.copy2(PUBLIC / "assets" / name, DOCS / "assets" / name)
     build_landing()
