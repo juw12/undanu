@@ -602,3 +602,9 @@ body.opened .fabs { opacity: 1; pointer-events: auto; }
 }
 .tradition-list button:hover { background: var(--surface-2); }
 .tradition-list button.active { background: var(--primary); color: #fff; }
+
+/* Ornament styles: arch frames and botanical corners only with 'leaves' */
+body[data-ornament="none"] .corner { display: none; }
+body[data-ornament="line"] .corner { opacity: .55; }
+body[data-ornament="line"] .portrait,
+body[data-ornament="none"] .portrait { border-radius: 22px; }

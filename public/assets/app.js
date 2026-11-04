@@ -1248,6 +1248,7 @@
         ])}
         ${config.heroMode === 'video' ? f.video('heroVideo', 'Video latar sampul', { hint: `MP4/MOV/WEBM maks. ${MAX_VIDEO_MB} MB. Ideal 10–20 detik, portrait.` }) : ''}
         ${f.toggle('showSymbol', 'Tampilkan simbol agama di sampul')}
+          ${f.select('ornament', 'Ornamen & bingkai foto', [['line', 'Garis minimalis (netral)'], ['leaves', 'Daun / botanical (bingkai lengkung)'], ['none', 'Polos tanpa ornamen']])}
           ${f.toggle('showTypoNote', 'Tampilkan "Mohon maaf apabila ada kesalahan penulisan nama dan gelar" di sampul')}
         <div class="row row-2">
           ${f.select('defaultLang', 'Bahasa awal undangan', [['id', 'Bahasa Indonesia'], ['en', 'English']])}

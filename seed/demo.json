@@ -77,14 +77,14 @@
   "dressCode": {
     "enabled": true,
     "colors": [
-      "#7d8b6a",
-      "#c9d1b8",
-      "#e9dfcc",
-      "#b8955a"
+      "#3b3541",
+      "#d9b8aa",
+      "#efe5dc",
+      "#b5826e"
     ],
     "note": {
-      "id": "Kami mengundang Anda mengenakan busana bernuansa sage, krem, atau emas.",
-      "en": "We kindly invite you to dress in shades of sage, cream, or gold."
+      "id": "Kami mengundang Anda mengenakan busana bernuansa netral: gelap, blush, krem, atau rose gold.",
+      "en": "We kindly invite you to dress in neutral shades: dark tones, blush, cream or rose gold."
     }
   },
   "story": [
@@ -179,5 +179,6 @@
       "en": "Pre-wedding Video"
     },
     "url": ""
-  }
+  },
+  "ornament": "line"
 }

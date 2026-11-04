@@ -1,0 +1,65 @@
+{
+  "id": "/app",
+  "name": "Undanu — Undangan Digital",
+  "short_name": "Undanu",
+  "description": "Undangan pernikahan digital, RSVP & buku tamu untuk semua agama dan tradisi.",
+  "lang": "id",
+  "start_url": "/app?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#f8f5f2",
+  "theme_color": "#26222b",
+  "categories": [
+    "lifestyle",
+    "productivity",
+    "events"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Undangan saya",
+      "short_name": "Undangan",
+      "url": "/app#/",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Contoh undangan",
+      "short_name": "Demo",
+      "url": "/i/demo",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

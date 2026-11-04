@@ -424,6 +424,7 @@
     }
     document.documentElement.lang = state.lang;
     applyStaticText();
+    renderOrnament();
     $$('.cover-note').forEach((el) => {
       el.hidden = !C.showTypoNote;
     });
@@ -448,6 +449,18 @@
     $('#musicBtn').hidden = !hasMusic();
     $('#musicBtn').title = musicUrl() ? '' : (SONGS[songId()]?.title || '');
     observeReveals();
+  }
+
+  // Decorative style: 'line' (geometric, default for new invitations), 'leaves' (botanical) or 'none'.
+  function renderOrnament() {
+    const ornament = ['line', 'leaves', 'none'].includes(C.ornament) ? C.ornament : 'leaves';
+    document.body.dataset.ornament = ornament;
+    $$('svg.corner use').forEach((use) => {
+      use.setAttribute('href', ornament === 'leaves' ? '#corner' : '#corner-line');
+    });
+    $$('svg.divider use').forEach((use) => {
+      use.setAttribute('href', ornament === 'leaves' ? '#divider' : '#divider-line');
+    });
   }
 
   function applyStaticText() {

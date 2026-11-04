@@ -382,3 +382,13 @@ td .acts { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end
   padding: .3rem .75rem; font: inherit; font-size: .8rem; font-weight: 600; letter-spacing: .06em; cursor: pointer;
 }
 .lang-toggle:hover { border-color: var(--primary); }
+
+/* Installable app (PWA) */
+.install-btn { background: var(--primary); color: #fff; border-color: var(--primary); }
+.install-btn:hover { background: var(--primary-dark); }
+.install-fab {
+  position: fixed; left: 16px; bottom: 16px; z-index: 90; border: 0; border-radius: 999px; cursor: pointer;
+  padding: .65rem 1.1rem; background: var(--primary); color: #fff; font: inherit; font-weight: 600;
+  box-shadow: 0 10px 24px -10px rgba(38, 34, 43, .6);
+}
+.is-installed-app .landing-nav { padding-top: max(1.1rem, env(safe-area-inset-top)); }

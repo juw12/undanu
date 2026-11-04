@@ -213,6 +213,7 @@
       },
       brideFirst: false,
       showSymbol: true,
+    ornament: 'line',
       heroPhoto: '',
       heroMode: 'photo',
       heroVideo: '',

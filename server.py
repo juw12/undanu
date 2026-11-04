@@ -1676,6 +1676,13 @@ class Handler(BaseHTTPRequestHandler):
             return self.static_file(PUBLIC_DIR / "index.html", PUBLIC_DIR)
         if path in ("/app", "/app/"):
             return self.static_file(PUBLIC_DIR / "app.html", PUBLIC_DIR)
+        if path in ("/manifest.webmanifest", "/sw.js", "/offline.html"):
+            # The service worker must live at the root so it can control the whole site.
+            return self.static_file(PUBLIC_DIR / path.lstrip("/"), PUBLIC_DIR)
+        if path == "/favicon.ico":
+            return self.static_file(PUBLIC_DIR / "icons" / "favicon-32.png", PUBLIC_DIR / "icons", "public, max-age=86400")
+        if path.startswith("/icons/"):
+            return self.static_file(PUBLIC_DIR / path.lstrip("/"), PUBLIC_DIR / "icons", "public, max-age=86400")
         if path.startswith("/assets/"):
             return self.static_file(PUBLIC_DIR / path.lstrip("/"), PUBLIC_DIR / "assets", "public, max-age=300")
         if path.startswith("/uploads/"):

@@ -44,6 +44,9 @@ def build_landing():
         ('<a class="btn btn-primary btn-lg" href="/app#/register" data-en="Sign up free">Daftar gratis</a>',
          f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy" data-en="How to deploy">Lihat cara deploy</a>', 1),
         ('src="/assets/landing.js"', 'src="assets/landing.js"', 1),
+        ('src="/assets/pwa.js"', 'src="assets/pwa.js"', 1),
+        ('  <link rel="manifest" href="/manifest.webmanifest">\n', '', 1),
+        ('href="/icons/', 'href="icons/', 2),
         ('href="/"', 'href="./"', 1),
     ], "landing")
     # /i/demo?agama=hindu -> demo/?agama=hindu (also inside data-src for the religion chips)
@@ -92,6 +95,7 @@ def build_demo(stamp):
     html = replace_all(html, [
         ('href="/assets/', 'href="../assets/', 1),
         ('src="/assets/', 'src="../assets/', 2),
+        ('href="/icons/', 'href="../icons/', 1),
         ("<!--META-->", meta, 1),
         ("<!--DATA-->", data_json, 1),
     ], "demo")
@@ -135,8 +139,9 @@ def main():
         else:
             child.unlink()
     (DOCS / "assets").mkdir(parents=True, exist_ok=True)
-    for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js", "landing.js"):
+    for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js", "landing.js", "pwa.js"):
         shutil.copy2(PUBLIC / "assets" / name, DOCS / "assets" / name)
+    shutil.copytree(PUBLIC / "icons", DOCS / "icons", dirs_exist_ok=True)
     build_landing()
     build_demos()
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
