@@ -42,7 +42,7 @@ from datetime import datetime, timezone
 from email.message import EmailMessage
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import demos
 
@@ -92,7 +92,7 @@ RESERVED_SLUGS = {
     "app", "api", "admin", "assets", "uploads", "login", "register", "demo-admin",
     "static", "healthz", "www", "help", "support", "i", "reviews", "live",
 }
-RESERVED_SLUGS.update(demos.demo_slugs())
+RESERVED_SLUGS.update(demos.reserved_slugs())
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 ATTENDANCE = ("yes", "no", "maybe")
 
@@ -1548,6 +1548,8 @@ def render_invite_page(req: Request, slug: str) -> Response:
         "guest": guest,
         "appName": APP_NAME,
     }
+    if row["slug"] == demos.DEMO_SLUG:
+        data["demoTraditions"] = demos.tradition_patches()
     data_json = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     template = (PUBLIC_DIR / "invite.html").read_text(encoding="utf-8")
     page = template.replace("<!--META-->", "\n  ".join(meta)).replace("<!--DATA-->", data_json)
@@ -1681,6 +1683,12 @@ class Handler(BaseHTTPRequestHandler):
                                     "public, max-age=31536000, immutable", self.headers.get("Range"))
         match = re.match(r"^/i/([a-z0-9-]{3,40})/?$", path)
         if match:
+            religion = demos.legacy_slugs().get(match.group(1))
+            if religion:
+                # Old per-religion demo links -> the unified demo in that tradition.
+                query = urlencode({**req.query, "agama": religion})
+                return Response(302, b"", "text/plain; charset=utf-8",
+                                [("Location", f"/i/{demos.DEMO_SLUG}?{query}")])
             return render_invite_page(req, match.group(1))
         return not_found_page()
 
@@ -1722,9 +1730,9 @@ class Handler(BaseHTTPRequestHandler):
 # Demo seed
 # --------------------------------------------------------------------------- #
 def seed_demo() -> None:
-    """Create or refresh one demo invitation per religion (/i/demo, /i/demo-islam, ...)."""
-    configs = demos.demo_configs()
-    if not configs:
+    """Create or refresh the unified demo invitation (/i/demo) and drop the old per-religion copies."""
+    config = demos.demo_config()
+    if not config:
         return
     conn = connect()
     try:
@@ -1734,32 +1742,39 @@ def seed_demo() -> None:
             ("demo@undangan.local", "Demo", hash_password(secrets.token_urlsafe(24)), stamp),
         )
         user_id = conn.execute("SELECT id FROM users WHERE email = 'demo@undangan.local'").fetchone()[0]
-        for slug, (variant, config) in configs.items():
-            config_json = json.dumps(sanitize_config(config), ensure_ascii=False)
-            existing = conn.execute("SELECT id, user_id FROM invitations WHERE slug = ?", (slug,)).fetchone()
-            if existing:
-                if existing["user_id"] == user_id:
-                    conn.execute(
-                        "UPDATE invitations SET config = ?, published = 1, updated_at = ? WHERE id = ?",
-                        (config_json, stamp, existing["id"]),
-                    )
-                continue
-            cursor = conn.execute(
-                "INSERT INTO invitations (user_id, slug, config, published, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?)",
-                (user_id, slug, config_json, stamp, stamp),
+        legacy = list(demos.legacy_slugs())
+        if legacy:
+            placeholders = ", ".join("?" for _ in legacy)
+            conn.execute(
+                f"DELETE FROM invitations WHERE user_id = ? AND slug IN ({placeholders})",
+                (user_id, *legacy),
             )
-            invitation_id = cursor.lastrowid
-            for name, attendance, count, message in demos.sample_wishes(variant):
-                code = new_guest_code(conn, invitation_id)
-                guest_cursor = conn.execute(
-                    "INSERT INTO guests (invitation_id, code, name, pax, source, created_at) VALUES (?, ?, ?, 2, 'rsvp', ?)",
-                    (invitation_id, code, name, stamp),
-                )
+        config_json = json.dumps(sanitize_config(config), ensure_ascii=False)
+        existing = conn.execute("SELECT id, user_id FROM invitations WHERE slug = ?", (demos.DEMO_SLUG,)).fetchone()
+        if existing:
+            if existing["user_id"] == user_id:
                 conn.execute(
-                    """INSERT INTO rsvps (invitation_id, guest_id, name, attendance, guests, message, created_at, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (invitation_id, guest_cursor.lastrowid, name, attendance, count, message, stamp, stamp),
+                    "UPDATE invitations SET config = ?, published = 1, updated_at = ? WHERE id = ?",
+                    (config_json, stamp, existing["id"]),
                 )
+            conn.commit()
+            return
+        cursor = conn.execute(
+            "INSERT INTO invitations (user_id, slug, config, published, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?)",
+            (user_id, demos.DEMO_SLUG, config_json, stamp, stamp),
+        )
+        invitation_id = cursor.lastrowid
+        for name, attendance, count, message in demos.sample_wishes():
+            code = new_guest_code(conn, invitation_id)
+            guest_cursor = conn.execute(
+                "INSERT INTO guests (invitation_id, code, name, pax, source, created_at) VALUES (?, ?, ?, 2, 'rsvp', ?)",
+                (invitation_id, code, name, stamp),
+            )
+            conn.execute(
+                """INSERT INTO rsvps (invitation_id, guest_id, name, attendance, guests, message, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (invitation_id, guest_cursor.lastrowid, name, attendance, count, message, stamp, stamp),
+            )
         conn.commit()
     finally:
         conn.close()

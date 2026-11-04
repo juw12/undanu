@@ -1,39 +1,15 @@
 {
-  "variants": [
+  "_comment": "One unified demo (/i/demo): the same couple, with the religion-specific parts (greeting, ceremony name and place, quote, closing, symbol) switchable in the page. See demos.py.",
+  "default": "umum",
+  "traditions": [
     {
-      "slug": "demo",
       "religion": "umum",
       "label": "Umum",
-      "theme": "sage",
-      "groom": {
-        "nickname": "Raka",
-        "fullName": "Raka Aditya Pratama, S.T.",
-        "parents": {
-          "id": "Putra pertama dari Bapak Hendra Pratama & Ibu Sri Wahyuni",
-          "en": "First son of Mr. Hendra Pratama & Mrs. Sri Wahyuni"
-        }
-      },
-      "bride": {
-        "nickname": "Ayu",
-        "fullName": "Ayu Lestari Putri, S.Ds.",
-        "parents": {
-          "id": "Putri kedua dari Bapak Bambang Sutrisno & Ibu Ratna Dewi",
-          "en": "Second daughter of Mr. Bambang Sutrisno & Mrs. Ratna Dewi"
-        }
-      },
-      "hashtag": "#RakaAyuSelamanya",
       "ceremony": {
         "venue": "Balai Kartini",
         "address": "Jl. Jend. Gatot Subroto Kav. 37, Kuningan, Jakarta Selatan",
         "mapsQuery": "Balai Kartini Jakarta"
       },
-      "dressColors": [
-        "#7d8b6a",
-        "#c9d1b8",
-        "#e9dfcc",
-        "#b8955a"
-      ],
-      "firstWish": "Selamat menempuh hidup baru! Semoga selalu bahagia dan saling menguatkan.",
       "text": {
         "label": "Umum / Universal",
         "ceremony": {
@@ -58,39 +34,13 @@
       }
     },
     {
-      "slug": "demo-islam",
       "religion": "islam",
       "label": "Islam",
-      "theme": "emerald",
-      "groom": {
-        "nickname": "Fajar",
-        "fullName": "Muhammad Fajar Ramadhan, S.E.",
-        "parents": {
-          "id": "Putra pertama dari Bapak H. Ahmad Syarif & Ibu Hj. Nurhayati",
-          "en": "First son of Mr. Ahmad Syarif & Mrs. Nurhayati"
-        }
-      },
-      "bride": {
-        "nickname": "Nisa",
-        "fullName": "Annisa Rahmawati, S.Pd.",
-        "parents": {
-          "id": "Putri kedua dari Bapak Hasan Basri & Ibu Siti Aminah",
-          "en": "Second daughter of Mr. Hasan Basri & Mrs. Siti Aminah"
-        }
-      },
-      "hashtag": "#FajarNisaHalal",
       "ceremony": {
         "venue": "Masjid Agung Al-Azhar",
         "address": "Jl. Sisingamangaraja No. 1, Kebayoran Baru, Jakarta Selatan",
         "mapsQuery": "Masjid Agung Al-Azhar Jakarta"
       },
-      "dressColors": [
-        "#14594a",
-        "#9fbfb0",
-        "#f2f5ef",
-        "#c9a45c"
-      ],
-      "firstWish": "Barakallahu lakuma wa baraka 'alaikuma. Semoga menjadi keluarga yang sakinah, mawaddah, warahmah.",
       "text": {
         "label": "Islam",
         "ceremony": {
@@ -115,39 +65,13 @@
       }
     },
     {
-      "slug": "demo-kristen",
       "religion": "kristen",
       "label": "Kristen",
-      "theme": "navy",
-      "groom": {
-        "nickname": "Daniel",
-        "fullName": "Daniel Christian Simanjuntak, S.Kom.",
-        "parents": {
-          "id": "Putra kedua dari Bapak Robert Simanjuntak & Ibu Maria Siregar",
-          "en": "Second son of Mr. Robert Simanjuntak & Mrs. Maria Siregar"
-        }
-      },
-      "bride": {
-        "nickname": "Grace",
-        "fullName": "Grace Natalia Wenas, S.H.",
-        "parents": {
-          "id": "Putri pertama dari Bapak Johanis Wenas & Ibu Ester Lumenta",
-          "en": "First daughter of Mr. Johanis Wenas & Mrs. Ester Lumenta"
-        }
-      },
-      "hashtag": "#DanielGraceBlessed",
       "ceremony": {
         "venue": "GPIB Immanuel Jakarta",
         "address": "Jl. Medan Merdeka Timur No. 10, Gambir, Jakarta Pusat",
         "mapsQuery": "GPIB Immanuel Jakarta"
       },
-      "dressColors": [
-        "#2a3b5c",
-        "#8fa3c4",
-        "#f3f1ec",
-        "#c2a36b"
-      ],
-      "firstWish": "Selamat berbahagia! Kiranya kasih Tuhan Yesus selalu menyertai rumah tangga kalian.",
       "text": {
         "label": "Kristen",
         "ceremony": {
@@ -172,39 +96,13 @@
       }
     },
     {
-      "slug": "demo-katolik",
       "religion": "katolik",
       "label": "Katolik",
-      "theme": "blush",
-      "groom": {
-        "nickname": "Yohan",
-        "fullName": "Yohanes Bimo Wicaksono, S.Ars.",
-        "parents": {
-          "id": "Putra pertama dari Bapak Antonius Wicaksono & Ibu Theresia Sulastri",
-          "en": "First son of Mr. Antonius Wicaksono & Mrs. Theresia Sulastri"
-        }
-      },
-      "bride": {
-        "nickname": "Clara",
-        "fullName": "Clara Anindya Putri, S.Psi.",
-        "parents": {
-          "id": "Putri ketiga dari Bapak Fransiskus Hartono & Ibu Maria Goretti Endang",
-          "en": "Third daughter of Mr. Fransiskus Hartono & Mrs. Maria Goretti Endang"
-        }
-      },
-      "hashtag": "#YohanClaraBerkahDalem",
       "ceremony": {
         "venue": "Gereja Katedral Jakarta",
         "address": "Jl. Katedral No. 7B, Pasar Baru, Sawah Besar, Jakarta Pusat",
         "mapsQuery": "Gereja Katedral Jakarta"
       },
-      "dressColors": [
-        "#b07c80",
-        "#e7c9c9",
-        "#faf3f1",
-        "#b59a64"
-      ],
-      "firstWish": "Proficiat! Semoga Sakramen Pernikahan ini membawa berkat dan damai Kristus bagi keluarga baru kalian.",
       "text": {
         "label": "Katolik",
         "ceremony": {
@@ -229,39 +127,13 @@
       }
     },
     {
-      "slug": "demo-hindu",
       "religion": "hindu",
       "label": "Hindu",
-      "theme": "terracotta",
-      "groom": {
-        "nickname": "Gede",
-        "fullName": "I Gede Arya Wiguna, S.T.",
-        "parents": {
-          "id": "Putra pertama dari Bapak I Made Suarta & Ibu Ni Ketut Sriani",
-          "en": "First son of Mr. I Made Suarta & Mrs. Ni Ketut Sriani"
-        }
-      },
-      "bride": {
-        "nickname": "Dewi",
-        "fullName": "Ni Luh Putu Dewi Lestari, S.Farm.",
-        "parents": {
-          "id": "Putri pertama dari Bapak I Wayan Sudarma & Ibu Ni Nyoman Ariani",
-          "en": "First daughter of Mr. I Wayan Sudarma & Mrs. Ni Nyoman Ariani"
-        }
-      },
-      "hashtag": "#GedeDewiPawiwahan",
       "ceremony": {
         "venue": "Pura Aditya Jaya Rawamangun",
         "address": "Jl. Daksinapati Raya No. 10, Rawamangun, Jakarta Timur",
         "mapsQuery": "Pura Aditya Jaya Rawamangun"
       },
-      "dressColors": [
-        "#a85d3e",
-        "#d9a679",
-        "#f7efe6",
-        "#6f7f5c"
-      ],
-      "firstWish": "Om Swastyastu. Semoga pawiwahan ini dianugerahi kebahagiaan, rahayu, dan suputra.",
       "text": {
         "label": "Hindu",
         "ceremony": {
@@ -286,39 +158,13 @@
       }
     },
     {
-      "slug": "demo-buddha",
       "religion": "buddha",
       "label": "Buddha",
-      "theme": "noir",
-      "groom": {
-        "nickname": "Arya",
-        "fullName": "Arya Wijaya Santoso, S.E.",
-        "parents": {
-          "id": "Putra kedua dari Bapak Budi Santoso & Ibu Lily Gunawan",
-          "en": "Second son of Mr. Budi Santoso & Mrs. Lily Gunawan"
-        }
-      },
-      "bride": {
-        "nickname": "Melinda",
-        "fullName": "Melinda Tanaya, S.I.Kom.",
-        "parents": {
-          "id": "Putri pertama dari Bapak Hartono Tanaya & Ibu Susanti",
-          "en": "First daughter of Mr. Hartono Tanaya & Mrs. Susanti"
-        }
-      },
-      "hashtag": "#AryaMelindaSadhu",
       "ceremony": {
         "venue": "Vihara Ekayana Arama",
         "address": "Jl. Mangga II No. 8, Duri Kepa, Kebon Jeruk, Jakarta Barat",
         "mapsQuery": "Vihara Ekayana Arama Jakarta"
       },
-      "dressColors": [
-        "#15161a",
-        "#2a2c32",
-        "#c9a96e",
-        "#e8dcc2"
-      ],
-      "firstWish": "Selamat berbahagia! Semoga Tiratana selalu memberkahi, saling menjaga dalam cinta kasih. Sadhu, sadhu, sadhu.",
       "text": {
         "label": "Buddha",
         "ceremony": {
@@ -343,39 +189,13 @@
       }
     },
     {
-      "slug": "demo-konghucu",
       "religion": "konghucu",
       "label": "Khonghucu",
-      "theme": "crimson",
-      "groom": {
-        "nickname": "William",
-        "fullName": "William Tanoto, S.T.",
-        "parents": {
-          "id": "Putra pertama dari Bapak Hendrik Tanoto & Ibu Lie Mei Hwa",
-          "en": "First son of Mr. Hendrik Tanoto & Mrs. Lie Mei Hwa"
-        }
-      },
-      "bride": {
-        "nickname": "Mei Lan",
-        "fullName": "Mei Lan Kurniawan, S.Ak.",
-        "parents": {
-          "id": "Putri kedua dari Bapak Tjandra Kurniawan & Ibu Oey Siu Lan",
-          "en": "Second daughter of Mr. Tjandra Kurniawan & Mrs. Oey Siu Lan"
-        }
-      },
-      "hashtag": "#WilliamMeiLanShuangXi",
       "ceremony": {
         "venue": "Klenteng Boen Tek Bio",
         "address": "Jl. Bhakti No. 14, Pasar Lama, Kota Tangerang",
         "mapsQuery": "Klenteng Boen Tek Bio Tangerang"
       },
-      "dressColors": [
-        "#9e1b26",
-        "#d4a24c",
-        "#fbf3e6",
-        "#4a1015"
-      ],
-      "firstWish": "Gong xi! Semoga rumah tangga kalian harmonis seperti kecapi dan harpa, penuh rezeki dan kebajikan. Shanzai.",
       "text": {
         "label": "Khonghucu",
         "ceremony": {
@@ -400,44 +220,13 @@
       }
     },
     {
-      "slug": "demo-kepercayaan",
       "religion": "kepercayaan",
       "label": "Kepercayaan",
-      "theme": "sage",
-      "groom": {
-        "nickname": "Bayu",
-        "fullName": "Bayu Setyo Nugroho",
-        "parents": {
-          "id": "Putra pertama dari Bapak Suryo Hadi & Ibu Sumarni",
-          "en": "First son of Mr. Suryo Hadi & Mrs. Sumarni"
-        }
-      },
-      "bride": {
-        "nickname": "Laras",
-        "fullName": "Larasati Kusuma Wardhani",
-        "parents": {
-          "id": "Putri kedua dari Bapak Joko Prasetyo & Ibu Wahyuningsih",
-          "en": "Second daughter of Mr. Joko Prasetyo & Mrs. Wahyuningsih"
-        }
-      },
-      "hashtag": "#BayuLarasRahayu",
       "ceremony": {
         "venue": "Pendopo Agung Royal Ambarrukmo",
         "address": "Jl. Laksda Adisucipto No. 81, Depok, Sleman, Yogyakarta",
         "mapsQuery": "Pendopo Agung Royal Ambarrukmo"
       },
-      "reception": {
-        "venue": "Pendopo Agung Royal Ambarrukmo",
-        "address": "Jl. Laksda Adisucipto No. 81, Depok, Sleman, Yogyakarta",
-        "mapsQuery": "Royal Ambarrukmo Yogyakarta"
-      },
-      "dressColors": [
-        "#6b7b5b",
-        "#a8865a",
-        "#f4f1e8",
-        "#3d4a35"
-      ],
-      "firstWish": "Rahayu! Sugeng manunggaling katresnan, semoga langgeng, ayem tentrem, lan tansah rahayu.",
       "text": {
         "label": "Penghayat Kepercayaan",
         "ceremony": {

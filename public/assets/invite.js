@@ -15,6 +15,32 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  // Unified demo: one invitation whose religion-specific parts (greeting, ceremony name and
+  // place, quote, closing, symbol) can be switched in place, e.g. /i/demo?agama=hindu.
+  // Same merge as apply_patch() in demos.py.
+  const TRADITIONS = Array.isArray(DATA.demoTraditions) ? DATA.demoTraditions : [];
+  const DEMO_BASE = TRADITIONS.length ? JSON.parse(JSON.stringify(C)) : null;
+
+  function applyTradition(religion) {
+    const patch = TRADITIONS.find((item) => item.religion === religion);
+    if (!patch) {
+      return false;
+    }
+    const next = JSON.parse(JSON.stringify(DEMO_BASE));
+    next.religion = patch.religion;
+    next.showSymbol = true;
+    next.opening = patch.opening;
+    next.quote = patch.quote;
+    next.closing = patch.closing;
+    if (Array.isArray(next.events) && next.events[0]) {
+      next.events[0] = { ...next.events[0], ...patch.ceremony };
+    }
+    C = next;
+    return true;
+  }
+
+  applyTradition(params.get('agama') || '');
+
   /* ------------------------------------------------------------------ */
   /* Strings                                                            */
   /* ------------------------------------------------------------------ */
@@ -89,6 +115,7 @@
       footer: 'Dibuat dengan ♥ untuk hari bahagia kami',
       poweredBy: 'Buat undanganmu sendiri di {app}',
       previewBanner: 'PRATINJAU — undangan belum dipublikasikan',
+      traditionLabel: 'Contoh untuk',
       navHome: 'Beranda', navCouple: 'Mempelai', navEvents: 'Acara', navGallery: 'Galeri', navRsvp: 'RSVP', navGift: 'Hadiah',
       videoTitle: 'Video',
       watchHere: 'Putar di sini',
@@ -192,6 +219,7 @@
       footer: 'Made with ♥ for our special day',
       poweredBy: 'Create your own invitation at {app}',
       previewBanner: 'PREVIEW — this invitation is not published yet',
+      traditionLabel: 'Sample for',
       navHome: 'Home', navCouple: 'Couple', navEvents: 'Events', navGallery: 'Gallery', navRsvp: 'RSVP', navGift: 'Gift',
       videoTitle: 'Video',
       watchHere: 'Play here',
@@ -413,6 +441,7 @@
     renderWishes();
     updateCountdown();
     $('#langBtn').textContent = state.lang === 'id' ? 'EN' : 'ID';
+    renderTraditionBar();
     $('#musicBtn').hidden = !hasMusic();
     $('#musicBtn').title = musicUrl() ? '' : (SONGS[songId()]?.title || '');
     observeReveals();
@@ -1950,6 +1979,55 @@
       stepLightbox(dx < 0 ? 1 : -1);
     }
   });
+
+  /* ------------------------------------------------------------------ */
+  /* Unified demo: tradition switcher                                   */
+  /* ------------------------------------------------------------------ */
+  function renderTraditionBar() {
+    if (!TRADITIONS.length || params.get('switcher') === '0') {
+      return;
+    }
+    let bar = $('#traditionBar');
+    if (!bar) {
+      bar = document.createElement('nav');
+      bar.id = 'traditionBar';
+      bar.className = 'tradition-bar';
+      const label = document.createElement('span');
+      label.className = 'tradition-label';
+      const list = document.createElement('div');
+      list.className = 'tradition-list';
+      TRADITIONS.forEach((item) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.religion = item.religion;
+        button.textContent = item.label;
+        button.addEventListener('click', () => switchTradition(item.religion));
+        list.appendChild(button);
+      });
+      bar.append(label, list);
+      document.body.appendChild(bar);
+      document.body.classList.add('has-tradition-bar');
+    }
+    bar.setAttribute('aria-label', t('traditionLabel'));
+    $('.tradition-label', bar).textContent = t('traditionLabel');
+    $$('button', bar).forEach((button) => {
+      const active = button.dataset.religion === C.religion;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function switchTradition(religion) {
+    if (!applyTradition(religion)) {
+      return;
+    }
+    renderAll();
+    revealVisibleNow();
+    const url = new URL(location.href);
+    url.searchParams.set('agama', religion);
+    history.replaceState(null, '', url);
+    $(`#traditionBar button[data-religion="${religion}"]`)?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
 
   // Live preview from the dashboard editor (same-origin iframe only).
   window.addEventListener('message', (e) => {

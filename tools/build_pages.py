@@ -46,12 +46,8 @@ def build_landing():
         ('src="/assets/landing.js"', 'src="assets/landing.js"', 1),
         ('href="/"', 'href="./"', 1),
     ], "landing")
-    # /i/demo -> demo/, /i/demo-islam -> demo/islam/ (also inside data-src for the religion chips)
-    html = re.sub(
-        r'(href|src|data-src)="/i/demo(?:-([a-z]+))?',
-        lambda m: f'{m.group(1)}="demo/' + (f"{m.group(2)}/" if m.group(2) else ""),
-        html,
-    )
+    # /i/demo?agama=hindu -> demo/?agama=hindu (also inside data-src for the religion chips)
+    html = re.sub(r'(href|src|data-src)="/i/demo(?=[?"])', r'\1="demo/', html)
     html = html.replace(
         "<p>Gratis untuk dicoba. Data tamu Anda tidak dibagikan ke siapa pun.</p>",
         "<p>Ini demo statis di GitHub Pages. Aplikasi lengkap (dashboard, RSVP, check-in) "
@@ -60,52 +56,70 @@ def build_landing():
     (DOCS / "index.html").write_text(html, encoding="utf-8")
 
 
-def build_demo(slug, variant, config, stamp):
-    """Write one static demo: /i/demo -> docs/demo/, /i/demo-hindu -> docs/demo/hindu/."""
-    sub = slug[len("demo-"):] if slug.startswith("demo-") else ""
-    out_dir = DOCS / "demo" / sub if sub else DOCS / "demo"
-    up = "../../" if sub else "../"
+def build_demo(stamp):
+    """Write the unified demo (/i/demo -> docs/demo/), switchable between traditions."""
     wishes = [
         {"id": f"w{i}", "name": name, "attendance": attendance, "time": stamp, "message": message}
-        for i, (name, attendance, _count, message) in enumerate(demos.sample_wishes(variant), start=1)
+        for i, (name, attendance, _count, message) in enumerate(demos.sample_wishes(), start=1)
     ]
     wishes[0]["likes"] = 12
     wishes[0]["reply"] = f"Terima kasih banyak {wishes[0]['name']}! Sampai jumpa di hari H 🤍"
+    config = demos.demo_config()
     data = {
-        "slug": slug,
+        "slug": demos.DEMO_SLUG,
         "published": True,
         "preview": False,
         "staticDemo": True,
         "config": config,
+        "demoTraditions": demos.tradition_patches(),
         "guest": None,
         "appName": "Undanu",
-        "homeUrl": up,
+        "homeUrl": "../",
         "sampleWishes": wishes,
     }
     data_json = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-    couple = f"{variant['groom']['nickname']} &amp; {variant['bride']['nickname']}"
-    label = variant["label"]
+    couple = f"{config['couple']['groom']['nickname']} &amp; {config['couple']['bride']['nickname']}"
     meta = "\n  ".join([
-        f"<title>The Wedding of {couple} · Demo {label} · Undanu</title>",
-        f'<meta name="description" content="Contoh undangan pernikahan digital ({label}) dari Undanu.">',
+        f"<title>The Wedding of {couple} · Demo · Undanu</title>",
+        '<meta name="description" content="Contoh undangan pernikahan digital Undanu untuk semua agama &amp; kepercayaan.">',
         f'<meta property="og:title" content="The Wedding of {couple}">',
-        f'<meta property="og:description" content="Demo undangan {label} — Undanu">',
+        '<meta property="og:description" content="Demo undangan Undanu — Umum, Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu, Kepercayaan">',
     ])
     html = (PUBLIC / "invite.html").read_text(encoding="utf-8")
     html = replace_all(html, [
-        ('href="/assets/', f'href="{up}assets/', 1),
-        ('src="/assets/', f'src="{up}assets/', 2),
+        ('href="/assets/', 'href="../assets/', 1),
+        ('src="/assets/', 'src="../assets/', 2),
         ("<!--META-->", meta, 1),
         ("<!--DATA-->", data_json, 1),
-    ], f"demo {slug}")
+    ], "demo")
+    out_dir = DOCS / "demo"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "index.html").write_text(html, encoding="utf-8")
 
 
+def build_legacy_redirects():
+    """Old per-religion demo URLs (demo/hindu/) -> the unified demo (demo/?agama=hindu)."""
+    for slug, religion in demos.legacy_slugs().items():
+        target = f"../?agama={religion}"
+        page = f"""<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url={target}">
+<title>Undanu demo</title></head>
+<body><script>
+  var extra = location.search ? '&' + location.search.slice(1) : '';
+  location.replace('{target}' + extra + location.hash);
+</script><a href="{target}">Lihat demo</a></body></html>
+"""
+        out_dir = DOCS / "demo" / slug[len(demos.DEMO_SLUG) + 1:]
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "index.html").write_text(page, encoding="utf-8")
+
+
 def build_demos():
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    for slug, (variant, config) in demos.demo_configs().items():
-        build_demo(slug, variant, config, stamp)
+    build_demo(stamp)
+    build_legacy_redirects()
 
 
 def main():

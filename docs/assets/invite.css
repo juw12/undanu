@@ -575,3 +575,23 @@ body.opened .fabs { opacity: 1; pointer-events: auto; }
 .share-ic.ig { background: radial-gradient(circle at 30% 110%, #fdd56b 0%, #f56040 40%, #c13584 70%, #5851db 100%); font-size: 1.5rem; }
 .share-ic.copy { background: var(--primary); }
 .sheet-panel .btn + .btn { margin-top: .5rem; }
+
+/* Unified demo: switch religion/tradition in place (only rendered on /i/demo) */
+.tradition-bar {
+  position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 150;
+  display: flex; align-items: center; gap: .5rem; max-width: calc(100% - 20px);
+  padding: 5px 6px 5px 12px; border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font: 500 .74rem var(--sans); color: var(--muted);
+}
+.tradition-label { white-space: nowrap; }
+.tradition-list { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
+.tradition-list::-webkit-scrollbar { display: none; }
+.tradition-list button {
+  flex: none; border: 0; border-radius: 999px; padding: 6px 11px; cursor: pointer;
+  background: transparent; color: var(--text); font: inherit; font-weight: 600;
+}
+.tradition-list button:hover { background: var(--surface-2); }
+.tradition-list button.active { background: var(--primary); color: #fff; }

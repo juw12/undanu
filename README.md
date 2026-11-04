@@ -54,15 +54,7 @@ Digital wedding invitations for Indonesia, with RSVP and a guest book. Couples s
 envelope-style invitation with a live phone preview, send each guest a personal link on WhatsApp,
 see who opened it and who's coming, and check guests in with a QR e-pass on the wedding day.
 
-**Live demo (static):** https://juw12.github.io/undanu/ · demo invitations, one per tradition:
-[Umum](https://juw12.github.io/undanu/demo/) ·
-[Islam](https://juw12.github.io/undanu/demo/islam/) ·
-[Kristen](https://juw12.github.io/undanu/demo/kristen/) ·
-[Katolik](https://juw12.github.io/undanu/demo/katolik/) ·
-[Hindu](https://juw12.github.io/undanu/demo/hindu/) ·
-[Buddha](https://juw12.github.io/undanu/demo/buddha/) ·
-[Khonghucu](https://juw12.github.io/undanu/demo/konghucu/) ·
-[Kepercayaan](https://juw12.github.io/undanu/demo/kepercayaan/)
+**Live demo (static):** https://juw12.github.io/undanu/ · [demo invitation](https://juw12.github.io/undanu/demo/?to=Bapak%20Budi%20%26%20Keluarga): one invitation, switchable between Umum, Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu and Kepercayaan (e.g. [`?agama=hindu`](https://juw12.github.io/undanu/demo/?agama=hindu))
 
 [![tests](https://github.com/juw12/undanu/actions/workflows/tests.yml/badge.svg)](https://github.com/juw12/undanu/actions/workflows/tests.yml)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/juw12/undanu)
@@ -116,10 +108,10 @@ python server.py            # → http://localhost:8000
 
 On Windows you can also double-click `start.bat`.
 
-- `/` is the landing page, `/app` is the couple's dashboard, and `/i/demo` is a sample invitation (neutral);
-  per-religion samples are at `/i/demo-islam`, `/i/demo-kristen`, `/i/demo-katolik`, `/i/demo-hindu`,
-  `/i/demo-buddha`, `/i/demo-konghucu` and `/i/demo-kepercayaan`. They are generated on startup from
-  `seed/demo.json` + `seed/demo_variants.json` (see `demos.py`); those slugs are reserved
+- `/` is the landing page, `/app` is the couple's dashboard, and `/i/demo` is the sample invitation. It has a
+  switcher for every religion/tradition (also `?agama=islam`, `?agama=hindu`, …; `?switcher=0` hides the bar).
+  It is built on startup from `seed/demo.json` + `seed/demo_traditions.json` (see `demos.py`); the old
+  `/i/demo-<religion>` links redirect to it
 - Data (SQLite database, uploaded photos) is stored in `./data/`
 - Without SMTP settings, emails (password reset, RSVP notifications) are saved as `.eml` files in `./data/outbox/`
 
