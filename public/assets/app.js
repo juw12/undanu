@@ -58,6 +58,11 @@
   const icon = (name) =>
     `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 
+  // Where invitation pages live. The static GitHub Pages demo (assets/demo-api.js) overrides this.
+  function inviteHref(slug, query = '') {
+    return window.UNDANU_DEMO ? window.UNDANU_DEMO.inviteHref(slug, query) : `/i/${slug}${query}`;
+  }
+
   function esc(value) {
     return String(value ?? '').replace(/[&<>"']/g, (c) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -471,7 +476,7 @@
         <h1>${esc(coupleTitle(config))}</h1>
         ${inv.published ? '<span class="badge live"><span class="dot"></span>Live</span>' : '<span class="badge draft">Draft</span>'}
         <span class="spacer"></span>
-        <a class="btn btn-ghost btn-sm" href="/i/${esc(inv.slug)}${inv.published ? '' : '?preview=1'}" target="_blank" rel="noopener">${icon('eye')} Lihat undangan</a>
+        <a class="btn btn-ghost btn-sm" href="${esc(inviteHref(inv.slug, inv.published ? '' : '?preview=1'))}" target="_blank" rel="noopener">${icon('eye')} Lihat undangan</a>
       </div>
       <nav class="tabs">
         ${tabs.map(([key, label, ic]) => `<a href="#/inv/${inv.id}/${key}" class="${key === active ? 'active' : ''}">${icon(ic)} ${label}</a>`).join('')}
@@ -740,7 +745,7 @@
     shell('<div class="spinner"></div>');
     const { invitations } = await api('/api/invitations');
     const cards = invitations.map((inv) => {
-      const url = `${location.origin}/i/${inv.slug}`;
+      const url = new URL(inviteHref(inv.slug), location.href).href;
       const names = inv.groom || inv.bride ? `${esc(inv.groom || '…')} & ${esc(inv.bride || '…')}` : 'Undangan';
       return `
         <article class="inv-card">
@@ -1419,7 +1424,7 @@
               <button class="btn btn-danger btn-sm" data-act="delete-inv">${icon('trash')} Hapus</button>
             </div>
           </div>
-          <div class="phone-frame"><iframe id="previewFrame" title="Pratinjau" src="/i/${esc(inv.slug)}?preview=1&open=1"></iframe></div>
+          <div class="phone-frame"><iframe id="previewFrame" title="Pratinjau" src="${esc(inviteHref(inv.slug, '?preview=1&open=1'))}"></iframe></div>
           <p class="muted small" style="text-align:center;margin:0">Pratinjau langsung — perubahan tampil otomatis.</p>
         </aside>
       </div>`);
@@ -1599,7 +1604,7 @@
               inv.slug = res.slug;
               inv.url = res.url;
               $('#inviteUrl').value = res.url;
-              frame.src = `/i/${res.slug}?preview=1&open=1`;
+              frame.src = inviteHref(res.slug, '?preview=1&open=1');
               close();
               toast('Link diperbarui');
             } catch (err) {

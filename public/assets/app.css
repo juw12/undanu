@@ -468,3 +468,12 @@ td .acts { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end
   .seat-name, .seat-cap { border: 0 !important; }
   body { background: #fff; }
 }
+
+/* ---- GitHub Pages dashboard demo bar (assets/demo-api.js) ---- */
+.demo-bar { position: fixed; left: 50%; bottom: .8rem; transform: translateX(-50%); z-index: 90; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; justify-content: center;
+  background: var(--text, #26222b); color: #fff; border-radius: 999px; padding: .45rem .6rem .45rem 1rem; font-size: .78rem; box-shadow: 0 8px 24px rgba(0,0,0,.18); max-width: calc(100vw - 1.6rem); }
+.demo-bar button, .demo-bar a { border: 0; border-radius: 999px; padding: .3rem .75rem; font: 600 .75rem var(--sans); cursor: pointer; text-decoration: none; }
+.demo-bar button { background: rgba(255,255,255,.14); color: #fff; }
+.demo-bar a { background: #fff; color: var(--text, #26222b); }
+body.has-demo-bar { padding-bottom: 4.5rem; }
+@media print { .demo-bar { display: none !important; } }

@@ -50,8 +50,10 @@
 
 ## The couple's dashboard
 
-The static demo only shows the invitation. The dashboard needs the Python backend, so run it
-locally (see [Run locally](#run-locally)) or deploy it. Here's what it looks like with the
+**[Try the dashboard demo →](https://juw12.github.io/undanu/app/)** It's the real dashboard running on GitHub Pages,
+with an in-browser stand-in for the API (`public/assets/demo-api.js`). The sample couple's guests, menus and tables
+are stored only in your browser, and *Reset demo* starts over. For real use (sending to guests, RSVPs from phones,
+check-in) run the Python backend locally (see [Run locally](#run-locally)) or deploy it. Here's what it looks like with the
 sample couple from `tools/seed_sample.py` (gift confirmations and QR check-in have their own tabs too):
 
 <table>
@@ -71,7 +73,7 @@ Digital wedding invitations for Indonesia, with RSVP and a guest book. Couples s
 envelope-style invitation with a live phone preview, send each guest a personal link on WhatsApp,
 see who opened it and who's coming, and check guests in with a QR e-pass on the wedding day.
 
-**Live demo (static):** https://juw12.github.io/undanu/ · [demo invitation](https://juw12.github.io/undanu/demo/?to=Keluarga%20Santoso): one invitation, switchable between Umum, Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu and Kepercayaan (e.g. [`?agama=hindu`](https://juw12.github.io/undanu/demo/?agama=hindu))
+**Live demo (static):** https://juw12.github.io/undanu/ · [dashboard demo](https://juw12.github.io/undanu/app/) · [demo invitation](https://juw12.github.io/undanu/demo/?to=Keluarga%20Santoso): one invitation, switchable between Umum, Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu and Kepercayaan (e.g. [`?agama=hindu`](https://juw12.github.io/undanu/demo/?agama=hindu))
 
 [![tests](https://github.com/juw12/undanu/actions/workflows/tests.yml/badge.svg)](https://github.com/juw12/undanu/actions/workflows/tests.yml)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/juw12/undanu)

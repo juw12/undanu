@@ -3,9 +3,13 @@ Build the static GitHub Pages demo into docs/.
 
     python tools/build_pages.py
 
-GitHub Pages can't run the Python backend, so this produces the landing page plus
-a pre-rendered demo invitation where RSVPs are simulated in the browser.
+GitHub Pages can't run the Python backend, so this produces the landing page,
+a pre-rendered demo invitation where RSVPs are simulated in the browser, and the
+couple's dashboard (docs/app/) running against assets/demo-api.js, an in-browser
+stand-in for the API that keeps the sample couple's data in localStorage.
 """
+import hashlib
+import importlib.util
 import json
 import re
 import shutil
@@ -36,7 +40,7 @@ def build_landing():
     html = replace_all(html, [
         ('href="/assets/', 'href="assets/', 1),
         ('<a class="btn btn-ghost btn-sm" href="/app#/login" data-en="Log in">Masuk</a>',
-         f'<a class="btn btn-ghost btn-sm" href="{REPO_URL}">GitHub</a>', 1),
+         '<a class="btn btn-ghost btn-sm" href="app/" data-en="Try the dashboard">Coba dashboard</a>', 1),
         ('<a class="btn btn-primary btn-sm" href="/app#/register" data-en="Sign up free">Daftar gratis</a>',
          f'<a class="btn btn-primary btn-sm" href="{REPO_URL}#deploy" data-en="Deploy free">Deploy gratis</a>', 1),
         ('<a class="btn btn-primary btn-lg" href="/app#/register" data-en="Create a free invitation">Buat undangan gratis</a>',
@@ -54,10 +58,10 @@ def build_landing():
     html = html.replace(
         '<p data-en="Free to try. Your guest data is never shared with anyone.">'
         "Gratis untuk dicoba. Data tamu Anda tidak dibagikan ke siapa pun.</p>",
-        '<p data-en="This is a static demo on GitHub Pages. The full app (dashboard, RSVP, check-in) '
-        'runs on your own server, free and open source.">'
-        "Ini demo statis di GitHub Pages. Aplikasi lengkap (dashboard, RSVP, check-in) "
-        "berjalan di server Anda sendiri — gratis dan open source.</p>",
+        '<p data-en="This is a static demo on GitHub Pages: try the <a href=&quot;app/&quot;>couple\'s dashboard</a> '
+        '(data stays in your browser). The full app runs on your own server, free and open source.">'
+        'Ini demo statis di GitHub Pages — coba <a href="app/">dashboard pasangan</a> (data tersimpan di browser Anda). '
+        "Aplikasi lengkap berjalan di server Anda sendiri — gratis dan open source.</p>",
     )
     (DOCS / "index.html").write_text(html, encoding="utf-8")
 
@@ -123,6 +127,62 @@ def build_legacy_redirects():
         (out_dir / "index.html").write_text(page, encoding="utf-8")
 
 
+def dashboard_seed():
+    """Sample couple for the dashboard demo: same data as tools/seed_sample.py."""
+    spec = importlib.util.spec_from_file_location("seed_sample", ROOT / "tools" / "seed_sample.py")
+    sample = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(sample)
+    not_opened = set(sample.NOT_OPENED) | set(sample.NOT_SENT)
+    guests = [
+        {"name": name, "phone": phone, "pax": pax, "group": group,
+         "sent": name not in sample.NOT_SENT, "opened": name not in not_opened,
+         "meal": sample.OWNER_MEALS.get(name, "")}
+        for name, phone, pax, group in sample.GUESTS
+    ]
+    rsvps = {
+        name: {"attendance": attendance, "guests": count, "message": message, "song": song,
+               "meal": meal, "dietNote": diet_note}
+        for name, (attendance, count, message, song, meal, diet_note) in sample.RSVPS.items()
+    }
+    first = next(iter(rsvps))
+    rsvps[first].update({"likes": 3, "reply": f"Terima kasih banyak, {first}! Sampai jumpa di hari H 🤍"})
+    seed = {
+        "slug": "leo-maya",
+        "user": {"email": "demo@undanu.app", "name": sample.ACCOUNT_NAME},
+        "config": sample.sample_config(),
+        "guests": guests,
+        "rsvps": rsvps,
+        "gifts": sample.GIFTS,
+        "tables": [list(table) for table in sample.TABLES],
+        "checkedIn": list(sample.CHECKED_IN),
+    }
+    # Bump the stored demo when the seed changes, so returning visitors get the new sample data.
+    seed["version"] = hashlib.sha1(json.dumps(seed, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:10]
+    return seed
+
+
+def build_dashboard():
+    """docs/app/: the real dashboard (app.js) with assets/demo-api.js answering its API calls."""
+    seed_json = json.dumps(dashboard_seed(), ensure_ascii=False)
+    seed_json = seed_json.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    html = (PUBLIC / "app.html").read_text(encoding="utf-8")
+    html = replace_all(html, [
+        ("<title>Dashboard · Undanu</title>", "<title>Demo dashboard · Undanu</title>", 1),
+        ('  <link rel="manifest" href="/manifest.webmanifest">\n', "", 1),
+        ('href="/icons/', 'href="../icons/', 2),
+        ('href="/assets/app.css"', 'href="../assets/app.css"', 1),
+        ('  <script src="/assets/presets.js"></script>\n',
+         f"  <script>window.UNDANU_DEMO_SEED = {seed_json};</script>\n"
+         '  <script src="../assets/demo-api.js"></script>\n'
+         '  <script src="../assets/presets.js"></script>\n', 1),
+        ('src="/assets/app.js"', 'src="../assets/app.js"', 1),
+        ('  <script src="/assets/pwa.js"></script>\n', "", 1),
+    ], "dashboard")
+    out_dir = DOCS / "app"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "index.html").write_text(html, encoding="utf-8")
+
+
 def build_demos():
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
     build_demo(stamp)
@@ -139,11 +199,13 @@ def main():
         else:
             child.unlink()
     (DOCS / "assets").mkdir(parents=True, exist_ok=True)
-    for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js", "landing.js", "pwa.js"):
+    for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js", "landing.js", "pwa.js",
+                 "app.js", "presets.js", "demo-api.js"):
         shutil.copy2(PUBLIC / "assets" / name, DOCS / "assets" / name)
     shutil.copytree(PUBLIC / "icons", DOCS / "icons", dirs_exist_ok=True)
     build_landing()
     build_demos()
+    build_dashboard()
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
     print(f"Built static demo in {DOCS}")
 

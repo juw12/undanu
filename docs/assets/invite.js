@@ -7,6 +7,23 @@
 
   const DATA = JSON.parse(document.getElementById('invite-data').textContent || '{}');
   let C = DATA.config || {};
+  // GitHub Pages dashboard demo: ?dash=<slug> shows that invitation as edited in this browser.
+  (function loadDashboardDemoConfig() {
+    const slug = new URLSearchParams(location.search).get('dash');
+    if (!DATA.staticDemo || !slug) {
+      return;
+    }
+    try {
+      const store = JSON.parse(localStorage.getItem('undanu_demo_db_v1') || 'null');
+      const invitation = store && store.invitations.find((inv) => inv.slug === slug);
+      if (invitation) {
+        C = JSON.parse(JSON.stringify(invitation.config));
+        delete C.admin;
+      }
+    } catch {
+      /* fall back to the built-in demo */
+    }
+  })();
   const SLUG = DATA.slug;
   // Static demo (GitHub Pages): no backend, RSVPs are simulated in the browser.
   const STATIC_DEMO = Boolean(DATA.staticDemo);
@@ -2075,7 +2092,8 @@
 
   // Live preview from the dashboard editor (same-origin iframe only).
   window.addEventListener('message', (e) => {
-    if (e.origin !== location.origin || !DATA.preview) {
+    const previewing = DATA.preview || (STATIC_DEMO && params.get('preview') === '1');
+    if (e.origin !== location.origin || !previewing) {
       return;
     }
     if (e.data && e.data.type === 'invite-config' && e.data.config) {
