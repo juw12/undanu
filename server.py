@@ -1758,6 +1758,13 @@ def seed_demo() -> None:
             )
         config_json = json.dumps(sanitize_config(config), ensure_ascii=False)
         existing = conn.execute("SELECT id, user_id FROM invitations WHERE slug = ?", (demos.DEMO_SLUG,)).fetchone()
+        if existing and existing["user_id"] == user_id:
+            # Older seeds used a different sample guest name on the wishes wall.
+            for table in ("rsvps", "guests"):
+                conn.execute(
+                    f"UPDATE {table} SET name = 'Tasya & Andre' WHERE invitation_id = ? AND name = 'Dimas & Sari'",
+                    (existing["id"],),
+                )
         if existing:
             if existing["user_id"] == user_id:
                 conn.execute(

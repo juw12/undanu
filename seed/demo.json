@@ -6,31 +6,31 @@
   "religion": "umum",
   "couple": {
     "groom": {
-      "nickname": "Raka",
-      "fullName": "Raka Aditya Pratama, S.T.",
+      "nickname": "Leo",
+      "fullName": "Leo Pradipta, S.T.",
       "parents": {
-        "id": "Putra pertama dari Bapak Hendra Pratama & Ibu Sri Wahyuni",
-        "en": "First son of Mr. Hendra Pratama & Mrs. Sri Wahyuni"
+        "id": "Putra pertama dari Bapak Adrian Pradipta & Ibu Linda",
+        "en": "First son of Mr. Adrian Pradipta & Mrs. Linda"
       },
-      "instagram": "raka.pratama",
+      "instagram": "leo.pradipta",
       "photo": "",
       "tiktok": ""
     },
     "bride": {
-      "nickname": "Ayu",
-      "fullName": "Ayu Lestari Putri, S.Ds.",
+      "nickname": "Maya",
+      "fullName": "Maya Kusuma, S.Ds.",
       "parents": {
-        "id": "Putri kedua dari Bapak Bambang Sutrisno & Ibu Ratna Dewi",
-        "en": "Second daughter of Mr. Bambang Sutrisno & Mrs. Ratna Dewi"
+        "id": "Putri kedua dari Bapak Hendra Kusuma & Ibu Rina",
+        "en": "Second daughter of Mr. Hendra Kusuma & Mrs. Rina"
       },
-      "instagram": "ayu.lestari",
+      "instagram": "maya.kusuma",
       "photo": "",
-      "tiktok": "ayu.lestari"
+      "tiktok": "maya.kusuma"
     }
   },
   "brideFirst": false,
   "heroPhoto": "",
-  "hashtag": "#RakaAyuSelamanya",
+  "hashtag": "#LeoMaya2027",
   "weddingDate": "2027-02-20T08:00:00+07:00",
   "opening": {
     "id": "Dengan penuh sukacita, kami mengundang Bapak/Ibu/Saudara/i untuk merayakan pernikahan kami:",
@@ -136,17 +136,17 @@
       {
         "provider": "BCA",
         "number": "1234567890",
-        "holder": "Raka Aditya Pratama"
+        "holder": "Leo Pradipta"
       },
       {
         "provider": "GoPay",
         "number": "081234567890",
-        "holder": "Ayu Lestari Putri"
+        "holder": "Maya Kusuma"
       }
     ],
     "qrisImage": "",
     "address": {
-      "recipient": "Ayu Lestari Putri",
+      "recipient": "Maya Kusuma",
       "phone": "081234567890",
       "text": "Jl. Melati No. 12, Kebayoran Baru, Jakarta Selatan 12160"
     },

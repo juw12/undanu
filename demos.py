@@ -86,7 +86,7 @@ def demo_config() -> dict:
 def sample_wishes() -> list:
     """(name, attendance, guests, message) tuples shown on the demo's wishes wall."""
     return [
-        ("Dimas & Sari", "yes", 2, "Selamat menempuh hidup baru! Semoga selalu bahagia dan saling menguatkan."),
+        ("Tasya & Andre", "yes", 2, "Selamat menempuh hidup baru! Semoga selalu bahagia dan saling menguatkan."),
         ("Tante Lina", "yes", 1, "Bahagia sekali mendengar kabar ini. Semoga langgeng sampai kakek nenek ya!"),
         ("Kevin", "no", 0, "Maaf belum bisa hadir, doa terbaik dari Singapura. Congrats both of you!"),
     ]

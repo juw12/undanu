@@ -54,7 +54,7 @@ Digital wedding invitations for Indonesia, with RSVP and a guest book. Couples s
 envelope-style invitation with a live phone preview, send each guest a personal link on WhatsApp,
 see who opened it and who's coming, and check guests in with a QR e-pass on the wedding day.
 
-**Live demo (static):** https://juw12.github.io/undanu/ · [demo invitation](https://juw12.github.io/undanu/demo/?to=Bapak%20Budi%20%26%20Keluarga): one invitation, switchable between Umum, Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu and Kepercayaan (e.g. [`?agama=hindu`](https://juw12.github.io/undanu/demo/?agama=hindu))
+**Live demo (static):** https://juw12.github.io/undanu/ · [demo invitation](https://juw12.github.io/undanu/demo/?to=Keluarga%20Santoso): one invitation, switchable between Umum, Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu and Kepercayaan (e.g. [`?agama=hindu`](https://juw12.github.io/undanu/demo/?agama=hindu))
 
 [![tests](https://github.com/juw12/undanu/actions/workflows/tests.yml/badge.svg)](https://github.com/juw12/undanu/actions/workflows/tests.yml)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/juw12/undanu)

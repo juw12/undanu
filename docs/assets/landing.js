@@ -34,7 +34,7 @@
 (() => {
   'use strict';
   const STORAGE_KEY = 'undanu_lang';
-  const GUEST = { id: 'Bapak Budi & Keluarga', en: 'Mr. & Mrs. Budi' };
+  const GUEST = { id: 'Keluarga Santoso', en: 'The Santoso Family' };
   const translatable = Array.from(document.querySelectorAll('[data-en]'));
   translatable.forEach((el) => {
     el.dataset.id = el.innerHTML;

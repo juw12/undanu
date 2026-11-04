@@ -948,8 +948,8 @@
       body: `
         <form id="createForm" novalidate>
           <div class="row row-2">
-            <label class="field"><span>Nama panggilan pria</span><input name="groom" required maxlength="30" placeholder="mis. Raka"></label>
-            <label class="field"><span>Nama panggilan wanita</span><input name="bride" required maxlength="30" placeholder="mis. Ayu"></label>
+            <label class="field"><span>Nama panggilan pria</span><input name="groom" required maxlength="30" placeholder="mis. Leo"></label>
+            <label class="field"><span>Nama panggilan wanita</span><input name="bride" required maxlength="30" placeholder="mis. Maya"></label>
           </div>
           <div class="row row-2">
             <label class="field"><span>Tanggal & jam acara utama</span><input name="date" type="datetime-local" required></label>
@@ -1285,7 +1285,7 @@
         ${f.i18n('quote.text', 'Kutipan / ayat', { multiline: true })}
         ${f.text('quote.source', 'Sumber kutipan', { placeholder: 'QS. Ar-Rum: 21' })}
         ${f.i18n('closing', 'Kata penutup', { multiline: true })}
-        ${f.text('hashtag', 'Hashtag', { placeholder: '#RakaAyuSelamanya', max: 60 })}
+        ${f.text('hashtag', 'Hashtag', { placeholder: '#LeoMaya2027', max: 60 })}
       `),
       section('story', 'book', 'Kisah Cinta', 'Timeline perjalanan kalian (opsional)', `
         ${story || '<p class="muted small">Belum ada cerita. Bagian ini tidak tampil jika kosong.</p>'}
@@ -1754,7 +1754,7 @@
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-bottom:1rem">
         <form class="card" id="addGuestForm">
           <h2>Tambah tamu</h2>
-          <label class="field"><span>Nama (sesuai sapaan di undangan)</span><input name="name" required maxlength="80" placeholder="Bapak Budi Santoso & Keluarga"></label>
+          <label class="field"><span>Nama (sesuai sapaan di undangan)</span><input name="name" required maxlength="80" placeholder="Keluarga Santoso"></label>
           <div class="row row-3">
             <label class="field"><span>No. WhatsApp</span><input name="phone" inputmode="tel" placeholder="0812..."></label>
             <label class="field"><span>Maks. tamu</span><input name="pax" type="number" min="1" max="20" value="${defaultPax}"></label>
