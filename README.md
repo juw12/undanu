@@ -48,6 +48,23 @@
 </p>
 <!-- HERO:END -->
 
+## The couple's dashboard
+
+The static demo only shows the invitation. The dashboard needs the Python backend, so run it
+locally (see [Run locally](#run-locally)) or deploy it. Here's what it looks like with the
+sample couple from `tools/seed_sample.py`:
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/media/dashboard-editor.jpg" alt="Editor with live phone preview"><br><sub><b>Editor:</b> themes, ornaments, photos and music, with a live phone preview</sub></td>
+    <td width="50%"><img src="docs/media/dashboard-guests.jpg" alt="Guest list and WhatsApp sending"><br><sub><b>Guests:</b> bulk add or CSV import, a personal WhatsApp link per guest, sent/opened tracking</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/media/dashboard-rsvp.jpg" alt="RSVP and wishes"><br><sub><b>RSVP & wishes:</b> who's coming, a catering estimate, replies, song requests, CSV export</sub></td>
+    <td width="50%"><img src="docs/media/dashboard-gifts.jpg" alt="Gift confirmations"><br><sub><b>Gifts:</b> transfer and gift confirmations from guests (plus QR check-in on the day)</sub></td>
+  </tr>
+</table>
+
 ## About
 
 Digital wedding invitations for Indonesia, with RSVP and a guest book. Couples sign up, design an
@@ -117,6 +134,16 @@ On Windows you can also double-click `start.bat`.
   `/i/demo-<religion>` links redirect to it
 - Data (SQLite database, uploaded photos) is stored in `./data/`
 - Without SMTP settings, emails (password reset, RSVP notifications) are saved as `.eml` files in `./data/outbox/`
+
+Want a filled-in dashboard to click around? With the server running:
+
+```bash
+python tools/seed_sample.py          # creates the sample couple "Leo & Maya"
+```
+
+Then log in at `/app` with **coba@undanu.test / undanu123**: 10 guests, 6 RSVPs with wishes and song
+requests, 2 gift confirmations and 1 check-in. The guest view is at `/i/leo-maya`. Start the server with
+`ADMIN_EMAILS=coba@undanu.test` to also see the admin review page (`/app#/admin`); `--reset` recreates the sample.
 
 Tests (with the server running):
 
