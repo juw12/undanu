@@ -69,7 +69,9 @@ Nothing to `pip install`, no build step.
 - **Equal templates for every religion recognised in Indonesia** — Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu —
   plus Penghayat Kepercayaan and a neutral *Umum* one: greeting, ceremony name (Akad Nikah, Pemberkatan, Sakramen Pernikahan,
   Pawiwahan, Li Yuan, …), quote/scripture, closing, and an optional cover symbol. No religion is
-  preselected: couples pick their own when creating an invitation, and can switch any time. 7 colour themes
+  preselected: couples pick their own when creating an invitation, and can switch any time. 8 colour themes
+  that work with any tradition; the default **Ivory** theme (ink + rose gold, serif type) is deliberately
+  free of religious colour cues. Landing page in Bahasa Indonesia and English
 - Form editor with **live phone preview** and autosave: couple (Instagram/TikTok), events and maps, love story,
   dress code, RSVP settings, music upload or built-in tunes (Canon in D, Für Elise, Ode to Joy, gamelan)
 - **Motion & video:** cover as photo, slideshow, or looping background video; gallery mixes photos, videos and

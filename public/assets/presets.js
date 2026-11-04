@@ -167,7 +167,8 @@
   };
 
   const themes = [
-    { id: 'sage', label: 'Sage', colors: ['#6b7b5b', '#b8955a', '#f4f1e8'] },
+    { id: 'ivory', label: 'Ivory', colors: ['#3b3541', '#b5826e', '#f8f5f2'] },
+  { id: 'sage', label: 'Sage', colors: ['#6b7b5b', '#b8955a', '#f4f1e8'] },
     { id: 'navy', label: 'Navy', colors: ['#2a3b5c', '#c2a36b', '#f3f1ec'] },
     { id: 'terracotta', label: 'Terracotta', colors: ['#a85d3e', '#6f7f5c', '#f7efe6'] },
     { id: 'blush', label: 'Blush', colors: ['#b07c80', '#b59a64', '#faf3f1'] },
@@ -194,7 +195,7 @@
     return JSON.parse(JSON.stringify(value));
   }
 
-  function newConfig({ groom, bride, date, religion = 'umum', theme = 'sage', timeZone = 'Asia/Jakarta' }) {
+  function newConfig({ groom, bride, date, religion = 'umum', theme = 'ivory', timeZone = 'Asia/Jakarta' }) {
     const preset = religions[religion] || religions.umum;
     const tz = timeZones.find((z) => z.id === timeZone) || timeZones[0];
     const day = (date || '').slice(0, 10);

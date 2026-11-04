@@ -831,7 +831,7 @@ def invitation_summary(conn, row) -> dict:
         "groom": couple.get("groom", {}).get("nickname", ""),
         "bride": couple.get("bride", {}).get("nickname", ""),
         "weddingDate": config.get("weddingDate", ""),
-        "theme": config.get("theme", "sage"),
+        "theme": config.get("theme", "ivory"),
         "updatedAt": row["updated_at"],
         "stats": invitation_stats(conn, row["id"]),
     }

@@ -3,130 +3,132 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Undanu — Undangan Pernikahan Digital dengan RSVP & Buku Tamu</title>
-  <meta name="description" content="Buat undangan pernikahan digital yang elegan dalam 5 menit. Link personal untuk setiap tamu, kirim via WhatsApp, RSVP real-time, amplop digital, dan check-in QR di hari H.">
-  <meta property="og:title" content="Undanu — Undangan Pernikahan Digital">
-  <meta property="og:description" content="Undangan elegan + RSVP + buku tamu digital dalam satu aplikasi.">
+  <title>Undanu — Undangan Pernikahan Digital untuk Semua Agama &amp; Tradisi</title>
+  <meta name="description" content="Undangan pernikahan digital untuk semua agama dan tradisi di Indonesia. Link personal untuk setiap tamu, kirim via WhatsApp, RSVP real-time, amplop digital, dan check-in QR. Bahasa Indonesia &amp; English.">
+  <meta property="og:title" content="Undanu — Digital wedding invitations for every faith">
+  <meta property="og:description" content="Undangan elegan + RSVP + buku tamu digital, untuk semua agama &amp; tradisi.">
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Great+Vibes&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/app.css">
 </head>
 <body>
   <nav class="landing-nav">
     <a class="brand" href="/"><span class="brand-mark">U</span>Undanu</a>
     <span class="spacer"></span>
-    <a class="plain" href="#fitur">Fitur</a>
-    <a class="plain" href="#agama">Agama</a>
+    <a class="plain" href="#fitur" data-en="Features">Fitur</a>
+    <a class="plain" href="#agama" data-en="Every faith">Semua agama</a>
     <a class="plain" href="/i/demo" target="_blank" rel="noopener">Demo</a>
-    <a class="btn btn-ghost btn-sm" href="/app#/login">Masuk</a>
-    <a class="btn btn-primary btn-sm" href="/app#/register">Daftar gratis</a>
+    <button type="button" class="lang-toggle" id="langToggle" aria-label="Ganti bahasa / Switch language">EN</button>
+    <a class="btn btn-ghost btn-sm" href="/app#/login" data-en="Log in">Masuk</a>
+    <a class="btn btn-primary btn-sm" href="/app#/register" data-en="Sign up free">Daftar gratis</a>
   </nav>
 
   <header class="hero-l">
     <div>
-      <span class="eyebrow-l">💌 Undangan digital + RSVP + buku tamu</span>
-      <h1>Undangan pernikahan yang <em>indah</em>, tamu yang terkelola.</h1>
-      <p class="lead">Buat undangan online elegan dalam 5 menit, kirim link personal ke setiap tamu lewat WhatsApp, dan pantau siapa yang hadir secara real-time — sampai check-in QR di hari H.</p>
+      <span class="eyebrow-l" data-en="💌 Digital invitation + RSVP + guest book · every faith &amp; tradition">💌 Undangan digital + RSVP + buku tamu · untuk semua agama &amp; tradisi</span>
+      <h1 data-en="A &lt;em&gt;beautiful&lt;/em&gt; wedding invitation, with every guest taken care of.">Undangan pernikahan yang <em>indah</em>, tamu yang terkelola.</h1>
+      <p class="lead" data-en="Create an elegant online invitation in 5 minutes, send each guest a personal link on WhatsApp, and see who is coming in real time, right up to QR check-in on the day. Islam, Christian, Catholic, Hindu, Buddhist, Confucian, indigenous faiths, interfaith or no religious wording at all: you choose.">Buat undangan online elegan dalam 5 menit, kirim link personal ke setiap tamu lewat WhatsApp, dan pantau siapa yang hadir secara real-time — sampai check-in QR di hari H. Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu, Kepercayaan, beda agama, atau tanpa nuansa agama sama sekali: Anda yang memilih.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary btn-lg" href="/app#/register">Buat undangan gratis</a>
-        <a class="btn btn-ghost btn-lg" href="/i/demo?to=Bapak%20Budi%20%26%20Keluarga" target="_blank" rel="noopener">Lihat contoh</a>
+        <a class="btn btn-primary btn-lg" href="/app#/register" data-en="Create a free invitation">Buat undangan gratis</a>
+        <a class="btn btn-ghost btn-lg" id="heroDemoLink" href="/i/demo?to=Bapak%20Budi%20%26%20Keluarga" target="_blank" rel="noopener" data-en="See a sample">Lihat contoh</a>
       </div>
-      <div class="hero-points"><span>Tanpa coding</span><span>Tamu tanpa batas</span><span>Bahasa Indonesia & English</span></div>
+      <div class="hero-points"><span data-en="No coding">Tanpa coding</span><span data-en="Unlimited guests">Tamu tanpa batas</span><span>Bahasa Indonesia &amp; English</span></div>
     </div>
     <div class="hero-phone">
       <div class="phone-frame"><iframe id="heroDemo" src="/i/demo?switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga" title="Contoh undangan" loading="lazy"></iframe></div>
       <div class="demo-chips" role="group" aria-label="Lihat contoh untuk setiap agama">
-        <button type="button" class="demo-chip active" data-src="/i/demo?agama=umum&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Umum</button>
-        <button type="button" class="demo-chip" data-src="/i/demo?agama=islam&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Islam</button>
-        <button type="button" class="demo-chip" data-src="/i/demo?agama=kristen&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Kristen</button>
-        <button type="button" class="demo-chip" data-src="/i/demo?agama=katolik&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Katolik</button>
-        <button type="button" class="demo-chip" data-src="/i/demo?agama=hindu&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Hindu</button>
-        <button type="button" class="demo-chip" data-src="/i/demo?agama=buddha&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Buddha</button>
-        <button type="button" class="demo-chip" data-src="/i/demo?agama=konghucu&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Khonghucu</button>
-        <button type="button" class="demo-chip" data-src="/i/demo?agama=kepercayaan&amp;switcher=0&amp;to=Bapak%20Budi%20%26%20Keluarga">Kepercayaan</button>
+        <button type="button" class="demo-chip active" data-agama="umum" data-en="General">Umum</button>
+        <button type="button" class="demo-chip" data-agama="islam">Islam</button>
+        <button type="button" class="demo-chip" data-agama="kristen" data-en="Christian">Kristen</button>
+        <button type="button" class="demo-chip" data-agama="katolik" data-en="Catholic">Katolik</button>
+        <button type="button" class="demo-chip" data-agama="hindu">Hindu</button>
+        <button type="button" class="demo-chip" data-agama="buddha" data-en="Buddhist">Buddha</button>
+        <button type="button" class="demo-chip" data-agama="konghucu" data-en="Confucian">Khonghucu</button>
+        <button type="button" class="demo-chip" data-agama="kepercayaan" data-en="Indigenous faith">Kepercayaan</button>
       </div>
     </div>
   </header>
 
   <section class="band" id="fitur">
     <div class="section-l">
-      <h2>Semua yang dibutuhkan calon pengantin</h2>
-      <p class="sub">Dari desain undangan sampai rekap kehadiran — tidak perlu spreadsheet terpisah.</p>
+      <h2 data-en="Everything a couple needs">Semua yang dibutuhkan calon pengantin</h2>
+      <p class="sub" data-en="From invitation design to the attendance list, no separate spreadsheet needed.">Dari desain undangan sampai rekap kehadiran — tidak perlu spreadsheet terpisah.</p>
       <div class="features">
-        <div class="feature"><div class="fi">✎</div><h3>Editor dengan pratinjau langsung</h3><p>Isi formulir sederhana, lihat hasilnya langsung di bingkai HP. Foto otomatis dikompres agar cepat dibuka.</p></div>
-        <div class="feature"><div class="fi">✉</div><h3>Link personal tiap tamu</h3><p>Nama tamu muncul di sampul amplop. Kirim satu-satu lewat WhatsApp dengan template pesan yang bisa diubah.</p></div>
-        <div class="feature"><div class="fi">✓</div><h3>RSVP real-time</h3><p>Tamu konfirmasi hadir & jumlah orang. Anda lihat rekap hadir, ragu, tidak hadir, dan estimasi katering.</p></div>
-        <div class="feature"><div class="fi">❤</div><h3>Dinding ucapan & doa</h3><p>Tamu bisa menyukai ucapan, mempelai bisa membalas, dan ucapan yang tidak pantas bisa disembunyikan.</p></div>
-        <div class="feature"><div class="fi">▣</div><h3>E-pass QR & check-in</h3><p>Tamu yang hadir mendapat QR. Di hari H, scan dengan HP untuk buku tamu digital & hitung kedatangan.</p></div>
-        <div class="feature"><div class="fi">₿</div><h3>Amplop digital</h3><p>Rekening bank, e-wallet, QRIS, dan alamat kirim kado — tamu tinggal salin dengan satu ketukan.</p></div>
-        <div class="feature"><div class="fi">✦</div><h3>Untuk semua agama & kepercayaan</h3><p>Template salam, ayat/kutipan, nama upacara, dan simbol untuk Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu, Penghayat Kepercayaan, atau umum.</p></div>
-        <div class="feature"><div class="fi">♫</div><h3>Lagu & request lagu</h3><p>Unggah lagu favorit atau pilih musik bawaan bebas royalti. Tamu bisa request lagu untuk acara lewat RSVP.</p></div>
-        <div class="feature"><div class="fi">▶</div><h3>Video & motion photo</h3><p>Sampul slideshow atau video bergerak, video pre-wedding (unggah atau YouTube), dan motion photo Android yang tetap hidup.</p></div>
-        <div class="feature"><div class="fi">●</div><h3>Live streaming</h3><p>Siaran YouTube/Vimeo diputar langsung di undangan, lengkap dengan tanda LIVE saat acara berlangsung.</p></div>
-        <div class="feature"><div class="fi">↗</div><h3>Bagikan ke media sosial</h3><p>WhatsApp, Facebook, X, Telegram, gambar Instagram Story otomatis, tagar, dan akun Instagram/TikTok mempelai.</p></div>
-        <div class="feature"><div class="fi">♡</div><h3>Donasi & konfirmasi hadiah</h3><p>Mode donasi pengganti kado ke rekening/QRIS Anda, nama bagian bisa diganti (Tanda Kasih, Angpao, Dana Punia…), dan tamu bisa mengonfirmasi kirimannya.</p></div>
+        <div class="feature"><div class="fi">✎</div><h3 data-en="Editor with live preview">Editor dengan pratinjau langsung</h3><p data-en="Fill in a simple form and see the result instantly in a phone frame. Photos are compressed automatically so the invitation opens fast.">Isi formulir sederhana, lihat hasilnya langsung di bingkai HP. Foto otomatis dikompres agar cepat dibuka.</p></div>
+        <div class="feature"><div class="fi">✉</div><h3 data-en="A personal link for every guest">Link personal tiap tamu</h3><p data-en="The guest's name appears on the envelope. Send each one on WhatsApp with a message template you can edit.">Nama tamu muncul di sampul amplop. Kirim satu-satu lewat WhatsApp dengan template pesan yang bisa diubah.</p></div>
+        <div class="feature"><div class="fi">✓</div><h3 data-en="Real-time RSVP">RSVP real-time</h3><p data-en="Guests confirm attendance and party size. You see who is coming, maybe or not, plus a catering estimate.">Tamu konfirmasi hadir &amp; jumlah orang. Anda lihat rekap hadir, ragu, tidak hadir, dan estimasi katering.</p></div>
+        <div class="feature"><div class="fi">❤</div><h3 data-en="Wishes wall">Dinding ucapan</h3><p data-en="Guests can like wishes, the couple can reply, and inappropriate messages can be hidden.">Tamu bisa menyukai ucapan, mempelai bisa membalas, dan ucapan yang tidak pantas bisa disembunyikan.</p></div>
+        <div class="feature"><div class="fi">▣</div><h3 data-en="QR e-pass &amp; check-in">E-pass QR &amp; check-in</h3><p data-en="Attending guests get a QR code. On the day, scan it with a phone for a digital guest book and arrival count.">Tamu yang hadir mendapat QR. Di hari H, scan dengan HP untuk buku tamu digital &amp; hitung kedatangan.</p></div>
+        <div class="feature"><div class="fi">✧</div><h3 data-en="Digital gift envelope">Amplop digital</h3><p data-en="Bank accounts, e-wallets, QRIS and a gift delivery address: guests copy them with one tap.">Rekening bank, e-wallet, QRIS, dan alamat kirim kado — tamu tinggal salin dengan satu ketukan.</p></div>
+        <div class="feature"><div class="fi">✦</div><h3 data-en="For every faith &amp; tradition">Untuk semua agama &amp; kepercayaan</h3><p data-en="Greetings, scripture or quotes, ceremony names and symbols for Islam, Christian, Catholic, Hindu, Buddhist, Confucian and indigenous faiths, or a fully neutral version.">Salam, ayat/kutipan, nama upacara, dan simbol untuk Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu, Penghayat Kepercayaan, atau versi netral tanpa nuansa agama.</p></div>
+        <div class="feature"><div class="fi">♫</div><h3 data-en="Music &amp; song requests">Lagu &amp; request lagu</h3><p data-en="Upload your favourite song or pick royalty-free built-in music. Guests can request songs through the RSVP.">Unggah lagu favorit atau pilih musik bawaan bebas royalti. Tamu bisa request lagu untuk acara lewat RSVP.</p></div>
+        <div class="feature"><div class="fi">▶</div><h3 data-en="Video &amp; motion photos">Video &amp; motion photo</h3><p data-en="Slideshow or video cover, a pre-wedding video (upload or YouTube), and Android motion photos that stay alive.">Sampul slideshow atau video bergerak, video pre-wedding (unggah atau YouTube), dan motion photo Android yang tetap hidup.</p></div>
+        <div class="feature"><div class="fi">●</div><h3>Live streaming</h3><p data-en="YouTube/Vimeo streams play right inside the invitation, with a LIVE badge while the event is on.">Siaran YouTube/Vimeo diputar langsung di undangan, lengkap dengan tanda LIVE saat acara berlangsung.</p></div>
+        <div class="feature"><div class="fi">↗</div><h3 data-en="Share on social media">Bagikan ke media sosial</h3><p data-en="WhatsApp, Facebook, X, Telegram, an automatic Instagram Story image, your hashtag, and the couple's Instagram/TikTok.">WhatsApp, Facebook, X, Telegram, gambar Instagram Story otomatis, tagar, dan akun Instagram/TikTok mempelai.</p></div>
+        <div class="feature"><div class="fi">♡</div><h3 data-en="Donations &amp; gift confirmation">Donasi &amp; konfirmasi hadiah</h3><p data-en="A donation mode instead of gifts, a section name you choose (Tanda Kasih, Angpao, Dana Punia, Kasih…), and guests can confirm what they sent.">Mode donasi pengganti kado, nama bagian bisa Anda pilih (Tanda Kasih, Angpao, Dana Punia, Kasih…), dan tamu bisa mengonfirmasi kirimannya.</p></div>
       </div>
     </div>
   </section>
 
   <section class="section-l" id="agama">
-    <h2>Satu aplikasi untuk semua agama & kepercayaan</h2>
-    <p class="sub">Satu undangan, delapan tradisi: salam pembuka, nama &amp; tempat upacara, kutipan kitab suci, dan simbolnya menyesuaikan — bisa diganti kapan saja. Klik untuk melihat undangan contoh yang sama dalam tiap tradisi.</p>
+    <h2 data-en="One app for every faith &amp; tradition">Satu aplikasi untuk semua agama &amp; kepercayaan</h2>
+    <p class="sub" data-en="One invitation, eight traditions: the greeting, ceremony name and place, scripture and symbol adapt, and you can change them any time. Interfaith couples can mix and match or write their own. Click to see the same sample invitation in each tradition.">Satu undangan, delapan tradisi: salam, nama &amp; tempat upacara, kutipan kitab suci, dan simbol menyesuaikan — bisa diganti kapan saja. Pasangan beda agama bebas memadukan atau menulis sendiri. Klik untuk melihat undangan contoh yang sama dalam tiap tradisi.</p>
     <div class="themes-row religion-row">
-        <a class="theme-tile religion-tile theme-emerald" href="/i/demo?agama=islam&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">☪</span><strong>Islam</strong><small>Akad Nikah</small></a>
-        <a class="theme-tile religion-tile theme-navy" href="/i/demo?agama=kristen&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✝</span><strong>Kristen</strong><small>Pemberkatan Nikah</small></a>
-        <a class="theme-tile religion-tile theme-blush" href="/i/demo?agama=katolik&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✝</span><strong>Katolik</strong><small>Sakramen Pernikahan</small></a>
-        <a class="theme-tile religion-tile theme-terracotta" href="/i/demo?agama=hindu&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">ॐ</span><strong>Hindu</strong><small>Upacara Pawiwahan</small></a>
-        <a class="theme-tile religion-tile theme-noir" href="/i/demo?agama=buddha&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">☸</span><strong>Buddha</strong><small>Pemberkatan Pernikahan</small></a>
-        <a class="theme-tile religion-tile theme-crimson" href="/i/demo?agama=konghucu&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">囍</span><strong>Khonghucu</strong><small>Upacara Li Yuan</small></a>
-        <a class="theme-tile religion-tile theme-sage" href="/i/demo?agama=kepercayaan&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✦</span><strong>Kepercayaan</strong><small>Upacara Perkawinan</small></a>
-        <a class="theme-tile religion-tile theme-sage" href="/i/demo?agama=umum&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">♡</span><strong>Umum</strong><small>Upacara Pernikahan</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=umum&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">♡</span><strong data-en="General">Umum</strong><small data-en="No religious wording">Tanpa nuansa agama</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=islam&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">☪</span><strong>Islam</strong><small>Akad Nikah</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=kristen&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✝</span><strong data-en="Christian">Kristen</strong><small data-en="Holy Matrimony">Pemberkatan Nikah</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=katolik&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✝</span><strong data-en="Catholic">Katolik</strong><small data-en="Sacrament of Marriage">Sakramen Pernikahan</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=hindu&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">ॐ</span><strong>Hindu</strong><small>Pawiwahan</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=buddha&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">☸</span><strong data-en="Buddhist">Buddha</strong><small data-en="Wedding Blessing">Pemberkatan Pernikahan</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=konghucu&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">囍</span><strong data-en="Confucian">Khonghucu</strong><small>Li Yuan</small></a>
+        <a class="theme-tile religion-tile" href="/i/demo?agama=kepercayaan&amp;open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✦</span><strong data-en="Indigenous faith">Kepercayaan</strong><small data-en="Traditional ceremony">Upacara Perkawinan</small></a>
     </div>
   </section>
 
   <section class="section-l">
-    <h2>Siap dalam 3 langkah</h2>
-    <p class="sub">Tidak perlu install aplikasi. Bisa dari HP maupun laptop.</p>
+    <h2 data-en="Ready in 3 steps">Siap dalam 3 langkah</h2>
+    <p class="sub" data-en="Nothing to install. Works on phone and laptop.">Tidak perlu install aplikasi. Bisa dari HP maupun laptop.</p>
     <div class="steps">
-      <div class="step"><h3>Buat & desain</h3><p>Daftar gratis, isi nama dan tanggal, pilih tema. Tambahkan foto, acara, dan amplop digital.</p></div>
-      <div class="step"><h3>Kirim ke tamu</h3><p>Tempel daftar tamu (atau impor CSV), lalu kirim link personal ke masing-masing via WhatsApp.</p></div>
-      <div class="step"><h3>Pantau & sambut</h3><p>Lihat RSVP masuk secara langsung, ekspor ke Excel, dan scan QR tamu saat hari bahagia tiba.</p></div>
+      <div class="step"><h3 data-en="Create &amp; design">Buat &amp; desain</h3><p data-en="Sign up free, enter your names and date, choose a theme and your tradition. Add photos, events and a gift envelope.">Daftar gratis, isi nama dan tanggal, pilih tema dan tradisi. Tambahkan foto, acara, dan amplop digital.</p></div>
+      <div class="step"><h3 data-en="Send to guests">Kirim ke tamu</h3><p data-en="Paste your guest list (or import a CSV), then send each guest a personal link on WhatsApp.">Tempel daftar tamu (atau impor CSV), lalu kirim link personal ke masing-masing via WhatsApp.</p></div>
+      <div class="step"><h3 data-en="Track &amp; welcome">Pantau &amp; sambut</h3><p data-en="Watch RSVPs come in live, export to Excel, and scan guests' QR codes on the big day.">Lihat RSVP masuk secara langsung, ekspor ke Excel, dan scan QR tamu saat hari bahagia tiba.</p></div>
     </div>
   </section>
 
   <section class="band">
     <div class="section-l">
-      <h2>7 tema elegan</h2>
-      <p class="sub">Klik untuk melihat contoh undangan di setiap tema.</p>
+      <h2 data-en="8 elegant themes">8 tema elegan</h2>
+      <p class="sub" data-en="Any theme works with any tradition. Click to preview.">Semua tema bisa dipakai untuk tradisi apa pun. Klik untuk melihat contoh.</p>
       <div class="themes-row">
-        <a class="theme-tile theme-sage" href="/i/demo?theme=sage&open=1" target="_blank" rel="noopener"><span class="names">Sage</span><small>Hijau zaitun & emas</small></a>
-        <a class="theme-tile theme-navy" href="/i/demo?theme=navy&open=1" target="_blank" rel="noopener"><span class="names">Navy</span><small>Biru tua klasik</small></a>
-        <a class="theme-tile theme-terracotta" href="/i/demo?theme=terracotta&open=1" target="_blank" rel="noopener"><span class="names">Terracotta</span><small>Hangat & rustic</small></a>
-        <a class="theme-tile theme-blush" href="/i/demo?theme=blush&open=1" target="_blank" rel="noopener"><span class="names">Blush</span><small>Merah muda lembut</small></a>
-        <a class="theme-tile theme-noir" href="/i/demo?theme=noir&open=1" target="_blank" rel="noopener"><span class="names">Noir</span><small>Hitam & emas mewah</small></a>
-        <a class="theme-tile theme-crimson" href="/i/demo?theme=crimson&open=1" target="_blank" rel="noopener"><span class="names">Crimson</span><small>Merah & emas</small></a>
-        <a class="theme-tile theme-emerald" href="/i/demo?theme=emerald&open=1" target="_blank" rel="noopener"><span class="names">Emerald</span><small>Hijau zamrud & emas</small></a>
+        <a class="theme-tile theme-ivory" href="/i/demo?theme=ivory&amp;open=1" target="_blank" rel="noopener"><span class="names">Ivory</span><small data-en="Ink &amp; rose gold">Tinta &amp; rose gold</small></a>
+        <a class="theme-tile theme-blush" href="/i/demo?theme=blush&amp;open=1" target="_blank" rel="noopener"><span class="names">Blush</span><small data-en="Soft pink">Merah muda lembut</small></a>
+        <a class="theme-tile theme-navy" href="/i/demo?theme=navy&amp;open=1" target="_blank" rel="noopener"><span class="names">Navy</span><small data-en="Classic deep blue">Biru tua klasik</small></a>
+        <a class="theme-tile theme-noir" href="/i/demo?theme=noir&amp;open=1" target="_blank" rel="noopener"><span class="names">Noir</span><small data-en="Black &amp; gold">Hitam &amp; emas</small></a>
+        <a class="theme-tile theme-terracotta" href="/i/demo?theme=terracotta&amp;open=1" target="_blank" rel="noopener"><span class="names">Terracotta</span><small data-en="Warm &amp; rustic">Hangat &amp; rustic</small></a>
+        <a class="theme-tile theme-sage" href="/i/demo?theme=sage&amp;open=1" target="_blank" rel="noopener"><span class="names">Sage</span><small data-en="Olive &amp; gold">Hijau zaitun &amp; emas</small></a>
+        <a class="theme-tile theme-crimson" href="/i/demo?theme=crimson&amp;open=1" target="_blank" rel="noopener"><span class="names">Crimson</span><small data-en="Red &amp; gold">Merah &amp; emas</small></a>
+        <a class="theme-tile theme-emerald" href="/i/demo?theme=emerald&amp;open=1" target="_blank" rel="noopener"><span class="names">Emerald</span><small data-en="Emerald &amp; gold">Hijau zamrud &amp; emas</small></a>
       </div>
     </div>
   </section>
 
   <section class="section-l" id="ulasan" hidden>
-    <h2>Kata pasangan yang sudah memakai</h2>
+    <h2 data-en="What couples say">Kata pasangan yang sudah memakai</h2>
     <p class="sub" id="reviewSummary"></p>
     <div class="reviews-grid" id="reviewsGrid"></div>
   </section>
 
   <section class="section-l">
     <div class="cta-band">
-      <h2>Mulai undangan Anda hari ini</h2>
-      <p>Gratis untuk dicoba. Data tamu Anda tidak dibagikan ke siapa pun.</p>
-      <a class="btn btn-primary btn-lg" href="/app#/register">Daftar gratis</a>
+      <h2 data-en="Start your invitation today">Mulai undangan Anda hari ini</h2>
+      <p data-en="Free to try. Your guest data is never shared with anyone.">Gratis untuk dicoba. Data tamu Anda tidak dibagikan ke siapa pun.</p>
+      <a class="btn btn-primary btn-lg" href="/app#/register" data-en="Sign up free">Daftar gratis</a>
     </div>
   </section>
 
-  <footer class="footer-l">© Undanu · Dibuat dengan ♥ untuk pasangan Indonesia</footer>
+  <footer class="footer-l" data-en="© Undanu · Made with ♥ for every couple in Indonesia, whatever their faith">© Undanu · Dibuat dengan ♥ untuk setiap pasangan di Indonesia, apa pun keyakinannya</footer>
   <script src="/assets/landing.js" defer></script>
 </body>
 </html>

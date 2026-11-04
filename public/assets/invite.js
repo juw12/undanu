@@ -424,6 +424,9 @@
     }
     document.documentElement.lang = state.lang;
     applyStaticText();
+    $$('.cover-note').forEach((el) => {
+      el.hidden = !C.showTypoNote;
+    });
     renderBindings();
     renderSymbol();
     renderHeroMedia();

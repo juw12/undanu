@@ -7,6 +7,12 @@
   --sans: 'Jost', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --col: 480px;
 }
+[data-theme="ivory"] {
+  --bg: #f8f5f2; --surface: #fffdfb; --surface-2: #f0e9e4;
+  --primary: #3b3541; --primary-dark: #26222b; --accent: #b5826e;
+  --text: #2b262e; --muted: #776f75; --line: #e6ddd7;
+  --script: 'Cormorant Garamond', Georgia, serif; --script-style: italic; --script-weight: 500;
+}
 [data-theme="sage"] {
   --bg: #f4f1e8; --surface: #fffdf8; --surface-2: #e9e4d6;
   --primary: #6b7b5b; --primary-dark: #4a573e; --accent: #b8955a;
@@ -60,7 +66,8 @@ body.locked { overflow: hidden; height: 100vh; }
 img { max-width: 100%; display: block; }
 h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; }
 p { margin: 0 0 1rem; }
-.script { font-family: var(--script); font-weight: 400; }
+.script { font-family: var(--script); font-weight: var(--script-weight, 400); }
+.script, .section-title, .monogram, .person-nick, .amp, .event h3 { font-style: var(--script-style, normal); }
 .center { text-align: center; }
 .bank-number, .countdown b, .event-date, .pass-code, .provider, .stat b, .tl-year {
   font-variant-numeric: lining-nums tabular-nums;

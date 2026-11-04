@@ -35,22 +35,25 @@ def build_landing():
     html = (PUBLIC / "index.html").read_text(encoding="utf-8")
     html = replace_all(html, [
         ('href="/assets/', 'href="assets/', 1),
-        ('<a class="btn btn-ghost btn-sm" href="/app#/login">Masuk</a>',
+        ('<a class="btn btn-ghost btn-sm" href="/app#/login" data-en="Log in">Masuk</a>',
          f'<a class="btn btn-ghost btn-sm" href="{REPO_URL}">GitHub</a>', 1),
-        ('<a class="btn btn-primary btn-sm" href="/app#/register">Daftar gratis</a>',
-         f'<a class="btn btn-primary btn-sm" href="{REPO_URL}#deploy">Deploy gratis</a>', 1),
-        ('<a class="btn btn-primary btn-lg" href="/app#/register">Buat undangan gratis</a>',
-         f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy">Deploy sendiri</a>', 1),
-        ('<a class="btn btn-primary btn-lg" href="/app#/register">Daftar gratis</a>',
-         f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy">Lihat cara deploy</a>', 1),
+        ('<a class="btn btn-primary btn-sm" href="/app#/register" data-en="Sign up free">Daftar gratis</a>',
+         f'<a class="btn btn-primary btn-sm" href="{REPO_URL}#deploy" data-en="Deploy free">Deploy gratis</a>', 1),
+        ('<a class="btn btn-primary btn-lg" href="/app#/register" data-en="Create a free invitation">Buat undangan gratis</a>',
+         f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy" data-en="Deploy your own">Deploy sendiri</a>', 1),
+        ('<a class="btn btn-primary btn-lg" href="/app#/register" data-en="Sign up free">Daftar gratis</a>',
+         f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy" data-en="How to deploy">Lihat cara deploy</a>', 1),
         ('src="/assets/landing.js"', 'src="assets/landing.js"', 1),
         ('href="/"', 'href="./"', 1),
     ], "landing")
     # /i/demo?agama=hindu -> demo/?agama=hindu (also inside data-src for the religion chips)
     html = re.sub(r'(href|src|data-src)="/i/demo(?=[?"])', r'\1="demo/', html)
     html = html.replace(
-        "<p>Gratis untuk dicoba. Data tamu Anda tidak dibagikan ke siapa pun.</p>",
-        "<p>Ini demo statis di GitHub Pages. Aplikasi lengkap (dashboard, RSVP, check-in) "
+        '<p data-en="Free to try. Your guest data is never shared with anyone.">'
+        "Gratis untuk dicoba. Data tamu Anda tidak dibagikan ke siapa pun.</p>",
+        '<p data-en="This is a static demo on GitHub Pages. The full app (dashboard, RSVP, check-in) '
+        'runs on your own server, free and open source.">'
+        "Ini demo statis di GitHub Pages. Aplikasi lengkap (dashboard, RSVP, check-in) "
         "berjalan di server Anda sendiri — gratis dan open source.</p>",
     )
     (DOCS / "index.html").write_text(html, encoding="utf-8")
