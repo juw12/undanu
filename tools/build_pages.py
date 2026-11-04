@@ -7,7 +7,9 @@ GitHub Pages can't run the Python backend, so this produces the landing page plu
 a pre-rendered demo invitation where RSVPs are simulated in the browser.
 """
 import json
+import re
 import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -15,6 +17,9 @@ ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
 DOCS = ROOT / "docs"
 REPO_URL = "https://github.com/juw12/undanu"
+
+sys.path.insert(0, str(ROOT))
+import demos  # noqa: E402  (shared with server.py)
 
 
 def replace_all(text, replacements, label):
@@ -38,11 +43,15 @@ def build_landing():
          f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy">Deploy sendiri</a>', 1),
         ('<a class="btn btn-primary btn-lg" href="/app#/register">Daftar gratis</a>',
          f'<a class="btn btn-primary btn-lg" href="{REPO_URL}#deploy">Lihat cara deploy</a>', 1),
-        ('href="/i/demo', 'href="demo/', 9),
         ('src="/assets/landing.js"', 'src="assets/landing.js"', 1),
-        ('src="/i/demo', 'src="demo/', 1),
         ('href="/"', 'href="./"', 1),
     ], "landing")
+    # /i/demo -> demo/, /i/demo-islam -> demo/islam/ (also inside data-src for the religion chips)
+    html = re.sub(
+        r'(href|src|data-src)="/i/demo(?:-([a-z]+))?',
+        lambda m: f'{m.group(1)}="demo/' + (f"{m.group(2)}/" if m.group(2) else ""),
+        html,
+    )
     html = html.replace(
         "<p>Gratis untuk dicoba. Data tamu Anda tidak dibagikan ke siapa pun.</p>",
         "<p>Ini demo statis di GitHub Pages. Aplikasi lengkap (dashboard, RSVP, check-in) "
@@ -51,45 +60,52 @@ def build_landing():
     (DOCS / "index.html").write_text(html, encoding="utf-8")
 
 
-def build_demo():
-    config = json.loads((ROOT / "seed" / "demo.json").read_text(encoding="utf-8"))
-    stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    sample_wishes = [
-        {"id": "w1", "name": "Dimas & Sari", "attendance": "yes", "time": stamp, "likes": 12,
-         "reply": "Aamiin, terima kasih banyak Dimas & Sari! Sampai jumpa di hari H 🤍",
-         "message": "Selamat menempuh hidup baru! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah."},
-        {"id": "w2", "name": "Tante Lina", "attendance": "yes", "time": stamp,
-         "message": "Bahagia sekali mendengar kabar ini. Semoga langgeng sampai kakek nenek ya!"},
-        {"id": "w3", "name": "Kevin", "attendance": "no", "time": stamp,
-         "message": "Maaf belum bisa hadir, doa terbaik dari Singapura. Congrats both of you!"},
+def build_demo(slug, variant, config, stamp):
+    """Write one static demo: /i/demo -> docs/demo/, /i/demo-hindu -> docs/demo/hindu/."""
+    sub = slug[len("demo-"):] if slug.startswith("demo-") else ""
+    out_dir = DOCS / "demo" / sub if sub else DOCS / "demo"
+    up = "../../" if sub else "../"
+    wishes = [
+        {"id": f"w{i}", "name": name, "attendance": attendance, "time": stamp, "message": message}
+        for i, (name, attendance, _count, message) in enumerate(demos.sample_wishes(variant), start=1)
     ]
+    wishes[0]["likes"] = 12
+    wishes[0]["reply"] = f"Terima kasih banyak {wishes[0]['name']}! Sampai jumpa di hari H 🤍"
     data = {
-        "slug": "demo",
+        "slug": slug,
         "published": True,
         "preview": False,
         "staticDemo": True,
         "config": config,
         "guest": None,
         "appName": "Undanu",
-        "homeUrl": "../",
-        "sampleWishes": sample_wishes,
+        "homeUrl": up,
+        "sampleWishes": wishes,
     }
     data_json = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    couple = f"{variant['groom']['nickname']} &amp; {variant['bride']['nickname']}"
+    label = variant["label"]
     meta = "\n  ".join([
-        "<title>The Wedding of Raka &amp; Ayu · Demo Undanu</title>",
-        '<meta name="description" content="Contoh undangan pernikahan digital dari Undanu.">',
-        '<meta property="og:title" content="The Wedding of Raka &amp; Ayu">',
-        '<meta property="og:description" content="Sabtu, 20 Februari 2027 · Jakarta — demo Undanu">',
+        f"<title>The Wedding of {couple} · Demo {label} · Undanu</title>",
+        f'<meta name="description" content="Contoh undangan pernikahan digital ({label}) dari Undanu.">',
+        f'<meta property="og:title" content="The Wedding of {couple}">',
+        f'<meta property="og:description" content="Demo undangan {label} — Undanu">',
     ])
     html = (PUBLIC / "invite.html").read_text(encoding="utf-8")
     html = replace_all(html, [
-        ('href="/assets/', 'href="../assets/', 1),
-        ('src="/assets/', 'src="../assets/', 2),
+        ('href="/assets/', f'href="{up}assets/', 1),
+        ('src="/assets/', f'src="{up}assets/', 2),
         ("<!--META-->", meta, 1),
         ("<!--DATA-->", data_json, 1),
-    ], "demo")
-    (DOCS / "demo").mkdir(parents=True, exist_ok=True)
-    (DOCS / "demo" / "index.html").write_text(html, encoding="utf-8")
+    ], f"demo {slug}")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "index.html").write_text(html, encoding="utf-8")
+
+
+def build_demos():
+    stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    for slug, (variant, config) in demos.demo_configs().items():
+        build_demo(slug, variant, config, stamp)
 
 
 def main():
@@ -98,7 +114,7 @@ def main():
     for name in ("app.css", "invite.css", "invite.js", "qrcode.min.js", "landing.js"):
         shutil.copy2(PUBLIC / "assets" / name, DOCS / "assets" / name)
     build_landing()
-    build_demo()
+    build_demos()
     (DOCS / ".nojekyll").write_text("", encoding="utf-8")
     print(f"Built static demo in {DOCS}")
 

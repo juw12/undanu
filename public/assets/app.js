@@ -955,8 +955,8 @@
             <label class="field"><span>Tanggal & jam acara utama</span><input name="date" type="datetime-local" required></label>
             <label class="field"><span>Zona waktu</span><select name="timeZone">${tzOptions}</select></label>
           </div>
-          <label class="field"><span>Template teks</span><select name="religion">${religionOptions}</select>
-            <small>Mengisi salam pembuka, kutipan, dan penutup. Bisa diubah kapan saja.</small></label>
+          <label class="field"><span>Agama / tradisi</span><select name="religion" required><option value="" selected disabled>— Pilih agama / tradisi —</option>${religionOptions}</select>
+            <small>Mengisi salam pembuka, kutipan kitab suci, nama upacara, dan simbol. Bisa diubah kapan saja.</small></label>
           <div class="field"><span class="label">Tema</span>${themePickerHtml('sage')}</div>
           <label class="field"><span>Link undangan</span>
             <div class="input-prefix"><span>${esc(location.host)}/i/</span><input name="slug" required maxlength="40" placeholder="raka-ayu"></div>
@@ -1013,6 +1013,11 @@
             errorBox.hidden = false;
             return;
           }
+          if (!form.religion.value) {
+            errorBox.textContent = 'Pilih agama / tradisi untuk template undangan (pilih "Umum" jika ingin netral).';
+            errorBox.hidden = false;
+            return;
+          }
           await checkSlug.flush();
           if (!slugOk) {
             errorBox.textContent = 'Link tidak tersedia, coba yang lain.';
@@ -1047,7 +1052,7 @@
       config.music.preset = config.music.builtIn === false ? 'none' : 'canon';
       delete config.music.builtIn;
     }
-    const defaults = P.newConfig({ groom: '', bride: '', date: '', religion: config.religion || 'islam' });
+    const defaults = P.newConfig({ groom: '', bride: '', date: '', religion: config.religion || 'umum' });
     const fill = (target, source) => {
       Object.entries(source).forEach(([key, value]) => {
         if (target[key] === undefined) {
@@ -1176,12 +1181,12 @@
     const events = config.events.map((ev, i) => `
       <div class="list-item">
         <div class="list-item-head"><strong>Acara ${i + 1}${ev.title?.id ? ` — ${esc(ev.title.id)}` : ''}</strong>${listControls('events', i, config.events.length)}</div>
-        ${f.i18n(`events.${i}.title`, 'Nama acara', { placeholder: 'Akad Nikah / Resepsi' })}
+        ${f.i18n(`events.${i}.title`, 'Nama acara', { placeholder: 'Akad / Pemberkatan / Pawiwahan / Li Yuan / Resepsi' })}
         <div class="row row-2">
           ${f.datetime(`events.${i}.start`, 'Mulai')}
           ${f.datetime(`events.${i}.end`, 'Selesai', { hint: 'Kosongkan untuk "Selesai".' })}
         </div>
-        ${f.text(`events.${i}.venue`, 'Nama tempat', { placeholder: 'Gedung / Masjid / Gereja / Rumah' })}
+        ${f.text(`events.${i}.venue`, 'Nama tempat', { placeholder: 'Gedung / Masjid / Gereja / Pura / Vihara / Klenteng / Rumah' })}
         ${f.textarea(`events.${i}.address`, 'Alamat lengkap', { rows: 2 })}
         <div class="row row-2">
           ${f.text(`events.${i}.mapsQuery`, 'Kata kunci Google Maps', { placeholder: 'mis. Balai Kartini Jakarta', hint: 'Dipakai untuk peta & petunjuk arah.' })}
@@ -1242,7 +1247,7 @@
           ['video', 'Video latar (loop, tanpa suara)']
         ])}
         ${config.heroMode === 'video' ? f.video('heroVideo', 'Video latar sampul', { hint: `MP4/MOV/WEBM maks. ${MAX_VIDEO_MB} MB. Ideal 10–20 detik, portrait.` }) : ''}
-        ${f.toggle('showSymbol', 'Tampilkan simbol / kaligrafi agama di sampul')}
+        ${f.toggle('showSymbol', 'Tampilkan simbol agama di sampul')}
         <div class="row row-2">
           ${f.select('defaultLang', 'Bahasa awal undangan', [['id', 'Bahasa Indonesia'], ['en', 'English']])}
           <div class="field" style="padding-top:1.4rem">${f.toggle('brideFirst', 'Tampilkan mempelai wanita lebih dulu')}</div>
@@ -1261,7 +1266,7 @@
         ${f.i18n(bride('parents'), 'Keterangan orang tua', { multiline: true, rows: 2, placeholder: 'Putri kedua dari Bapak ... & Ibu ...' })}
         <div class="row row-2">${f.image(bride('photo'), 'Foto')}<div>${f.text(bride('instagram'), 'Instagram (tanpa @)', { max: 40 })}${f.text(bride('tiktok'), 'TikTok (tanpa @)', { max: 40 })}</div></div>
       `),
-      section('events', 'calendar', 'Tanggal & Acara', 'Akad/pemberkatan, resepsi, lokasi & peta', `
+      section('events', 'calendar', 'Tanggal & Acara', 'Upacara, resepsi, lokasi & peta', `
         <div class="row row-2">
           ${f.datetime('weddingDate', 'Tanggal utama', { hint: 'Untuk hitung mundur & tanggal di sampul.' })}
           ${f.select('timeZone', 'Zona waktu', tzOptions)}

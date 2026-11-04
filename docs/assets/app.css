@@ -359,3 +359,14 @@ td .acts { display: flex; gap: .3rem; flex-wrap: wrap; justify-content: flex-end
 .review p { color: var(--text); font-size: .95rem; margin: .5rem 0 .8rem; }
 .review .who { font-size: .85rem; color: var(--muted); }
 .review .who b { color: var(--text); }
+
+/* ---------- Religion demos ---------- */
+.hero-phone { flex-direction: column; align-items: center; gap: 1.2rem; }
+.demo-chips { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 420px; }
+.demo-chip { border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 999px; padding: .35rem .85rem; font: inherit; font-size: .85rem; cursor: pointer; transition: background .15s, color .15s; }
+.demo-chip:hover { border-color: var(--primary); }
+.demo-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.religion-row { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.religion-tile { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: 1.4rem 1rem; }
+.religion-tile .religion-symbol { font-size: 1.9rem; line-height: 1; height: 2rem; }
+.religion-tile strong { font-size: 1.1rem; font-weight: 600; }

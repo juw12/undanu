@@ -44,6 +44,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+import demos
+
 # --------------------------------------------------------------------------- #
 # Settings
 # --------------------------------------------------------------------------- #
@@ -90,6 +92,7 @@ RESERVED_SLUGS = {
     "app", "api", "admin", "assets", "uploads", "login", "register", "demo-admin",
     "static", "healthz", "www", "help", "support", "i", "reviews", "live",
 }
+RESERVED_SLUGS.update(demos.demo_slugs())
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 ATTENDANCE = ("yes", "no", "maybe")
 
@@ -1719,43 +1722,44 @@ class Handler(BaseHTTPRequestHandler):
 # Demo seed
 # --------------------------------------------------------------------------- #
 def seed_demo() -> None:
-    seed_file = SEED_DIR / "demo.json"
-    if not seed_file.exists():
+    """Create or refresh one demo invitation per religion (/i/demo, /i/demo-islam, ...)."""
+    configs = demos.demo_configs()
+    if not configs:
         return
     conn = connect()
     try:
-        if conn.execute("SELECT 1 FROM invitations WHERE slug = 'demo'").fetchone():
-            return
         stamp = now_iso()
-        cursor = conn.execute(
+        conn.execute(
             "INSERT OR IGNORE INTO users (email, name, password_hash, created_at) VALUES (?, ?, ?, ?)",
             ("demo@undangan.local", "Demo", hash_password(secrets.token_urlsafe(24)), stamp),
         )
-        user_id = cursor.lastrowid or conn.execute(
-            "SELECT id FROM users WHERE email = 'demo@undangan.local'"
-        ).fetchone()[0]
-        config = json.loads(seed_file.read_text(encoding="utf-8"))
-        cursor = conn.execute(
-            "INSERT INTO invitations (user_id, slug, config, published, created_at, updated_at) VALUES (?, 'demo', ?, 1, ?, ?)",
-            (user_id, json.dumps(sanitize_config(config), ensure_ascii=False), stamp, stamp),
-        )
-        invitation_id = cursor.lastrowid
-        samples = [
-            ("Dimas & Sari", "yes", 2, "Selamat menempuh hidup baru! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah."),
-            ("Tante Lina", "yes", 1, "Bahagia sekali mendengar kabar ini. Semoga langgeng sampai kakek nenek ya!"),
-            ("Kevin", "no", 0, "Maaf belum bisa hadir, doa terbaik dari Singapura. Congrats both of you!"),
-        ]
-        for name, attendance, count, message in samples:
-            code = new_guest_code(conn, invitation_id)
-            guest_cursor = conn.execute(
-                "INSERT INTO guests (invitation_id, code, name, pax, source, created_at) VALUES (?, ?, ?, 2, 'rsvp', ?)",
-                (invitation_id, code, name, stamp),
+        user_id = conn.execute("SELECT id FROM users WHERE email = 'demo@undangan.local'").fetchone()[0]
+        for slug, (variant, config) in configs.items():
+            config_json = json.dumps(sanitize_config(config), ensure_ascii=False)
+            existing = conn.execute("SELECT id, user_id FROM invitations WHERE slug = ?", (slug,)).fetchone()
+            if existing:
+                if existing["user_id"] == user_id:
+                    conn.execute(
+                        "UPDATE invitations SET config = ?, published = 1, updated_at = ? WHERE id = ?",
+                        (config_json, stamp, existing["id"]),
+                    )
+                continue
+            cursor = conn.execute(
+                "INSERT INTO invitations (user_id, slug, config, published, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?)",
+                (user_id, slug, config_json, stamp, stamp),
             )
-            conn.execute(
-                """INSERT INTO rsvps (invitation_id, guest_id, name, attendance, guests, message, created_at, updated_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (invitation_id, guest_cursor.lastrowid, name, attendance, count, message, stamp, stamp),
-            )
+            invitation_id = cursor.lastrowid
+            for name, attendance, count, message in demos.sample_wishes(variant):
+                code = new_guest_code(conn, invitation_id)
+                guest_cursor = conn.execute(
+                    "INSERT INTO guests (invitation_id, code, name, pax, source, created_at) VALUES (?, ?, ?, 2, 'rsvp', ?)",
+                    (invitation_id, code, name, stamp),
+                )
+                conn.execute(
+                    """INSERT INTO rsvps (invitation_id, guest_id, name, attendance, guests, message, created_at, updated_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (invitation_id, guest_cursor.lastrowid, name, attendance, count, message, stamp, stamp),
+                )
         conn.commit()
     finally:
         conn.close()

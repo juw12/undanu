@@ -54,8 +54,15 @@ Digital wedding invitations for Indonesia, with RSVP and a guest book. Couples s
 envelope-style invitation with a live phone preview, send each guest a personal link on WhatsApp,
 see who opened it and who's coming, and check guests in with a QR e-pass on the wedding day.
 
-**Live demo (static):** https://juw12.github.io/undanu/ ·
-[demo invitation](https://juw12.github.io/undanu/demo/?to=Bapak%20Budi%20%26%20Keluarga)
+**Live demo (static):** https://juw12.github.io/undanu/ · demo invitations, one per tradition:
+[Umum](https://juw12.github.io/undanu/demo/) ·
+[Islam](https://juw12.github.io/undanu/demo/islam/) ·
+[Kristen](https://juw12.github.io/undanu/demo/kristen/) ·
+[Katolik](https://juw12.github.io/undanu/demo/katolik/) ·
+[Hindu](https://juw12.github.io/undanu/demo/hindu/) ·
+[Buddha](https://juw12.github.io/undanu/demo/buddha/) ·
+[Khonghucu](https://juw12.github.io/undanu/demo/konghucu/) ·
+[Kepercayaan](https://juw12.github.io/undanu/demo/kepercayaan/)
 
 [![tests](https://github.com/juw12/undanu/actions/workflows/tests.yml/badge.svg)](https://github.com/juw12/undanu/actions/workflows/tests.yml)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/juw12/undanu)
@@ -67,9 +74,10 @@ Nothing to `pip install`, no build step.
 
 **For couples (dashboard)**
 - Account with email/password, **password reset by email**, change password, delete account (removes all data)
-- Templates for **every religion recognised in Indonesia** — Islam, Kristen, Katolik, Hindu, Buddha, Konghucu —
-  plus Penghayat Kepercayaan and a neutral one: greeting, quote/scripture, closing, and an optional cover symbol
-  (Bismillah, cross, ॐ, ☸, 囍). Switch religion any time from the editor. 7 colour themes
+- **Equal templates for every religion recognised in Indonesia** — Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu —
+  plus Penghayat Kepercayaan and a neutral *Umum* one: greeting, ceremony name (Akad Nikah, Pemberkatan, Sakramen Pernikahan,
+  Pawiwahan, Li Yuan, …), quote/scripture, closing, and an optional cover symbol. No religion is
+  preselected: couples pick their own when creating an invitation, and can switch any time. 7 colour themes
 - Form editor with **live phone preview** and autosave: couple (Instagram/TikTok), events and maps, love story,
   dress code, RSVP settings, music upload or built-in tunes (Canon in D, Für Elise, Ode to Joy, gamelan)
 - **Motion & video:** cover as photo, slideshow, or looping background video; gallery mixes photos, videos and
@@ -108,7 +116,10 @@ python server.py            # → http://localhost:8000
 
 On Windows you can also double-click `start.bat`.
 
-- `/` is the landing page, `/app` is the couple's dashboard, and `/i/demo` is a sample invitation
+- `/` is the landing page, `/app` is the couple's dashboard, and `/i/demo` is a sample invitation (neutral);
+  per-religion samples are at `/i/demo-islam`, `/i/demo-kristen`, `/i/demo-katolik`, `/i/demo-hindu`,
+  `/i/demo-buddha`, `/i/demo-konghucu` and `/i/demo-kepercayaan`. They are generated on startup from
+  `seed/demo.json` + `seed/demo_variants.json` (see `demos.py`); those slugs are reserved
 - Data (SQLite database, uploaded photos) is stored in `./data/`
 - Without SMTP settings, emails (password reset, RSVP notifications) are saved as `.eml` files in `./data/outbox/`
 

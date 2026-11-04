@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000
 
 WORKDIR /app
-COPY server.py ./
+COPY server.py demos.py ./
 COPY public ./public
 COPY seed ./seed
 

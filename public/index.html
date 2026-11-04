@@ -18,6 +18,7 @@
     <a class="brand" href="/"><span class="brand-mark">U</span>Undanu</a>
     <span class="spacer"></span>
     <a class="plain" href="#fitur">Fitur</a>
+    <a class="plain" href="#agama">Agama</a>
     <a class="plain" href="/i/demo" target="_blank" rel="noopener">Demo</a>
     <a class="btn btn-ghost btn-sm" href="/app#/login">Masuk</a>
     <a class="btn btn-primary btn-sm" href="/app#/register">Daftar gratis</a>
@@ -35,7 +36,17 @@
       <div class="hero-points"><span>Tanpa coding</span><span>Tamu tanpa batas</span><span>Bahasa Indonesia & English</span></div>
     </div>
     <div class="hero-phone">
-      <div class="phone-frame"><iframe src="/i/demo?to=Bapak%20Budi%20%26%20Keluarga" title="Contoh undangan" loading="lazy"></iframe></div>
+      <div class="phone-frame"><iframe id="heroDemo" src="/i/demo?to=Bapak%20Budi%20%26%20Keluarga" title="Contoh undangan" loading="lazy"></iframe></div>
+      <div class="demo-chips" role="group" aria-label="Lihat contoh untuk setiap agama">
+        <button type="button" class="demo-chip active" data-src="/i/demo?to=Bapak%20Budi%20%26%20Keluarga">Umum</button>
+        <button type="button" class="demo-chip" data-src="/i/demo-islam?to=Bapak%20Budi%20%26%20Keluarga">Islam</button>
+        <button type="button" class="demo-chip" data-src="/i/demo-kristen?to=Bapak%20Budi%20%26%20Keluarga">Kristen</button>
+        <button type="button" class="demo-chip" data-src="/i/demo-katolik?to=Bapak%20Budi%20%26%20Keluarga">Katolik</button>
+        <button type="button" class="demo-chip" data-src="/i/demo-hindu?to=Bapak%20Budi%20%26%20Keluarga">Hindu</button>
+        <button type="button" class="demo-chip" data-src="/i/demo-buddha?to=Bapak%20Budi%20%26%20Keluarga">Buddha</button>
+        <button type="button" class="demo-chip" data-src="/i/demo-konghucu?to=Bapak%20Budi%20%26%20Keluarga">Khonghucu</button>
+        <button type="button" class="demo-chip" data-src="/i/demo-kepercayaan?to=Bapak%20Budi%20%26%20Keluarga">Kepercayaan</button>
+      </div>
     </div>
   </header>
 
@@ -50,13 +61,28 @@
         <div class="feature"><div class="fi">❤</div><h3>Dinding ucapan & doa</h3><p>Tamu bisa menyukai ucapan, mempelai bisa membalas, dan ucapan yang tidak pantas bisa disembunyikan.</p></div>
         <div class="feature"><div class="fi">▣</div><h3>E-pass QR & check-in</h3><p>Tamu yang hadir mendapat QR. Di hari H, scan dengan HP untuk buku tamu digital & hitung kedatangan.</p></div>
         <div class="feature"><div class="fi">₿</div><h3>Amplop digital</h3><p>Rekening bank, e-wallet, QRIS, dan alamat kirim kado — tamu tinggal salin dengan satu ketukan.</p></div>
-        <div class="feature"><div class="fi">☪</div><h3>Untuk semua agama & kepercayaan</h3><p>Template salam, ayat/kutipan, nama upacara, dan simbol untuk Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu, Penghayat Kepercayaan, atau umum.</p></div>
+        <div class="feature"><div class="fi">✦</div><h3>Untuk semua agama & kepercayaan</h3><p>Template salam, ayat/kutipan, nama upacara, dan simbol untuk Islam, Kristen, Katolik, Hindu, Buddha, Khonghucu, Penghayat Kepercayaan, atau umum.</p></div>
         <div class="feature"><div class="fi">♫</div><h3>Lagu & request lagu</h3><p>Unggah lagu favorit atau pilih musik bawaan bebas royalti. Tamu bisa request lagu untuk acara lewat RSVP.</p></div>
         <div class="feature"><div class="fi">▶</div><h3>Video & motion photo</h3><p>Sampul slideshow atau video bergerak, video pre-wedding (unggah atau YouTube), dan motion photo Android yang tetap hidup.</p></div>
         <div class="feature"><div class="fi">●</div><h3>Live streaming</h3><p>Siaran YouTube/Vimeo diputar langsung di undangan, lengkap dengan tanda LIVE saat acara berlangsung.</p></div>
         <div class="feature"><div class="fi">↗</div><h3>Bagikan ke media sosial</h3><p>WhatsApp, Facebook, X, Telegram, gambar Instagram Story otomatis, tagar, dan akun Instagram/TikTok mempelai.</p></div>
-        <div class="feature"><div class="fi">♡</div><h3>Donasi & konfirmasi hadiah</h3><p>Mode donasi amal sebagai pengganti kado, dan tamu bisa mengonfirmasi hadiah sehingga Anda tahu siapa yang mengirim.</p></div>
+        <div class="feature"><div class="fi">♡</div><h3>Donasi & konfirmasi hadiah</h3><p>Mode donasi pengganti kado ke rekening/QRIS Anda, nama bagian bisa diganti (Tanda Kasih, Angpao, Dana Punia…), dan tamu bisa mengonfirmasi kirimannya.</p></div>
       </div>
+    </div>
+  </section>
+
+  <section class="section-l" id="agama">
+    <h2>Satu aplikasi untuk semua agama & kepercayaan</h2>
+    <p class="sub">Setiap tradisi punya salam, kutipan kitab suci, nama upacara, dan simbolnya sendiri — bisa diganti kapan saja. Klik untuk melihat contoh lengkapnya.</p>
+    <div class="themes-row religion-row">
+        <a class="theme-tile religion-tile theme-emerald" href="/i/demo-islam?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">☪</span><strong>Islam</strong><small>Akad Nikah · Fajar &amp; Nisa</small></a>
+        <a class="theme-tile religion-tile theme-navy" href="/i/demo-kristen?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✝</span><strong>Kristen</strong><small>Pemberkatan Nikah · Daniel &amp; Grace</small></a>
+        <a class="theme-tile religion-tile theme-blush" href="/i/demo-katolik?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✝</span><strong>Katolik</strong><small>Sakramen Pernikahan · Yohan &amp; Clara</small></a>
+        <a class="theme-tile religion-tile theme-terracotta" href="/i/demo-hindu?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">ॐ</span><strong>Hindu</strong><small>Upacara Pawiwahan · Gede &amp; Dewi</small></a>
+        <a class="theme-tile religion-tile theme-noir" href="/i/demo-buddha?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">☸</span><strong>Buddha</strong><small>Pemberkatan Pernikahan · Arya &amp; Melinda</small></a>
+        <a class="theme-tile religion-tile theme-crimson" href="/i/demo-konghucu?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">囍</span><strong>Khonghucu</strong><small>Upacara Li Yuan · William &amp; Mei Lan</small></a>
+        <a class="theme-tile religion-tile theme-sage" href="/i/demo-kepercayaan?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">✦</span><strong>Kepercayaan</strong><small>Upacara Perkawinan · Bayu &amp; Laras</small></a>
+        <a class="theme-tile religion-tile theme-sage" href="/i/demo?open=1" target="_blank" rel="noopener"><span class="religion-symbol" aria-hidden="true">♡</span><strong>Umum</strong><small>Upacara Pernikahan · Raka &amp; Ayu</small></a>
     </div>
   </section>
 

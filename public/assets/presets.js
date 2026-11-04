@@ -194,7 +194,7 @@
     return JSON.parse(JSON.stringify(value));
   }
 
-  function newConfig({ groom, bride, date, religion = 'islam', theme = 'sage', timeZone = 'Asia/Jakarta' }) {
+  function newConfig({ groom, bride, date, religion = 'umum', theme = 'sage', timeZone = 'Asia/Jakarta' }) {
     const preset = religions[religion] || religions.umum;
     const tz = timeZones.find((z) => z.id === timeZone) || timeZones[0];
     const day = (date || '').slice(0, 10);

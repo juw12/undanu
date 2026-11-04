@@ -29,3 +29,19 @@
     /* keep hidden */
   }
 })();
+
+/* Landing page: switch the hero phone between the demo for each religion. */
+(() => {
+  'use strict';
+  const frame = document.getElementById('heroDemo');
+  const chips = document.querySelectorAll('.demo-chip[data-src]');
+  if (!frame || !chips.length) {
+    return;
+  }
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      chips.forEach((other) => other.classList.toggle('active', other === chip));
+      frame.src = chip.dataset.src;
+    });
+  });
+})();
