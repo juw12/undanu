@@ -120,6 +120,9 @@
       videoTitle: 'Video',
       watchHere: 'Putar di sini',
       liveNow: 'Sedang berlangsung — tonton sekarang!',
+      mealTitle: 'Pilihan menu',
+      dietNotePh: 'Catatan makanan / alergi (opsional)',
+      table: 'Meja',
       songRequest: 'Request lagu untuk acara (opsional)',
       songPh: 'Judul lagu – penyanyi',
       shareTitle: 'Bagikan undangan',
@@ -224,6 +227,9 @@
       videoTitle: 'Video',
       watchHere: 'Play here',
       liveNow: 'Happening now — watch live!',
+      mealTitle: 'Meal preference',
+      dietNotePh: 'Dietary note / allergies (optional)',
+      table: 'Table',
       songRequest: 'Request a song for the party (optional)',
       songPh: 'Song title – artist',
       shareTitle: 'Share invitation',
@@ -812,6 +818,7 @@
     select.value = Number(current) <= guest.pax ? current : '1';
     $('[data-action="wa-rsvp"]').hidden = !String(C.rsvp?.whatsapp || '').replace(/\D/g, '');
     $('#songField').hidden = !C.rsvp?.songRequests;
+    renderMealChoices();
     if (!rsvpEnabled()) {
       $('#rsvpForm').hidden = true;
       $('#rsvpDone').hidden = !state.rsvp;
@@ -819,6 +826,21 @@
     if (state.rsvp && !$('#rsvpDone').hidden) {
       showRsvpDone(state.rsvp);
     }
+  }
+
+  function mealOptions() {
+    const raw = C.rsvp?.mealOptions;
+    const list = Array.isArray(raw) ? raw : ['Halal', 'Non-halal', 'Vegetarian'];
+    return list.map((item) => String(item).trim()).filter(Boolean).slice(0, 8);
+  }
+
+  function renderMealChoices() {
+    const field = $('#mealField');
+    const options = C.rsvp?.askMeal ? mealOptions() : [];
+    const current = $('#rsvpForm').querySelector('input[name="meal"]:checked')?.value || state.rsvp?.meal || '';
+    field.hidden = !options.length || $('#rsvpForm').querySelector('input[name="attendance"]:checked')?.value === 'no';
+    $('#mealChoices').innerHTML = options.map((option) => `
+      <label class="choice"><input type="radio" name="meal" value="${esc(option)}" ${option === current ? 'checked' : ''}><span>${esc(option)}</span></label>`).join('');
   }
 
   function formatAccount(number) {
@@ -1077,7 +1099,9 @@
       attendance,
       guests: attendance === 'no' ? 0 : clamp(parseInt(data.get('guests'), 10) || 1, 1, guest.pax),
       message: String(data.get('message') || '').trim().slice(0, 500),
-      song: String(data.get('song') || '').trim().slice(0, 120)
+      song: String(data.get('song') || '').trim().slice(0, 120),
+      meal: attendance === 'no' ? '' : String(data.get('meal') || ''),
+      dietNote: attendance === 'no' ? '' : String(data.get('dietNote') || '').trim().slice(0, 120)
     };
   }
 
@@ -1147,7 +1171,8 @@
     if (entry.attendance === 'yes' && entry.code) {
       pass.hidden = false;
       $('#passCode').textContent = entry.code;
-      $('#passName').textContent = `${entry.name} · ${entry.guests} ${t('person')}`;
+      const table = DATA.guest?.table ? ` · ${t('table')} ${String(DATA.guest.table).replace(/^(meja|table)\s*/i, '')}` : '';
+      $('#passName').textContent = `${entry.name} · ${entry.guests} ${t('person')}${table}`;
       renderQr($('#passQr'), `${entry.code}|${entry.name}|${entry.guests}`);
     } else {
       pass.hidden = true;
@@ -1167,7 +1192,9 @@
       form.elements.guests.value = String(Math.max(1, saved.guests || 1));
       form.elements.message.value = saved.message || '';
       form.elements.song.value = saved.song || '';
+      form.elements.dietNote.value = saved.dietNote || '';
       $('#guestsField').hidden = saved.attendance === 'no';
+      renderMealChoices();
     }
     $('#rsvpDone').hidden = true;
     form.hidden = false;
@@ -1193,6 +1220,7 @@
     form.addEventListener('change', (e) => {
       if (e.target.name === 'attendance') {
         $('#guestsField').hidden = e.target.value === 'no';
+        renderMealChoices();
       }
     });
     form.addEventListener('submit', submitRsvp);

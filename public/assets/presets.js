@@ -195,6 +195,8 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  const DEFAULT_MEAL_OPTIONS = ['Halal', 'Non-halal', 'Vegetarian'];
+
   function newConfig({ groom, bride, date, religion = 'umum', theme = 'ivory', timeZone = 'Asia/Jakarta' }) {
     const preset = religions[religion] || religions.umum;
     const tz = timeZones.find((z) => z.id === timeZone) || timeZones[0];
@@ -238,7 +240,7 @@
       dressCode: { enabled: false, colors: ['#7d8b6a', '#e9dfcc', '#b8955a'], note: { id: '', en: '' } },
       story: [],
       gallery: [],
-      rsvp: { enabled: true, deadline, defaultPax: 2, whatsapp: '', songRequests: true },
+      rsvp: { enabled: true, deadline, defaultPax: 2, whatsapp: '', songRequests: true, askMeal: true, mealOptions: DEFAULT_MEAL_OPTIONS.slice(), showTable: false },
       gifts: {
         enabled: true, mode: 'gift', title: { id: '', en: '' }, intro: { id: '', en: '' },
         confirmations: true, accounts: [], qrisImage: '',
@@ -294,5 +296,5 @@
     { id: 'Dana Punia', en: 'Dana Punia' }
   ];
 
-  window.PRESETS = { religions, themes, timeZones, songs, giftTitles, newConfig, defaultWaTemplate, defaultWaReminder };
+  window.PRESETS = { defaultMealOptions: DEFAULT_MEAL_OPTIONS, religions, themes, timeZones, songs, giftTitles, newConfig, defaultWaTemplate, defaultWaReminder };
 })();

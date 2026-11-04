@@ -608,3 +608,6 @@ body[data-ornament="none"] .corner { display: none; }
 body[data-ornament="line"] .corner { opacity: .55; }
 body[data-ornament="line"] .portrait,
 body[data-ornament="none"] .portrait { border-radius: 22px; }
+
+#mealField input[name="dietNote"] { margin-top: .6rem; }
+#mealChoices { flex-wrap: wrap; }

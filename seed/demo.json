@@ -128,7 +128,14 @@
     "deadline": "2027-02-10",
     "defaultPax": 2,
     "whatsapp": "",
-    "songRequests": true
+    "songRequests": true,
+    "askMeal": true,
+    "mealOptions": [
+      "Halal",
+      "Non-halal",
+      "Vegetarian"
+    ],
+    "showTable": true
   },
   "gifts": {
     "enabled": true,

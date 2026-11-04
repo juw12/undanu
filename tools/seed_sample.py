@@ -6,7 +6,8 @@ Usage (with the server running):
     python tools/seed_sample.py http://localhost:8000 --reset
 
 Creates the account  coba@undanu.test / undanu123  with a published invitation at /i/leo-maya,
-10 guests, 6 RSVPs (wishes + song requests), 2 gift confirmations and 1 check-in.
+10 guests, 6 RSVPs (wishes, song requests, menu choices), 4 tables with an automatic seating plan,
+2 gift confirmations and 1 check-in.
 Everything goes through the public HTTP API, exactly like a real couple and real guests would.
 --reset deletes and recreates the sample invitation if it already exists.
 Set ADMIN_EMAILS=coba@undanu.test on the server to also see the admin page.
@@ -43,15 +44,18 @@ GUESTS = [
     ("Pak Gede Wirawan", "082312123434", 3, "Kantor"),
 ]
 
-# guest name -> (attendance, guests, wish, song request)
+# guest name -> (attendance, guests, wish, song request, menu, dietary note)
 RSVPS = {
-    "Keluarga Santoso": ("yes", 4, "Selamat menempuh hidup baru, Leo & Maya! Kami sekeluarga pasti hadir.", ""),
-    "Tasya & Andre": ("yes", 2, "Akhirnya! Bahagia selalu ya kalian berdua.", "Perfect — Ed Sheeran"),
-    "Ni Made Ayu Lestari": ("yes", 2, "Selamat menempuh hidup baru, semoga selalu rukun dan bahagia.", "Kasih Putih — Glenn Fredly"),
-    "Ahmad Fauzi": ("yes", 2, "Selamat ya Leo & Maya, semoga langgeng sampai tua.", ""),
-    "Yohanes & Clara": ("maybe", 2, "Kami usahakan datang ya! Selamat untuk kalian.", ""),
-    "Kevin": ("no", 0, "Maaf belum bisa hadir, doa terbaik dari jauh!", ""),
+    "Keluarga Santoso": ("yes", 4, "Selamat menempuh hidup baru, Leo & Maya! Kami sekeluarga pasti hadir.", "", "Non-halal", ""),
+    "Tasya & Andre": ("yes", 2, "Akhirnya! Bahagia selalu ya kalian berdua.", "Perfect — Ed Sheeran", "Halal", "Andre alergi kacang"),
+    "Ni Made Ayu Lestari": ("yes", 2, "Selamat menempuh hidup baru, semoga selalu rukun dan bahagia.", "Kasih Putih — Glenn Fredly", "Vegetarian", ""),
+    "Ahmad Fauzi": ("yes", 2, "Selamat ya Leo & Maya, semoga langgeng sampai tua.", "", "Halal", ""),
+    "Yohanes & Clara": ("maybe", 2, "Kami usahakan datang ya! Selamat untuk kalian.", "", "Non-halal", ""),
+    "Kevin": ("no", 0, "Maaf belum bisa hadir, doa terbaik dari jauh!", "", "", ""),
 }
+# Menu the couple filled in themselves (e.g. family who answered by phone)
+OWNER_MEALS = {"Bapak & Ibu Pradipta": "Halal", "Tante Lina": "Vegetarian"}
+TABLES = [("Meja Keluarga", 8), ("Meja 2", 6), ("Meja 3", 6), ("Meja 4", 6)]
 NOT_SENT = {"Tante Lina", "Wei Ling & Hendrik"}
 NOT_OPENED = {"Pak Gede Wirawan"}
 GIFTS = [
@@ -96,6 +100,7 @@ def log_in_or_register(owner: Client) -> None:
 def sample_config() -> dict:
     config = demos.demo_config()
     config.setdefault("rsvp", {})["songRequests"] = True
+    config["rsvp"].update({"askMeal": True, "mealOptions": ["Halal", "Non-halal", "Vegetarian"], "showTable": True})
     config.setdefault("gifts", {})["confirmations"] = True
     return config
 
@@ -135,17 +140,25 @@ def main() -> None:
         if name not in NOT_SENT and name not in NOT_OPENED:
             visitor.call("POST", f"/api/public/{SLUG}/open", {"guestCode": guest["code"]})
         if name in RSVPS:
-            attendance, count, wish, song = RSVPS[name]
+            attendance, count, wish, song, meal, diet_note = RSVPS[name]
             visitor.call("POST", f"/api/public/{SLUG}/rsvp", {
                 "guestCode": guest["code"], "name": name, "attendance": attendance,
-                "guests": count, "message": wish, "song": song,
+                "guests": count, "message": wish, "song": song, "meal": meal, "dietNote": diet_note,
             })
+    for name, meal in OWNER_MEALS.items():
+        owner.call("PUT", f"/api/invitations/{invitation_id}/guests/{guests[name]['id']}", {"meal": meal})
 
     for gift in GIFTS:
         Client(args.base).call("POST", f"/api/public/{SLUG}/gift", {
             "guestCode": guests[gift["guest"]]["code"], "name": gift["guest"],
             "method": gift["method"], "amount": gift["amount"], "message": gift["message"],
         })
+
+    owner.call("PUT", f"/api/invitations/{invitation_id}/tables",
+               {"tables": [{"name": table_name, "capacity": seats} for table_name, seats in TABLES]})
+    seating = owner.call("POST", f"/api/invitations/{invitation_id}/seating/auto",
+                         {"includeMaybe": True, "includePending": True, "keepExisting": False})
+    print(f"Seating: {seating['seated']} parties placed, {len(seating['unseated'])} without a table")
 
     name, count = CHECKED_IN
     owner.call("POST", f"/api/invitations/{invitation_id}/checkin",

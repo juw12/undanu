@@ -217,6 +217,14 @@ CREATE TABLE IF NOT EXISTS reviews (
     updated_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_gifts_invitation ON gifts(invitation_id);
+CREATE TABLE IF NOT EXISTS seating_tables (
+    id INTEGER PRIMARY KEY,
+    invitation_id INTEGER NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    capacity INTEGER NOT NULL DEFAULT 10,
+    sort INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_seating_invitation ON seating_tables(invitation_id, sort);
 CREATE TABLE IF NOT EXISTS password_resets (
     token_hash TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -235,6 +243,9 @@ MIGRATIONS = [
     ("rsvps", "likes", "INTEGER NOT NULL DEFAULT 0"),
     ("rsvps", "reply", "TEXT NOT NULL DEFAULT ''"),
     ("rsvps", "song", "TEXT NOT NULL DEFAULT ''"),
+    ("guests", "meal", "TEXT NOT NULL DEFAULT ''"),
+    ("guests", "diet_note", "TEXT NOT NULL DEFAULT ''"),
+    ("guests", "table_id", "INTEGER"),          # seating_tables.id (cleared manually when a table is removed)
 ]
 
 
@@ -475,6 +486,28 @@ def clamp_int(value, low: int, high: int, default: int) -> int:
     except (TypeError, ValueError):
         return default
     return max(low, min(high, number))
+
+
+DEFAULT_MEAL_OPTIONS = ["Halal", "Non-halal", "Vegetarian"]
+
+
+def meal_options(config: dict) -> list[str]:
+    """Menu choices offered to guests (owner-editable, e.g. Halal / Non-halal / Vegetarian)."""
+    raw = (config.get("rsvp") or {}).get("mealOptions")
+    if not isinstance(raw, list):
+        raw = DEFAULT_MEAL_OPTIONS
+    options = []
+    for item in raw:
+        label = clean_text(item, 40)
+        if label and label not in options:
+            options.append(label)
+    return options[:8]
+
+
+def clean_meal(value, options: list[str]) -> str:
+    """Match a submitted meal choice to one of the options (case-insensitive); '' if none."""
+    wanted = clean_text(value, 40).lower()
+    return next((option for option in options if option.lower() == wanted), "")
 
 
 def validate_slug(conn, slug: str, exclude_id: int | None = None) -> str:
@@ -812,12 +845,28 @@ def invitation_stats(conn, invitation_id: int) -> dict:
         "SELECT COUNT(*) AS total, COALESCE(SUM(amount), 0) AS amount FROM gifts WHERE invitation_id = ?",
         (invitation_id,),
     ).fetchone()
+    # People attending, per menu choice ('' = not chosen yet) - the caterer's numbers.
+    meal_rows = conn.execute(
+        """SELECT g.meal AS meal, COUNT(*) AS parties, SUM(r.guests) AS pax
+           FROM guests g JOIN rsvps r ON r.guest_id = g.id
+           WHERE g.invitation_id = ? AND r.attendance = 'yes'
+           GROUP BY g.meal ORDER BY pax DESC""",
+        (invitation_id,),
+    ).fetchall()
+    seating = conn.execute(
+        """SELECT (SELECT COUNT(*) FROM seating_tables WHERE invitation_id = ?) AS tables,
+                  (SELECT COALESCE(SUM(capacity), 0) FROM seating_tables WHERE invitation_id = ?) AS seats,
+                  (SELECT COUNT(*) FROM guests WHERE invitation_id = ? AND table_id IS NOT NULL) AS seated""",
+        (invitation_id, invitation_id, invitation_id),
+    ).fetchone()
     return {
         "gifts": gifts["total"], "giftAmount": gifts["amount"],
         "guests": g["total"], "sent": g["sent"], "opened": g["opened"],
         "checkedIn": g["checked_in"], "checkedInPax": g["checked_in_pax"],
         "responses": r["total"], "yes": r["yes"], "no": r["no"], "maybe": r["maybe"],
         "pax": r["pax"], "wishes": r["wishes"],
+        "meals": [{"meal": m["meal"], "parties": m["parties"], "pax": m["pax"] or 0} for m in meal_rows],
+        "tables": seating["tables"], "seats": seating["seats"], "seatedParties": seating["seated"],
     }
 
 
@@ -971,6 +1020,10 @@ def guest_payload(row) -> dict:
         "openCount": row["open_count"],
         "checkedInAt": row["checked_in_at"],
         "checkedInCount": row["checked_in_count"],
+        "meal": row["meal"],
+        "dietNote": row["diet_note"],
+        "tableId": row["table_id"],
+        "tableName": row["table_name"] if "table_name" in keys else None,
         "rsvp": {
             "attendance": row["attendance"],
             "guests": row["rsvp_guests"],
@@ -981,8 +1034,11 @@ def guest_payload(row) -> dict:
 
 
 GUEST_SELECT = """
-    SELECT g.*, r.attendance, r.guests AS rsvp_guests, r.message, r.song, r.updated_at AS rsvp_at
-    FROM guests g LEFT JOIN rsvps r ON r.guest_id = g.id
+    SELECT g.*, r.attendance, r.guests AS rsvp_guests, r.message, r.song, r.updated_at AS rsvp_at,
+           t.name AS table_name
+    FROM guests g
+    LEFT JOIN rsvps r ON r.guest_id = g.id
+    LEFT JOIN seating_tables t ON t.id = g.table_id
 """
 
 
@@ -1005,7 +1061,9 @@ def add_guests(req: Request, invitation_id):
     existing = req.conn.execute("SELECT COUNT(*) FROM guests WHERE invitation_id = ?", (row["id"],)).fetchone()[0]
     if existing + len(items) > MAX_GUESTS_PER_INVITATION:
         raise ApiError(400, f"Maksimal {MAX_GUESTS_PER_INVITATION} tamu per undangan.")
-    default_pax = clamp_int(json.loads(row["config"]).get("rsvp", {}).get("defaultPax"), 1, 20, 2)
+    config = json.loads(row["config"])
+    default_pax = clamp_int(config.get("rsvp", {}).get("defaultPax"), 1, 20, 2)
+    options = meal_options(config)
     created = []
     stamp = now_iso()
     for item in items:
@@ -1016,10 +1074,11 @@ def add_guests(req: Request, invitation_id):
             continue
         code = new_guest_code(req.conn, row["id"])
         cursor = req.conn.execute(
-            """INSERT INTO guests (invitation_id, code, name, phone, pax, grp, source, created_at)
-               VALUES (?, ?, ?, ?, ?, ?, 'list', ?)""",
+            """INSERT INTO guests (invitation_id, code, name, phone, pax, grp, meal, source, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, 'list', ?)""",
             (row["id"], code, name, normalise_phone(item.get("phone")),
-             clamp_int(item.get("pax"), 1, 20, default_pax), clean_text(item.get("group"), 40), stamp),
+             clamp_int(item.get("pax"), 1, 20, default_pax), clean_text(item.get("group"), 40),
+             clean_meal(item.get("meal"), options), stamp),
         )
         created.append(cursor.lastrowid)
     return json_response({"created": len(created)}, 201)
@@ -1039,6 +1098,9 @@ def update_guest(req: Request, invitation_id, guest_id):
         "phone": normalise_phone(data["phone"]) if "phone" in data else guest["phone"],
         "pax": clamp_int(data["pax"], 1, 20, guest["pax"]) if "pax" in data else guest["pax"],
         "grp": clean_text(data["group"], 40) if "group" in data else guest["grp"],
+        "meal": clean_text(data["meal"], 40) if "meal" in data else guest["meal"],
+        "diet_note": clean_text(data["dietNote"], 120) if "dietNote" in data else guest["diet_note"],
+        "table_id": own_table_id(req.conn, row["id"], data["tableId"]) if "tableId" in data else guest["table_id"],
         "sent_at": guest["sent_at"],
         "checked_in_at": guest["checked_in_at"],
         "checked_in_count": guest["checked_in_count"],
@@ -1055,7 +1117,8 @@ def update_guest(req: Request, invitation_id, guest_id):
             fields["checked_in_at"] = None
             fields["checked_in_count"] = 0
     req.conn.execute(
-        """UPDATE guests SET name = ?, phone = ?, pax = ?, grp = ?, sent_at = ?, checked_in_at = ?, checked_in_count = ?
+        """UPDATE guests SET name = ?, phone = ?, pax = ?, grp = ?, meal = ?, diet_note = ?, table_id = ?,
+                             sent_at = ?, checked_in_at = ?, checked_in_count = ?
            WHERE id = ?""",
         (*fields.values(), guest["id"]),
     )
@@ -1093,13 +1156,188 @@ def check_in(req: Request, invitation_id):
     return {"guest": guest_payload(guest), "alreadyCheckedIn": already, "stats": invitation_stats(req.conn, row["id"])}
 
 
+# ----- Seating (tables) -------------------------------------------------------
+MAX_TABLES_PER_INVITATION = 200
+
+
+def own_table_id(conn, invitation_id: int, value) -> int | None:
+    """Validate a table id from the client: must belong to this invitation (None = unseated)."""
+    if value in (None, "", 0):
+        return None
+    row = conn.execute(
+        "SELECT id FROM seating_tables WHERE id = ? AND invitation_id = ?", (clamp_int(value, 0, 2**31, 0), invitation_id)
+    ).fetchone()
+    if not row:
+        raise ApiError(400, "Meja tidak ditemukan.")
+    return row["id"]
+
+
+def table_payload(row) -> dict:
+    return {"id": row["id"], "name": row["name"], "capacity": row["capacity"], "sort": row["sort"]}
+
+
+def seats_needed(guest, include_maybe: bool, include_pending: bool) -> int:
+    """How many chairs a guest party needs: confirmed count, or their quota if they haven't answered."""
+    attendance = guest["attendance"]
+    if attendance == "yes":
+        return max(1, guest["rsvp_guests"] or 1)
+    if attendance == "maybe":
+        return max(1, guest["rsvp_guests"] or guest["pax"]) if include_maybe else 0
+    if attendance == "no":
+        return 0
+    return guest["pax"] if include_pending else 0
+
+
+def plan_seating(parties: list[dict], tables: list[dict]) -> tuple[dict, list[dict]]:
+    """Assign parties to tables, keeping each group (Keluarga, Kantor, ...) together where possible.
+
+    parties: [{"id", "group", "seats"}]   tables: [{"id", "capacity", "load"}] (load = seats already taken)
+    A party is never split across tables. Groups are placed largest first; a group's next party goes to
+    the fullest of its own tables that still fits (best fit), otherwise to the emptiest table (room to grow).
+    Returns ({party_id: table_id}, [unseated parties]).
+    """
+    free = {t["id"]: t["capacity"] - t["load"] for t in tables}
+    order = [t["id"] for t in tables]
+    groups: dict[str, list[dict]] = {}
+    for party in parties:
+        key = party["group"].strip().lower() or f"\0solo-{party['id']}"
+        groups.setdefault(key, []).append(party)
+    ordered_groups = sorted(groups.values(), key=lambda members: (-sum(p["seats"] for p in members), members[0]["id"]))
+    assignment: dict[int, int] = {}
+    unseated: list[dict] = []
+    for members in ordered_groups:
+        group_tables: list[int] = []
+        for party in sorted(members, key=lambda p: (-p["seats"], p["id"])):
+            fits_own = [t for t in group_tables if free[t] >= party["seats"]]
+            if fits_own:
+                table = min(fits_own, key=lambda t: (free[t], order.index(t)))
+            else:
+                fits_any = [t for t in order if free[t] >= party["seats"]]
+                if not fits_any:
+                    unseated.append(party)
+                    continue
+                table = max(fits_any, key=lambda t: (free[t], -order.index(t)))
+                group_tables.append(table)
+            free[table] -= party["seats"]
+            assignment[party["id"]] = table
+    return assignment, unseated
+
+
+@route("GET", r"/api/invitations/(\d+)/tables")
+def list_tables(req: Request, invitation_id):
+    row = req.own_invitation(invitation_id)
+    rows = req.conn.execute(
+        "SELECT * FROM seating_tables WHERE invitation_id = ? ORDER BY sort, id", (row["id"],)
+    ).fetchall()
+    return {"tables": [table_payload(t) for t in rows]}
+
+
+@route("PUT", r"/api/invitations/(\d+)/tables")
+def save_tables(req: Request, invitation_id):
+    """Replace the table list: rows with an id are updated, new rows created, missing ones removed."""
+    row = req.own_invitation(invitation_id)
+    items = req.json().get("tables")
+    if not isinstance(items, list):
+        raise ApiError(400, "Daftar meja tidak valid.")
+    if len(items) > MAX_TABLES_PER_INVITATION:
+        raise ApiError(400, f"Maksimal {MAX_TABLES_PER_INVITATION} meja.")
+    existing = {r["id"] for r in req.conn.execute("SELECT id FROM seating_tables WHERE invitation_id = ?", (row["id"],))}
+    keep = set()
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        name = clean_text(item.get("name"), 40) or f"Meja {index + 1}"
+        capacity = clamp_int(item.get("capacity"), 1, 50, 10)
+        table_id = clamp_int(item.get("id"), 0, 2**31, 0)
+        if table_id in existing:
+            req.conn.execute(
+                "UPDATE seating_tables SET name = ?, capacity = ?, sort = ? WHERE id = ?", (name, capacity, index, table_id)
+            )
+            keep.add(table_id)
+        else:
+            cursor = req.conn.execute(
+                "INSERT INTO seating_tables (invitation_id, name, capacity, sort) VALUES (?, ?, ?, ?)",
+                (row["id"], name, capacity, index),
+            )
+            keep.add(cursor.lastrowid)
+    removed = existing - keep
+    for table_id in removed:
+        req.conn.execute("UPDATE guests SET table_id = NULL WHERE table_id = ?", (table_id,))
+        req.conn.execute("DELETE FROM seating_tables WHERE id = ?", (table_id,))
+    return list_tables(req, invitation_id)
+
+
+@route("PUT", r"/api/invitations/(\d+)/seating")
+def save_seating(req: Request, invitation_id):
+    """Manual moves: {"assignments": [{"guestId": 1, "tableId": 3 | null}, ...]}."""
+    row = req.own_invitation(invitation_id)
+    items = req.json().get("assignments")
+    if not isinstance(items, list) or len(items) > MAX_GUESTS_PER_INVITATION:
+        raise ApiError(400, "Data tidak valid.")
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        table_id = own_table_id(req.conn, row["id"], item.get("tableId"))
+        req.conn.execute(
+            "UPDATE guests SET table_id = ? WHERE id = ? AND invitation_id = ?",
+            (table_id, clamp_int(item.get("guestId"), 0, 2**31, 0), row["id"]),
+        )
+    return {"ok": True, "stats": invitation_stats(req.conn, row["id"])}
+
+
+@route("POST", r"/api/invitations/(\d+)/seating/auto")
+def auto_seating(req: Request, invitation_id):
+    row = req.own_invitation(invitation_id)
+    data = req.json()
+    include_maybe = bool(data.get("includeMaybe"))
+    include_pending = bool(data.get("includePending"))
+    keep_existing = bool(data.get("keepExisting"))
+    tables = [dict(t) for t in req.conn.execute(
+        "SELECT id, capacity FROM seating_tables WHERE invitation_id = ? ORDER BY sort, id", (row["id"],)
+    )]
+    if not tables:
+        raise ApiError(400, "Buat meja dulu sebelum mengatur tempat duduk.")
+    guests = req.conn.execute(GUEST_SELECT + " WHERE g.invitation_id = ? ORDER BY g.id", (row["id"],)).fetchall()
+    load = {t["id"]: 0 for t in tables}
+    parties = []
+    assignment: dict[int, int | None] = {}
+    for guest in guests:
+        seats = seats_needed(guest, include_maybe, include_pending)
+        if seats == 0:
+            assignment[guest["id"]] = None              # declined / not counted: free their seat
+        elif keep_existing and guest["table_id"] in load:
+            load[guest["table_id"]] += seats
+            assignment[guest["id"]] = guest["table_id"]
+        else:
+            parties.append({"id": guest["id"], "group": guest["grp"], "seats": seats, "name": guest["name"]})
+    for table in tables:
+        table["load"] = load[table["id"]]
+    planned, unseated = plan_seating(parties, tables)
+    assignment.update(planned)
+    for party in unseated:
+        assignment[party["id"]] = None
+    for guest_id, table_id in assignment.items():
+        req.conn.execute("UPDATE guests SET table_id = ? WHERE id = ?", (table_id, guest_id))
+    max_capacity = max(t["capacity"] for t in tables)
+    return {
+        "seated": len(planned),
+        "unseated": [
+            {"id": p["id"], "name": p["name"], "seats": p["seats"], "tooBig": p["seats"] > max_capacity}
+            for p in unseated
+        ],
+        "stats": invitation_stats(req.conn, row["id"]),
+    }
+
+
 # ----- RSVPs (owner) ----------------------------------------------------------
 @route("GET", r"/api/invitations/(\d+)/rsvps")
 def list_rsvps(req: Request, invitation_id):
     row = req.own_invitation(invitation_id)
     rows = req.conn.execute(
-        """SELECT r.*, g.name AS invited_as, g.code, g.grp, g.pax, g.source
+        """SELECT r.*, g.name AS invited_as, g.code, g.grp, g.pax, g.source, g.meal, g.diet_note,
+                  t.name AS table_name
            FROM rsvps r JOIN guests g ON g.id = r.guest_id
+           LEFT JOIN seating_tables t ON t.id = g.table_id
            WHERE r.invitation_id = ? ORDER BY r.updated_at DESC""",
         (row["id"],),
     ).fetchall()
@@ -1110,6 +1348,7 @@ def list_rsvps(req: Request, invitation_id):
                 "group": r["grp"], "pax": r["pax"], "source": r["source"], "attendance": r["attendance"],
                 "guests": r["guests"], "message": r["message"], "hidden": bool(r["hidden"]),
                 "song": r["song"], "likes": r["likes"], "reply": r["reply"],
+                "meal": r["meal"], "dietNote": r["diet_note"], "tableName": r["table_name"],
                 "createdAt": r["created_at"], "updatedAt": r["updated_at"],
             }
             for r in rows
@@ -1151,7 +1390,8 @@ def export_csv(req: Request, invitation_id):
     buffer = io.StringIO()
     writer = csv.writer(buffer)
     writer.writerow(["Nama", "Grup", "WhatsApp", "Kode", "Link", "Maks Tamu", "Status RSVP",
-                     "Jumlah Hadir", "Ucapan", "Request Lagu", "Undangan Dikirim", "Dibuka", "Check-in", "Jumlah Check-in", "Sumber"])
+                     "Jumlah Hadir", "Menu", "Catatan Makanan", "Meja", "Ucapan", "Request Lagu",
+                     "Undangan Dikirim", "Dibuka", "Check-in", "Jumlah Check-in", "Sumber"])
     base = f"{req.base_url()}/i/{row['slug']}?g="
 
     def cell(value):
@@ -1161,7 +1401,8 @@ def export_csv(req: Request, invitation_id):
     for g in rows:
         writer.writerow([cell(v) for v in [
             g["name"], g["grp"], g["phone"], g["code"], base + g["code"], g["pax"],
-            labels.get(g["attendance"], "Belum"), g["rsvp_guests"] or 0, g["message"] or "", g["song"] or "",
+            labels.get(g["attendance"], "Belum"), g["rsvp_guests"] or 0, g["meal"], g["diet_note"], g["table_name"] or "",
+            g["message"] or "", g["song"] or "",
             g["sent_at"] or "", g["opened_at"] or "", g["checked_in_at"] or "", g["checked_in_count"],
             "Daftar tamu" if g["source"] == "list" else "Link umum",
         ]])
@@ -1182,7 +1423,7 @@ def load_public_invitation(req: Request, slug: str):
     return row, is_owner
 
 
-def public_guest(conn, invitation_id: int, code: str | None):
+def public_guest(conn, invitation_id: int, code: str | None, show_table: bool = False):
     if not code:
         return None
     code = re.sub(r"[^A-Z0-9]", "", code.upper())[:12]
@@ -1193,11 +1434,14 @@ def public_guest(conn, invitation_id: int, code: str | None):
         "name": guest["name"],
         "pax": guest["pax"],
         "code": guest["code"],
+        "table": guest["table_name"] if show_table else None,
         "rsvp": {
             "attendance": guest["attendance"],
             "guests": guest["rsvp_guests"],
             "message": guest["message"],
             "song": guest["song"],
+            "meal": guest["meal"],
+            "dietNote": guest["diet_note"],
         } if guest["attendance"] else None,
     }
 
@@ -1212,7 +1456,8 @@ def public_invitation(req: Request, slug):
         "published": bool(row["published"]),
         "preview": is_owner,
         "config": public_config(row["config"]),
-        "guest": public_guest(req.conn, row["id"], req.query.get("g")),
+        "guest": public_guest(req.conn, row["id"], req.query.get("g"),
+                              bool(json.loads(row["config"]).get("rsvp", {}).get("showTable"))),
     }
 
 
@@ -1257,6 +1502,10 @@ def public_rsvp(req: Request, slug):
 
     count = 0 if attendance == "no" else clamp_int(data.get("guests"), 1, guest["pax"], 1)
     song = clean_text(data.get("song"), 120) if config.get("rsvp", {}).get("songRequests") else ""
+    if config.get("rsvp", {}).get("askMeal") and attendance != "no":
+        meal = clean_meal(data.get("meal"), meal_options(config)) or guest["meal"]
+        diet_note = clean_text(data.get("dietNote"), 120)
+        req.conn.execute("UPDATE guests SET meal = ?, diet_note = ? WHERE id = ?", (meal, diet_note, guest["id"]))
     req.conn.execute(
         """INSERT INTO rsvps (invitation_id, guest_id, name, attendance, guests, message, song, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -1511,7 +1760,7 @@ def render_invite_page(req: Request, slug: str) -> Response:
     if not row:
         return not_found_page()
     config = public_config(row["config"])
-    guest = public_guest(req.conn, row["id"], req.query.get("g"))
+    guest = public_guest(req.conn, row["id"], req.query.get("g"), bool(config.get("rsvp", {}).get("showTable")))
     couple = config.get("couple", {})
     first, second = couple.get("groom", {}), couple.get("bride", {})
     if config.get("brideFirst"):

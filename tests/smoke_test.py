@@ -287,11 +287,72 @@ def main():
     status, _ = other.call("GET", f"/api/invitations/{inv_id}/gifts")
     check("other user cannot see gifts", status == 404, status)
 
+    # Menu choice (halal / non-halal / vegetarian): stored on the guest, totalled for the caterer
+    status, data = owner.call("GET", f"/api/invitations/{inv_id}")
+    cfg = data["config"]
+    cfg["rsvp"].update({"askMeal": True, "mealOptions": ["Halal", "Non-halal", "Vegetarian"], "showTable": True})
+    owner.call("PUT", f"/api/invitations/{inv_id}", {"config": cfg})
+    joko_rsvp_body = {"name": "Joko", "attendance": "yes", "guests": 2, "message": "Selamat!",
+                      "song": "Perfect – Ed Sheeran", "guestCode": joko["code"]}
+    anon.call("POST", f"/api/public/{slug}/rsvp", {**joko_rsvp_body, "meal": "Pizza"})
+    status, data = owner.call("GET", f"/api/invitations/{inv_id}/guests")
+    by_code = {g["code"]: g for g in data["guests"]}
+    check("unknown menu choice ignored", by_code[joko["code"]]["meal"] == "", by_code[joko["code"]])
+    anon.call("POST", f"/api/public/{slug}/rsvp", {**joko_rsvp_body, "meal": "vegetarian", "dietNote": "Tanpa MSG"})
+    teman = by_code[anon_code]
+    status, data = owner.call("PUT", f"/api/invitations/{inv_id}/guests/{teman['id']}", {"meal": "Halal"})
+    check("owner can set a guest's menu", status == 200 and data["guest"]["meal"] == "Halal", data)
+    status, data = owner.call("GET", f"/api/invitations/{inv_id}/guests")
+    by_code = {g["code"]: g for g in data["guests"]}
+    check("menu choice matched to options", by_code[joko["code"]]["meal"] == "Vegetarian"
+          and by_code[joko["code"]]["dietNote"] == "Tanpa MSG", by_code[joko["code"]])
+    meals = {m["meal"]: m["pax"] for m in data["stats"]["meals"]}
+    check("menu totals for the caterer", meals.get("Vegetarian") == 2 and meals.get("Halal") == 2, data["stats"]["meals"])
+    status, data = anon.call("GET", f"/api/public/{slug}?g={joko['code']}")
+    check("guest sees own menu choice when editing RSVP", data["guest"]["rsvp"]["meal"] == "Vegetarian", data["guest"])
+
+    # Seating: tables, automatic grouping, manual moves
+    status, data = other.call("PUT", f"/api/invitations/{inv_id}/tables", {"tables": [{"name": "X", "capacity": 5}]})
+    check("other user cannot edit tables", status == 404, status)
+    status, data = owner.call("POST", f"/api/invitations/{inv_id}/seating/auto", {})
+    check("auto seating needs tables first", status == 400, data)
+    status, data = owner.call("PUT", f"/api/invitations/{inv_id}/tables",
+                              {"tables": [{"name": "Meja 1", "capacity": 3}, {"name": "Meja 2", "capacity": 2}, {"capacity": 99}]})
+    tables = data.get("tables", [])
+    check("tables created (capacity clamped, default name)", status == 200 and [t["capacity"] for t in tables] == [3, 2, 50]
+          and tables[2]["name"] == "Meja 3", data)
+    status, data = owner.call("PUT", f"/api/invitations/{inv_id}/tables", {"tables": tables[:2]})
+    tables = data["tables"]
+    check("table removed", len(tables) == 2 and data["tables"][0]["id"] == tables[0]["id"], data)
+    status, data = owner.call("POST", f"/api/invitations/{inv_id}/seating/auto", {"includeMaybe": False, "includePending": False})
+    check("auto seating places confirmed parties", status == 200 and data["seated"] == 2 and not data["unseated"], data)
+    status, data = owner.call("GET", f"/api/invitations/{inv_id}/guests")
+    by_code = {g["code"]: g for g in data["guests"]}
+    joko_table, teman_table = by_code[joko["code"]]["tableId"], by_code[anon_code]["tableId"]
+    check("parties not split and tables not overfilled", joko_table == tables[0]["id"] and teman_table == tables[1]["id"],
+          (joko_table, teman_table, tables))
+    check("declined / pending guests left unseated", all(g["tableId"] is None for g in data["guests"]
+          if g["code"] not in (joko["code"], anon_code)), data["guests"])
+    status, data = owner.call("POST", f"/api/invitations/{inv_id}/seating/auto", {"includePending": True, "keepExisting": True})
+    check("guests that don't fit are reported", status == 200 and any(p["name"].startswith("=HYPERLINK") for p in data["unseated"])
+          and data["stats"]["seatedParties"] == 2, data)
+    status, data = owner.call("PUT", f"/api/invitations/{inv_id}/seating", {"assignments": [{"guestId": joko["id"], "tableId": 999999}]})
+    check("foreign table id rejected", status == 400, data)
+    status, data = anon.call("GET", f"/api/public/{slug}?g={anon_code}")
+    check("guest sees table number on e-pass", data["guest"]["table"] == "Meja 2", data["guest"])
+    status, data = owner.call("POST", f"/api/invitations/{inv_id}/checkin", {"code": anon_code})
+    check("check-in shows table + menu", data["guest"]["tableName"] == "Meja 2" and data["guest"]["meal"] == "Halal", data["guest"])
+    status, data = owner.call("PUT", f"/api/invitations/{inv_id}/seating", {"assignments": [{"guestId": joko["id"], "tableId": None}]})
+    check("manual unseat", status == 200 and data["stats"]["seatedParties"] == 1, data)
+    owner.call("PUT", f"/api/invitations/{inv_id}/seating", {"assignments": [{"guestId": joko["id"], "tableId": tables[0]["id"]}]})
+
     # CSV export
     status, body = owner.call("GET", f"/api/invitations/{inv_id}/export.csv")
     csv_text = body.decode("utf-8-sig") if isinstance(body, bytes) else ""
     check("CSV export", status == 200 and "Bapak Joko & Keluarga" in csv_text
           and "Request Lagu" in csv_text and "Perfect – Ed Sheeran" in csv_text, csv_text[:300])
+    check("CSV has menu + table columns", "Menu" in csv_text and "Vegetarian" in csv_text and "Tanpa MSG" in csv_text
+          and "Meja 1" in csv_text, csv_text[:400])
     check("CSV formula injection guarded", "'=HYPERLINK" in csv_text)
 
     # Path traversal

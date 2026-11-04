@@ -52,16 +52,16 @@
 
 The static demo only shows the invitation. The dashboard needs the Python backend, so run it
 locally (see [Run locally](#run-locally)) or deploy it. Here's what it looks like with the
-sample couple from `tools/seed_sample.py`:
+sample couple from `tools/seed_sample.py` (gift confirmations and QR check-in have their own tabs too):
 
 <table>
   <tr>
     <td width="50%"><img src="docs/media/dashboard-editor.jpg" alt="Editor with live phone preview"><br><sub><b>Editor:</b> themes, ornaments, photos and music, with a live phone preview</sub></td>
-    <td width="50%"><img src="docs/media/dashboard-guests.jpg" alt="Guest list and WhatsApp sending"><br><sub><b>Guests:</b> bulk add or CSV import, a personal WhatsApp link per guest, sent/opened tracking</sub></td>
+    <td width="50%"><img src="docs/media/dashboard-guests.jpg" alt="Guest list with status filters"><br><sub><b>Guests:</b> status chips (not sent / not opened / no reply / replied), menu + table per guest, one-by-one WhatsApp send & reminder queue</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/media/dashboard-rsvp.jpg" alt="RSVP and wishes"><br><sub><b>RSVP & wishes:</b> who's coming, a catering estimate, replies, song requests, CSV export</sub></td>
-    <td width="50%"><img src="docs/media/dashboard-gifts.jpg" alt="Gift confirmations"><br><sub><b>Gifts:</b> transfer and gift confirmations from guests (plus QR check-in on the day)</sub></td>
+    <td width="50%"><img src="docs/media/dashboard-rsvp.jpg" alt="RSVP, wishes and menu totals"><br><sub><b>RSVP & wishes:</b> who's coming, menu totals for the caterer (halal / non-halal / vegetarian + allergy notes), song requests</sub></td>
+    <td width="50%"><img src="docs/media/dashboard-seating.jpg" alt="Seating plan"><br><sub><b>Tables:</b> set tables × seats, auto-seat by group (parties never split), drag or move guests, menu count per table, print</sub></td>
   </tr>
 </table>
 
@@ -105,16 +105,25 @@ Nothing to `pip install`, no build step.
 - **Guests:** add one, paste many, or import CSV; per-guest max guests and group; personal links (`?g=CODE`);
   one-click WhatsApp send with an editable template
 - **Delivery tracking:** see who was sent the link and **who actually opened it** (link-preview bots aren't counted);
-  filters for "sent, not opened" and "opened, no reply"; a **WhatsApp reminder** template for guests who haven't replied
+  one-tap status chips with counts (*not sent yet*, *sent but not opened*, *no reply*, *replied*, attending…) and a
+  **send queue** that opens WhatsApp guest after guest — the invitation for those not sent yet, the **reminder** template
+  for those who haven't replied (marked as sent automatically)
+- **Menu choices:** guests pick Halal / Non-halal / Vegetarian (the options are editable) plus an allergy note when they RSVP;
+  the couple can set it per guest too. The RSVP tab totals people per menu for the caterer
+- **Table seating:** enter the number of tables and seats per table, then **auto-seat** — guests of the same group
+  (Keluarga, Kantor, Teman kuliah…) sit together, a party is never split, and anyone who doesn't fit is listed.
+  Rename tables, change a table's capacity, drag guests between tables (or use the *Pindah…* menu on phones),
+  see the menu count per table, and print the plan. The table shows up at check-in and, optionally, on the guest's e-pass
 - **RSVP dashboard:** attending/maybe/declined, head count, catering estimate, **song requests**, reply to or
   hide wishes, CSV export, optional **email notification for each new RSVP**
 - **Wedding-day check-in:** scan the guest's QR e-pass with a phone camera, type the code, or search by name;
-  live arrival counter
+  shows their **table and menu**; live arrival counter
 
 **For guests (invitation page)**
 - Envelope cover with the guest's name, Bahasa Indonesia / English, countdown, Google Calendar/.ics,
   maps, gallery with lightbox (photos + videos), copy-to-clipboard gift cards and gift confirmation
-- RSVP saved to the server (guests can change their answer), optional song request, and a QR e-pass if attending
+- RSVP saved to the server (guests can change their answer), menu choice + allergy note, optional song request,
+  and a QR e-pass if attending (with their table number if the couple turns it on)
 - **Wishes wall** with likes (one per device) and the couple's replies
 - **Share sheet:** WhatsApp, Facebook, X, Telegram, copy link, native share, and a generated
   **Instagram Story image** (1080×1920); hashtag links to Instagram
@@ -141,14 +150,14 @@ Want a filled-in dashboard to click around? With the server running:
 python tools/seed_sample.py          # creates the sample couple "Leo & Maya"
 ```
 
-Then log in at `/app` with **coba@undanu.test / undanu123**: 10 guests, 6 RSVPs with wishes and song
-requests, 2 gift confirmations and 1 check-in. The guest view is at `/i/leo-maya`. Start the server with
+Then log in at `/app` with **coba@undanu.test / undanu123**: 10 guests, 6 RSVPs with wishes, song
+requests and menu choices, 4 tables with an automatic seating plan, 2 gift confirmations and 1 check-in. The guest view is at `/i/leo-maya`. Start the server with
 `ADMIN_EMAILS=coba@undanu.test` to also see the admin review page (`/app#/admin`); `--reset` recreates the sample.
 
 Tests (with the server running):
 
 ```bash
-python tests/smoke_test.py http://localhost:8000 ./data     # 74 API checks incl. email, video, gifts, reviews
+python tests/smoke_test.py http://localhost:8000 ./data     # 91 API checks incl. email, video, gifts, menus, seating
 ```
 
 ## Install as an app

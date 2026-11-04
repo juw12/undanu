@@ -1,6 +1,6 @@
 /* =====================================================================
    Dashboard SPA (vanilla JS, no build step).
-   Routes: #/login #/register #/ #/inv/:id/edit|guests|rsvp|checkin #/account
+   Routes: #/login #/register #/ #/inv/:id/edit|guests|rsvp|seating|gifts|checkin #/account
    ===================================================================== */
 (() => {
   'use strict';
@@ -50,7 +50,10 @@
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
     arrowLeft: '<path d="M19 12H5M12 19l-7-7 7-7"/>',
     star: '<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
-    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    table: '<circle cx="12" cy="12" r="5"/><circle cx="12" cy="3" r="1.4"/><circle cx="12" cy="21" r="1.4"/><circle cx="3" cy="12" r="1.4"/><circle cx="21" cy="12" r="1.4"/>',
+    send: '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+    printer: '<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>'
   };
   const icon = (name) =>
     `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -401,6 +404,36 @@
   /* ------------------------------------------------------------------ */
   /* Shell                                                              */
   /* ------------------------------------------------------------------ */
+  // Menu choices + seats -------------------------------------------------
+  function mealOptionsOf(config) {
+    const raw = config?.rsvp?.mealOptions;
+    const list = Array.isArray(raw) ? raw : P.defaultMealOptions;
+    return list.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  function mealTag(guest) {
+    if (!guest.meal && !guest.dietNote) {
+      return '';
+    }
+    const note = guest.dietNote ? ` <span class="muted">(${esc(guest.dietNote)})</span>` : '';
+    return `<span class="meal-tag">🍽 ${esc(guest.meal || 'Menu?')}${note}</span>`;
+  }
+
+  // Chairs a party needs (mirrors seats_needed() on the server).
+  function seatsFor(guest, { includeMaybe = false, includePending = false } = {}) {
+    const attendance = guest.rsvp?.attendance;
+    if (attendance === 'yes') {
+      return Math.max(1, guest.rsvp.guests || 1);
+    }
+    if (attendance === 'maybe') {
+      return includeMaybe ? Math.max(1, guest.rsvp.guests || guest.pax) : 0;
+    }
+    if (attendance === 'no') {
+      return 0;
+    }
+    return includePending ? guest.pax : 0;
+  }
+
   function topbar() {
     const user = state.user;
     return `
@@ -428,6 +461,7 @@
       ['edit', 'Editor', 'edit'],
       ['guests', 'Tamu & Kirim', 'users'],
       ['rsvp', 'RSVP & Ucapan', 'mail'],
+      ['seating', 'Meja', 'table'],
       ['gifts', 'Hadiah', 'gift'],
       ['checkin', 'Check-in', 'scan']
     ];
@@ -459,6 +493,7 @@
     [/^#\/inv\/(\d+)\/rsvp$/, (m) => viewRsvps(Number(m[1]))],
     [/^#\/inv\/(\d+)\/checkin$/, (m) => viewCheckin(Number(m[1]))],
     [/^#\/inv\/(\d+)\/gifts$/, (m) => viewGifts(Number(m[1]))],
+    [/^#\/inv\/(\d+)\/seating$/, (m) => viewSeating(Number(m[1]))],
     [/^#\/admin$/, () => viewAdmin()]
   ];
 
@@ -1323,6 +1358,12 @@
         </div>
         ${f.text('rsvp.whatsapp', 'No. WhatsApp untuk konfirmasi alternatif (opsional)', { placeholder: '6281234567890', hint: 'Jika diisi, tamu juga bisa konfirmasi via WhatsApp.' })}
         ${f.toggle('rsvp.songRequests', 'Tamu bisa request lagu untuk acara')}
+        <div class="sub-head">Menu & meja</div>
+        ${f.toggle('rsvp.askMeal', 'Tanya pilihan menu tamu (mis. halal / non-halal / vegetarian)')}
+        <label class="field"><span>Pilihan menu</span>
+          <input data-path="rsvp.mealOptions" data-type="list" value="${esc(mealOptionsOf(config).join(', '))}" placeholder="Halal, Non-halal, Vegetarian" maxlength="300">
+          <small>Pisahkan dengan koma (maks. 8). Tamu juga bisa menulis catatan alergi. Rekapnya ada di menu RSVP.</small></label>
+        ${f.toggle('rsvp.showTable', 'Tampilkan nomor meja di e-pass tamu (atur di menu Meja)')}
         ${f.toggle('admin.notifyEmail', 'Kirim email ke saya setiap ada RSVP baru')}
       `),
       section('gifts', 'gift', 'Amplop Digital & Donasi', 'Rekening, e-wallet, QRIS, alamat kado', `
@@ -1613,6 +1654,8 @@
           value = Math.max(1, Math.min(20, parseInt(el.value, 10) || 1));
         } else if (el.dataset.type === 'datetime') {
           value = el.value ? `${el.value}:00${tzById(config.timeZone).offset}` : '';
+        } else if (el.dataset.type === 'list') {
+          value = el.value.split(',').map((item) => item.trim()).filter(Boolean).slice(0, 8);
         }
         setPath(config, el.dataset.path, value);
         if (el.dataset.path === 'timeZone') {
@@ -1736,10 +1779,42 @@
       .split('{pax}').join(String(guest.pax));
   }
 
+  const GUEST_STATUS_TABS = [
+    ['all', 'Semua'],
+    ['unsent', 'Belum dikirim'],
+    ['unopened', 'Dikirim, belum dibuka'],
+    ['norsvp', 'Belum balas'],
+    ['replied', 'Sudah balas'],
+    ['yes', 'Hadir'],
+    ['maybe', 'Ragu'],
+    ['no', 'Tidak hadir'],
+    ['checked', 'Check-in']
+  ];
+
+  function guestMatchesStatus(g, status) {
+    const a = g.rsvp?.attendance;
+    switch (status) {
+      case 'unsent': return !g.sentAt;
+      case 'sent': return Boolean(g.sentAt);
+      case 'unopened': return Boolean(g.sentAt) && !g.openedAt;
+      case 'opened-norsvp': return Boolean(g.openedAt) && !a;
+      case 'norsvp': return !a;
+      case 'replied': return Boolean(a);
+      case 'yes': case 'no': case 'maybe': return a === status;
+      case 'checked': return Boolean(g.checkedInAt);
+      default: return true;
+    }
+  }
+
   async function viewGuests(id) {
     shell('<div class="spinner"></div>');
-    const [inv, data] = await Promise.all([api(`/api/invitations/${id}`), api(`/api/invitations/${id}/guests`)]);
+    const [inv, data, tableData] = await Promise.all([
+      api(`/api/invitations/${id}`),
+      api(`/api/invitations/${id}/guests`),
+      api(`/api/invitations/${id}/tables`)
+    ]);
     ensureDefaults(inv.config);
+    const tables = tableData.tables;
     let guests = data.guests;
     let stats = data.stats;
     const filters = { q: '', status: 'all', group: '' };
@@ -1780,21 +1855,11 @@
         </div>
         <small class="hint">Variabel: {nama} {link} {pasangan} {tanggal} {pax}. Disimpan otomatis.</small>
       </details>
+      <div class="status-chips" id="statusTabs" role="tablist" aria-label="Filter status"></div>
       <div class="toolbar">
         <input class="search" id="guestSearch" placeholder="Cari nama, nomor, atau kode…">
-        <select id="statusFilter">
-          <option value="all">Semua status</option>
-          <option value="unsent">Belum dikirim</option>
-          <option value="sent">Sudah dikirim</option>
-          <option value="unopened">Dikirim, belum dibuka</option>
-          <option value="opened-norsvp">Dibuka, belum respon</option>
-          <option value="norsvp">Belum respon</option>
-          <option value="yes">Hadir</option>
-          <option value="maybe">Masih ragu</option>
-          <option value="no">Tidak hadir</option>
-          <option value="checked">Sudah check-in</option>
-        </select>
         <select id="groupFilter"></select>
+        <span id="queueBar"></span>
         <a class="btn btn-ghost" href="/api/invitations/${id}/export.csv">${icon('download')} Ekspor CSV</a>
       </div>
       <div id="guestTable"></div>
@@ -1816,6 +1881,34 @@
       const opts = groups();
       $('#groupFilter').innerHTML = `<option value="">Semua grup</option>${opts.map((g) => `<option ${g === filters.group ? 'selected' : ''}>${esc(g)}</option>`).join('')}`;
       $('#groupList').innerHTML = opts.map((g) => `<option value="${esc(g)}">`).join('');
+      renderTabs();
+    }
+
+    function renderTabs() {
+      const inGroup = guests.filter((g) => !filters.group || g.group === filters.group);
+      $('#statusTabs').innerHTML = GUEST_STATUS_TABS.map(([key, label]) => {
+        const count = inGroup.filter((g) => guestMatchesStatus(g, key)).length;
+        const urgent = ['unsent', 'norsvp'].includes(key) && count > 0;
+        return `<button type="button" data-status="${key}" class="${key === filters.status ? 'active' : ''} ${urgent ? 'urgent' : ''}" role="tab" aria-selected="${key === filters.status}">
+          ${esc(label)} <b>${count}</b></button>`;
+      }).join('');
+    }
+
+    // Guests in the current filter that still need a WhatsApp: the invitation itself, or a reminder.
+    function queueItems() {
+      return guests.filter(matches)
+        .filter((g) => !g.sentAt || !g.rsvp)
+        .map((g) => ({ guest: g, kind: g.sentAt ? 'remind' : 'invite' }));
+    }
+
+    function renderQueueBar() {
+      const items = queueItems();
+      const invites = items.filter((item) => item.kind === 'invite').length;
+      const reminders = items.length - invites;
+      const label = invites && reminders ? `Kirim & ingatkan (${items.length})` : invites ? `Kirim undangan (${invites})` : `Ingatkan yang belum balas (${reminders})`;
+      $('#queueBar').innerHTML = items.length && !['replied', 'yes', 'no', 'maybe', 'checked'].includes(filters.status)
+        ? `<button class="btn btn-wa" data-act="queue" title="Buka WhatsApp satu per satu untuk tamu di filter ini">${icon('send')} ${label}</button>`
+        : '';
     }
 
     function matches(g) {
@@ -1826,17 +1919,7 @@
       if (filters.group && g.group !== filters.group) {
         return false;
       }
-      const a = g.rsvp?.attendance;
-      switch (filters.status) {
-        case 'unsent': return !g.sentAt;
-        case 'sent': return Boolean(g.sentAt);
-        case 'unopened': return Boolean(g.sentAt) && !g.openedAt;
-        case 'opened-norsvp': return Boolean(g.openedAt) && !a;
-        case 'norsvp': return !a;
-        case 'yes': case 'no': case 'maybe': return a === filters.status;
-        case 'checked': return Boolean(g.checkedInAt);
-        default: return true;
-      }
+      return guestMatchesStatus(g, filters.status);
     }
 
     function renderTable() {
@@ -1844,11 +1927,17 @@
       const visible = showAll ? list : list.slice(0, 200);
       if (!guests.length) {
         $('#guestTable').innerHTML = '<div class="card empty-state"><div class="big">📇</div><p>Belum ada tamu. Tambahkan satu per satu atau tempel daftar di atas.</p></div>';
+        renderQueueBar();
+        return;
+      }
+      if (!list.length) {
+        $('#guestTable').innerHTML = '<div class="card empty-state"><div class="big">✅</div><p>Tidak ada tamu di filter ini.</p></div>';
+        renderQueueBar();
         return;
       }
       $('#guestTable').innerHTML = `
         <div class="table-wrap"><table>
-          <thead><tr><th>Tamu</th><th>WhatsApp</th><th>Maks</th><th>RSVP</th><th>Kirim / Dibuka</th><th style="text-align:right">Aksi</th></tr></thead>
+          <thead><tr><th>Tamu</th><th>WhatsApp</th><th>Maks</th><th>RSVP</th><th>Menu / Meja</th><th>Kirim / Dibuka</th><th style="text-align:right">Aksi</th></tr></thead>
           <tbody>${visible.map((g) => `
             <tr data-id="${g.id}">
               <td><div class="name">${esc(g.name)}</div>
@@ -1856,6 +1945,7 @@
               <td class="sub">${g.phone ? esc(g.phone) : '—'}</td>
               <td>${g.pax}</td>
               <td>${attendanceBadge(g.rsvp?.attendance)}${g.rsvp?.attendance === 'yes' ? `<div class="sub">${g.rsvp.guests} orang</div>` : ''}</td>
+              <td class="sub">${mealTag(g) || '<span class="muted">—</span>'}${g.tableName ? `<div><span class="table-tag">${icon('table')} ${esc(g.tableName)}</span></div>` : ''}</td>
               <td class="sub">${g.sentAt ? `✓ dikirim ${esc(relTime(g.sentAt))}` : '—'}${g.openedAt ? `<br>👁 dibuka ${esc(relTime(g.openedAt))}${g.openCount > 1 ? ` (${g.openCount}×)` : ''}` : ''}</td>
               <td><div class="acts">
                 ${g.sentAt && !g.rsvp
@@ -1869,6 +1959,7 @@
             </tr>`).join('')}</tbody>
         </table></div>
         <p class="muted small" style="margin-top:.6rem">Menampilkan ${visible.length} dari ${list.length} tamu${list.length > visible.length ? ` · <button class="link-btn" data-act="show-all">Tampilkan semua</button>` : ''}</p>`;
+      renderQueueBar();
     }
 
     async function reload() {
@@ -1917,6 +2008,17 @@
               <label class="field"><span>Maks. tamu</span><input name="pax" type="number" min="1" max="20" value="${guest.pax}"></label>
               <label class="field"><span>Grup</span><input name="group" value="${esc(guest.group)}" list="groupList"></label>
             </div>
+            <div class="row row-3">
+              <label class="field"><span>Menu</span><select name="meal">
+                <option value="">— Belum dipilih —</option>
+                ${Array.from(new Set([...mealOptionsOf(inv.config), guest.meal].filter(Boolean))).map((m) => `<option ${m === guest.meal ? 'selected' : ''}>${esc(m)}</option>`).join('')}
+              </select></label>
+              <label class="field"><span>Catatan makanan</span><input name="dietNote" value="${esc(guest.dietNote || '')}" maxlength="120" placeholder="Alergi kacang"></label>
+              <label class="field"><span>Meja</span><select name="tableId">
+                <option value="">— Belum diatur —</option>
+                ${tables.map((t) => `<option value="${t.id}" ${t.id === guest.tableId ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}
+              </select></label>
+            </div>
             <label class="toggle"><input type="checkbox" name="sent" ${guest.sentAt ? 'checked' : ''}><span class="track"></span>Tandai sudah dikirim</label>
             <p class="muted small" style="margin-top:1rem">Link personal: <code>${esc(inv.url)}?g=${esc(guest.code)}</code></p>
           </form>`,
@@ -1927,7 +2029,16 @@
             try {
               await api(`/api/invitations/${id}/guests/${guest.id}`, {
                 method: 'PUT',
-                body: { name: form.name.value, phone: form.phone.value, pax: Number(form.pax.value), group: form.group.value, sent: form.sent.checked }
+                body: {
+                  name: form.name.value,
+                  phone: form.phone.value,
+                  pax: Number(form.pax.value),
+                  group: form.group.value,
+                  meal: form.meal.value,
+                  dietNote: form.dietNote.value,
+                  tableId: form.tableId.value ? Number(form.tableId.value) : null,
+                  sent: form.sent.checked
+                }
               });
               close();
               toast('Tersimpan');
@@ -1936,6 +2047,79 @@
               toast(err.message, 'error');
             }
           });
+        }
+      });
+    }
+
+    // One WhatsApp at a time: browsers only allow one new tab per click, so the couple taps through the list.
+    function openSendQueue(items) {
+      let index = 0;
+      let opened = 0;
+      modal({
+        title: 'Kirim via WhatsApp satu per satu',
+        body: '<div id="queueBody"></div>',
+        foot: '<button class="btn btn-ghost" data-close>Selesai</button>',
+        onMount(el, close) {
+          const body = el.querySelector('#queueBody');
+          const messageFor = (item) => waMessage(item.kind === 'invite' ? $('#waTemplate').value : $('#waReminder').value, item.guest, inv);
+          function render() {
+            if (index >= items.length) {
+              body.innerHTML = `<div class="empty-state"><div class="big">🎉</div><p><b>Selesai!</b> ${opened} chat WhatsApp dibuka.</p>
+                <p class="muted small">Status "dikirim" sudah ditandai otomatis untuk undangan baru.</p></div>`;
+              return;
+            }
+            const item = items[index];
+            const g = item.guest;
+            body.innerHTML = `
+              <div class="queue-progress"><i style="width:${(index / items.length) * 100}%"></i></div>
+              <p class="muted small">${index + 1} dari ${items.length} · ${item.kind === 'invite' ? 'Undangan' : 'Pengingat (sudah dikirim, belum balas)'}</p>
+              <h3 style="margin:.2rem 0">${esc(g.name)}</h3>
+              <p class="muted small">${g.phone ? esc(g.phone) : '⚠️ Belum ada nomor WhatsApp — salin pesan lalu kirim manual.'}${g.group ? ` · ${esc(g.group)}` : ''}</p>
+              <pre class="queue-msg">${esc(messageFor(item))}</pre>
+              <div class="toolbar" style="margin:0">
+                ${g.phone ? `<button class="btn btn-wa" data-q="open">${icon('whatsapp')} Buka WhatsApp & lanjut</button>` : ''}
+                <button class="btn btn-ghost" data-q="copy">${icon('copy')} Salin pesan</button>
+                <button class="btn btn-ghost" data-q="skip">Lewati</button>
+              </div>`;
+          }
+          async function markSent(g) {
+            if (g.sentAt) {
+              return;
+            }
+            const res = await api(`/api/invitations/${id}/guests/${g.id}`, { method: 'PUT', body: { sent: true } }).catch(() => null);
+            if (res) {
+              Object.assign(g, res.guest);
+              stats.sent += 1;
+            }
+          }
+          body.addEventListener('click', async (e) => {
+            const action = e.target.closest('[data-q]')?.dataset.q;
+            if (!action) {
+              return;
+            }
+            const item = items[index];
+            if (action === 'open') {
+              window.open(`https://wa.me/${item.guest.phone}?text=${encodeURIComponent(messageFor(item))}`, '_blank', 'noopener');
+              opened += 1;
+              await markSent(item.guest);
+              index += 1;
+            } else if (action === 'copy') {
+              await copyText(messageFor(item));
+              toast('Pesan disalin');
+              await markSent(item.guest);
+              index += 1;
+            } else {
+              index += 1;
+            }
+            render();
+          });
+          el.addEventListener('click', (e) => {
+            if (e.target.closest('[data-close]')) {
+              renderStats();
+              renderTable();
+            }
+          });
+          render();
         }
       });
     }
@@ -1966,20 +2150,29 @@
         }
       },
       onChange(e) {
-        if (e.target.id === 'statusFilter') {
-          filters.status = e.target.value;
-          renderTable();
-        } else if (e.target.id === 'groupFilter') {
+        if (e.target.id === 'groupFilter') {
           filters.group = e.target.value;
+          renderTabs();
           renderTable();
         }
       },
       async onClick(e) {
+        const chip = e.target.closest('[data-status]');
+        if (chip) {
+          filters.status = chip.dataset.status;
+          renderTabs();
+          renderTable();
+          return;
+        }
         const btn = e.target.closest('[data-act]');
         if (!btn) {
           return;
         }
         const act = btn.dataset.act;
+        if (act === 'queue') {
+          openSendQueue(queueItems());
+          return;
+        }
         if (act === 'bulk-add') {
           const ok = await addGuests(parseGuestLines($('#bulkText').value));
           if (ok) {
@@ -2093,6 +2286,27 @@
             <i style="width:${(stats.no / total) * 100}%;background:var(--danger)"></i>
           </div>
           <p class="muted small" style="margin:.5rem 0 0">${stats.responses} respons masuk · siapkan katering untuk ±${stats.pax + Math.round(stats.maybe * 0.5)} orang (hadir + 50% yang ragu)</p>
+        </div>
+        ${mealSummaryCard()}`;
+    }
+
+    // Caterer view: people attending per menu choice, plus every allergy / special note.
+    function mealSummaryCard() {
+      if (!inv.config.rsvp?.askMeal && !stats.meals.some((m) => m.meal)) {
+        return '';
+      }
+      const chosen = stats.meals.filter((m) => m.meal);
+      const unset = stats.meals.find((m) => !m.meal);
+      const notes = rsvps.filter((r) => r.attendance === 'yes' && r.dietNote);
+      return `
+        <div class="card meal-card">
+          <h2>🍽 Rekap menu untuk katering <span class="muted small">(tamu yang hadir)</span></h2>
+          <div class="meal-grid">
+            ${chosen.map((m) => `<div class="meal-cell"><b>${m.pax}</b><span>${esc(m.meal)}</span><small>${m.parties} undangan</small></div>`).join('')}
+            ${unset ? `<div class="meal-cell unset"><b>${unset.pax}</b><span>Belum pilih</span><small>${unset.parties} undangan</small></div>` : ''}
+            ${!stats.meals.length ? '<p class="muted small">Belum ada tamu yang konfirmasi hadir.</p>' : ''}
+          </div>
+          ${notes.length ? `<div class="diet-notes"><b>Catatan khusus:</b> ${notes.map((r) => `<span>${esc(r.name)}: ${esc(r.dietNote)}</span>`).join('')}</div>` : ''}
         </div>`;
     }
 
@@ -2117,6 +2331,8 @@
             <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
               <strong>${esc(r.name)}</strong>${attendanceBadge(r.attendance)}
               ${r.attendance === 'yes' ? `<span class="badge">${r.guests} orang</span>` : ''}
+              ${r.attendance !== 'no' ? mealTag(r) : ''}
+              ${r.tableName ? `<span class="table-tag">${icon('table')} ${esc(r.tableName)}</span>` : ''}
               ${r.hidden ? '<span class="badge">Disembunyikan</span>' : ''}
             </div>
             ${r.message ? `<p class="msg">${esc(r.message)}</p>` : ''}
@@ -2221,6 +2437,357 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* Seating (tables)                                                   */
+  /* ------------------------------------------------------------------ */
+  async function viewSeating(id) {
+    shell('<div class="spinner"></div>');
+    const [inv, guestData, tableData] = await Promise.all([
+      api(`/api/invitations/${id}`),
+      api(`/api/invitations/${id}/guests`),
+      api(`/api/invitations/${id}/tables`)
+    ]);
+    let guests = guestData.guests;
+    let tables = tableData.tables;
+    const prefsKey = `undanu_seating_${id}`;
+    const prefs = { includeMaybe: false, includePending: false };
+    try {
+      Object.assign(prefs, JSON.parse(localStorage.getItem(prefsKey) || '{}'));
+    } catch {
+      /* ignore */
+    }
+    let dragGuestId = null;
+    let lastUnseated = [];
+
+    shell(`
+      ${invHeader(inv, 'seating')}
+      <div id="seatStats"></div>
+      <div class="grid seat-setup" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-bottom:1rem">
+        <form class="card" id="tableSetup">
+          <h2>Meja di venue</h2>
+          <div class="row row-2">
+            <label class="field"><span>Jumlah meja</span><input name="count" type="number" min="1" max="200" value="${tables.length || 10}" required></label>
+            <label class="field"><span>Kursi per meja</span><input name="capacity" type="number" min="1" max="50" value="${tables[0]?.capacity || 10}" required></label>
+          </div>
+          <button class="btn btn-primary" type="submit">${icon('table')} ${tables.length ? 'Perbarui jumlah meja' : 'Buat meja'}</button>
+          <small class="hint" style="display:block;margin-top:.5rem">Nama dan kapasitas tiap meja bisa diubah langsung di kartunya (mis. "Meja Keluarga Inti", 12 kursi).</small>
+        </form>
+        <div class="card">
+          <h2>Atur tempat duduk</h2>
+          <div class="field"><label class="toggle"><input type="checkbox" id="optMaybe" ${prefs.includeMaybe ? 'checked' : ''}><span class="track"></span>Sertakan tamu yang masih ragu</label></div>
+          <div class="field"><label class="toggle"><input type="checkbox" id="optPending" ${prefs.includePending ? 'checked' : ''}><span class="track"></span>Sertakan yang belum balas (pakai maks. tamu)</label></div>
+          <div class="toolbar" style="margin:.9rem 0 .4rem">
+            <button class="btn btn-primary" data-act="auto">✨ Atur otomatis</button>
+            <button class="btn btn-soft" data-act="auto-keep" title="Hanya tamu yang belum dapat meja; susunan yang sudah ada tidak diubah">Isi yang belum dapat meja</button>
+            <button class="btn btn-ghost" data-act="clear">Kosongkan</button>
+            <button class="btn btn-ghost" data-act="print">${icon('printer')} Cetak</button>
+          </div>
+          <small class="hint">Otomatis: tamu satu grup (Keluarga, Kantor, Teman kuliah…) didudukkan semeja/berdekatan, dan satu rombongan tidak pernah dipisah. Setelah itu geser tamu antar meja sesuka Anda.</small>
+        </div>
+      </div>
+      <div id="seatBoard"></div>`);
+
+    const displaySeats = (g) => seatsFor(g, { includeMaybe: true, includePending: true });
+    const tableById = (tableId) => tables.find((t) => t.id === tableId);
+    const membersOf = (tableId) => guests.filter((g) => g.tableId === tableId);
+    const usedSeats = (tableId) => membersOf(tableId).reduce((sum, g) => sum + displaySeats(g), 0);
+    const needsSeat = (g) => !g.tableId && seatsFor(g, prefs) > 0;
+
+    function renderStats() {
+      const capacity = tables.reduce((sum, t) => sum + t.capacity, 0);
+      const seatedPeople = guests.filter((g) => g.tableId).reduce((sum, g) => sum + displaySeats(g), 0);
+      const waiting = guests.filter(needsSeat);
+      const waitingPeople = waiting.reduce((sum, g) => sum + seatsFor(g, prefs), 0);
+      const need = seatedPeople + waitingPeople;
+      const spare = capacity - need;
+      $('#seatStats').innerHTML = `
+        <div class="stats">
+          <div class="stat"><b>${tables.length}</b><span>Meja · ${capacity} kursi</span></div>
+          <div class="stat accent"><b>${need}</b><span>Kursi dibutuhkan</span></div>
+          <div class="stat"><b>${seatedPeople}</b><span>Orang sudah dapat meja</span></div>
+          <div class="stat ${waitingPeople ? 'warn' : ''}"><b>${waitingPeople}</b><span>Belum dapat meja (${waiting.length} undangan)</span></div>
+          <div class="stat ${spare < 0 ? 'danger' : ''}"><b>${Math.abs(spare)}</b><span>${spare < 0 ? 'Kursi KURANG — tambah meja' : 'Kursi tersisa'}</span></div>
+        </div>`;
+    }
+
+    function mealLine(members) {
+      const counts = {};
+      members.forEach((g) => {
+        const seats = displaySeats(g);
+        if (seats) {
+          const key = g.meal || 'Menu belum dipilih';
+          counts[key] = (counts[key] || 0) + seats;
+        }
+      });
+      return Object.entries(counts).map(([meal, n]) => `<span>${esc(meal)} <b>${n}</b></span>`).join('');
+    }
+
+    function moveOptions(g) {
+      const options = tables
+        .filter((t) => t.id !== g.tableId)
+        .map((t) => `<option value="${t.id}">${esc(t.name)} (${Math.max(0, t.capacity - usedSeats(t.id))} kosong)</option>`)
+        .join('');
+      return `<select class="party-move" data-move="${g.id}" aria-label="Pindahkan ${esc(g.name)}">
+        <option value="">Pindah…</option>${options}${g.tableId ? '<option value="none">Lepas dari meja</option>' : ''}</select>`;
+    }
+
+    function partyChip(g) {
+      const seats = displaySeats(g);
+      const attendance = g.rsvp?.attendance;
+      const flag = attendance === 'no'
+        ? '<span class="badge no">Tidak hadir — lepas dari meja</span>'
+        : attendance === 'maybe' ? '<span class="badge maybe">Ragu</span>'
+          : !attendance ? '<span class="badge pending">Belum balas</span>' : '';
+      return `
+        <li class="party ${attendance === 'no' ? 'declined' : ''}" draggable="true" data-guest="${g.id}">
+          <div class="party-top"><span class="party-name">${esc(g.name)}</span><span class="party-seats" title="Kursi">${seats}</span></div>
+          <div class="party-sub">${g.group ? `<span class="badge info">${esc(g.group)}</span>` : ''}${mealTag(g)}${flag}</div>
+          ${moveOptions(g)}
+        </li>`;
+    }
+
+    function renderBoard() {
+      renderStats();
+      const board = $('#seatBoard');
+      if (!tables.length) {
+        const people = guests.reduce((sum, g) => sum + seatsFor(g, prefs), 0);
+        board.innerHTML = `<div class="card empty-state"><div class="big">🪑</div>
+          <p>Belum ada meja. Isi jumlah meja dan kursi per meja di atas, lalu klik <b>Buat meja</b>.</p>
+          ${people ? `<p class="muted small">Saat ini ${people} orang perlu kursi → dengan meja isi 10 butuh ±${Math.ceil(people / 10)} meja.</p>` : ''}</div>`;
+        return;
+      }
+      const waiting = guests.filter(needsSeat).sort((a, b) => (a.group || '~').localeCompare(b.group || '~') || a.name.localeCompare(b.name));
+      board.innerHTML = `
+        ${lastUnseated.length ? `<div class="card seat-alert">⚠️ <b>${lastUnseated.length} undangan tidak muat</b> di meja yang tersedia:
+          ${lastUnseated.map((p) => `${esc(p.name)} (${p.seats} kursi${p.tooBig ? ', lebih besar dari kapasitas meja' : ''})`).join(', ')}.
+          Tambah meja/kursi atau pindahkan manual.</div>` : ''}
+        <div class="seat-layout">
+          <aside class="card seat-waiting" data-table="none">
+            <h2>Belum dapat meja <span class="muted small">(${waiting.length})</span></h2>
+            <ul class="seat-list">${waiting.map(partyChip).join('') || '<li class="muted small seat-empty">Semua tamu sudah dapat meja 🎉</li>'}</ul>
+          </aside>
+          <div class="seat-grid">
+            ${tables.map((t) => {
+              const members = membersOf(t.id);
+              const used = usedSeats(t.id);
+              const over = used > t.capacity;
+              return `
+                <section class="seat-table ${over ? 'over' : ''} ${used === t.capacity ? 'full' : ''}" data-table="${t.id}">
+                  <div class="seat-head">
+                    <input class="seat-name" data-rename="${t.id}" value="${esc(t.name)}" maxlength="40" aria-label="Nama meja">
+                    <span class="seat-count"><b>${used}</b>/<input class="seat-cap" data-cap="${t.id}" type="number" min="1" max="50" value="${t.capacity}" aria-label="Kapasitas"></span>
+                  </div>
+                  <div class="seat-bar"><i style="width:${Math.min(100, (used / t.capacity) * 100)}%"></i></div>
+                  ${over ? `<p class="seat-over">Kelebihan ${used - t.capacity} orang</p>` : ''}
+                  <div class="seat-meals">${mealLine(members)}</div>
+                  <ul class="seat-list">${members.map(partyChip).join('') || '<li class="muted small seat-empty">Seret tamu ke sini</li>'}</ul>
+                </section>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }
+
+    async function reloadGuests() {
+      const fresh = await api(`/api/invitations/${id}/guests`);
+      guests = fresh.guests;
+    }
+
+    async function moveGuest(guestId, tableId) {
+      const guest = guests.find((g) => g.id === guestId);
+      if (!guest || guest.tableId === tableId) {
+        return;
+      }
+      try {
+        await api(`/api/invitations/${id}/seating`, { method: 'PUT', body: { assignments: [{ guestId, tableId }] } });
+        guest.tableId = tableId;
+        guest.tableName = tableId ? tableById(tableId)?.name : null;
+        lastUnseated = lastUnseated.filter((p) => p.id !== guestId);
+        renderBoard();
+        const table = tableById(tableId);
+        if (table && usedSeats(table.id) > table.capacity) {
+          toast(`${table.name} kelebihan ${usedSeats(table.id) - table.capacity} orang`, 'error');
+        }
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function saveTables(list) {
+      const res = await api(`/api/invitations/${id}/tables`, { method: 'PUT', body: { tables: list } });
+      tables = res.tables;
+      await reloadGuests();
+      renderBoard();
+    }
+
+    // Inline rename / capacity edits: save quietly (no re-render, so typing isn't interrupted).
+    let tableEditsPending = false;
+    const saveTableEdits = debounce(async () => {
+      if (!tableEditsPending) {
+        return;
+      }
+      tableEditsPending = false;
+      try {
+        await api(`/api/invitations/${id}/tables`, {
+          method: 'PUT',
+          body: { tables: tables.map((t) => ({ id: t.id, name: t.name, capacity: t.capacity })) }
+        });
+        guests.forEach((g) => {
+          g.tableName = g.tableId ? tableById(g.tableId)?.name : null;
+        });
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }, 700);
+
+    async function runAuto(keepExisting) {
+      if (!tables.length) {
+        toast('Buat meja dulu', 'error');
+        return;
+      }
+      if (!keepExisting && guests.some((g) => g.tableId)) {
+        const ok = await confirmDialog('Susun ulang semua tempat duduk? Pengaturan manual sebelumnya akan diganti.', { okText: 'Susun ulang' });
+        if (!ok) {
+          return;
+        }
+      }
+      try {
+        const res = await api(`/api/invitations/${id}/seating/auto`, { method: 'POST', body: { ...prefs, keepExisting } });
+        lastUnseated = res.unseated;
+        await reloadGuests();
+        renderBoard();
+        toast(res.unseated.length ? `${res.seated} undangan diatur · ${res.unseated.length} tidak muat` : `${res.seated} undangan sudah dapat meja`, res.unseated.length ? 'error' : '');
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    // Drag & drop between tables (desktop); the "Pindah…" select does the same on phones.
+    const board = $('#seatBoard');
+    board.addEventListener('dragstart', (e) => {
+      const chip = e.target.closest('.party');
+      if (chip) {
+        dragGuestId = Number(chip.dataset.guest);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', chip.dataset.guest);
+        chip.classList.add('dragging');
+      }
+    });
+    board.addEventListener('dragend', () => {
+      dragGuestId = null;
+      $$('.drop-hover', board).forEach((el) => el.classList.remove('drop-hover'));
+      $$('.dragging', board).forEach((el) => el.classList.remove('dragging'));
+    });
+    board.addEventListener('dragover', (e) => {
+      const target = e.target.closest('[data-table]');
+      if (target && dragGuestId) {
+        e.preventDefault();
+        $$('.drop-hover', board).forEach((el) => el !== target && el.classList.remove('drop-hover'));
+        target.classList.add('drop-hover');
+      }
+    });
+    board.addEventListener('drop', (e) => {
+      const target = e.target.closest('[data-table]');
+      if (target && dragGuestId) {
+        e.preventDefault();
+        const tableId = target.dataset.table === 'none' ? null : Number(target.dataset.table);
+        moveGuest(dragGuestId, tableId);
+      }
+    });
+
+    renderBoard();
+
+    state.view = {
+      async onSubmit(e) {
+        if (e.target.id !== 'tableSetup') {
+          return;
+        }
+        e.preventDefault();
+        const count = Math.max(1, Math.min(200, parseInt(e.target.count.value, 10) || 1));
+        const capacity = Math.max(1, Math.min(50, parseInt(e.target.capacity.value, 10) || 10));
+        const removed = tables.slice(count);
+        const displaced = guests.filter((g) => removed.some((t) => t.id === g.tableId));
+        if (displaced.length) {
+          const ok = await confirmDialog(`${removed.length} meja akan dihapus dan ${displaced.length} undangan di meja itu kembali ke daftar "Belum dapat meja". Lanjutkan?`, { okText: 'Lanjutkan', danger: true });
+          if (!ok) {
+            return;
+          }
+        }
+        const list = Array.from({ length: count }, (_, i) => (tables[i]
+          ? { id: tables[i].id, name: tables[i].name, capacity }
+          : { name: `Meja ${i + 1}`, capacity }));
+        try {
+          await saveTables(list);
+          e.target.querySelector('button[type="submit"]').innerHTML = `${icon('table')} Perbarui jumlah meja`;
+          toast(`${count} meja × ${capacity} kursi tersimpan`);
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      },
+      onInput(e) {
+        const renameId = Number(e.target.dataset.rename || 0);
+        const capId = Number(e.target.dataset.cap || 0);
+        if (renameId) {
+          tableById(renameId).name = e.target.value.trim() || tableById(renameId).name;
+          tableEditsPending = true;
+          saveTableEdits();
+        } else if (capId) {
+          tableById(capId).capacity = Math.max(1, Math.min(50, parseInt(e.target.value, 10) || 1));
+          tableEditsPending = true;
+          saveTableEdits();
+        }
+      },
+      onChange(e) {
+        if (e.target.id === 'optMaybe' || e.target.id === 'optPending') {
+          prefs.includeMaybe = $('#optMaybe').checked;
+          prefs.includePending = $('#optPending').checked;
+          localStorage.setItem(prefsKey, JSON.stringify(prefs));
+          renderBoard();
+        } else if (e.target.dataset.move) {
+          const value = e.target.value;
+          if (value) {
+            moveGuest(Number(e.target.dataset.move), value === 'none' ? null : Number(value));
+          }
+        } else if (e.target.dataset.cap) {
+          saveTableEdits.flush();
+          renderBoard();
+        }
+      },
+      async onClick(e) {
+        const btn = e.target.closest('[data-act]');
+        if (!btn) {
+          return;
+        }
+        const act = btn.dataset.act;
+        if (act === 'auto') {
+          runAuto(false);
+        } else if (act === 'auto-keep') {
+          runAuto(true);
+        } else if (act === 'print') {
+          window.print();
+        } else if (act === 'clear') {
+          const seated = guests.filter((g) => g.tableId);
+          if (!seated.length) {
+            return;
+          }
+          const ok = await confirmDialog(`Lepaskan ${seated.length} undangan dari semua meja?`, { okText: 'Kosongkan', danger: true });
+          if (ok) {
+            await api(`/api/invitations/${id}/seating`, { method: 'PUT', body: { assignments: seated.map((g) => ({ guestId: g.id, tableId: null })) } });
+            seated.forEach((g) => {
+              g.tableId = null;
+              g.tableName = null;
+            });
+            lastUnseated = [];
+            renderBoard();
+            toast('Semua meja dikosongkan');
+          }
+        }
+      },
+      cleanup() {
+        return saveTableEdits.flush();
+      }
+    };
+  }
+
+  /* ------------------------------------------------------------------ */
   /* Check-in                                                           */
   /* ------------------------------------------------------------------ */
   async function viewCheckin(id) {
@@ -2293,6 +2860,8 @@
         <span class="code-pill">${esc(guest.code)}</span>
         <h3>${esc(guest.name)}</h3>
         <p>${guest.group ? `<span class="badge info">${esc(guest.group)}</span> ` : ''}${rsvpText}</p>
+        ${guest.tableName ? `<p class="checkin-table">${icon('table')} ${esc(guest.tableName)}</p>` : ''}
+        ${mealTag(guest) ? `<p>${mealTag(guest)}</p>` : ''}
         ${already ? `<p><b>Sudah check-in</b> pukul ${esc(fmtDate(guest.checkedInAt, inv.config.timeZone, { hour: '2-digit', minute: '2-digit' }))} (${guest.checkedInCount} orang)</p>` : ''}
         <div class="stepper"><button type="button" data-act="minus">−</button><b id="countValue">${count}</b><button type="button" data-act="plus">+</button></div>
         <div class="muted small">Jumlah orang yang datang (maks. undangan: ${guest.pax})</div>
@@ -2325,7 +2894,7 @@
           guests[index] = res.guest;
         }
         renderStats();
-        renderResult('ok', `<div class="big-count">✓</div><h3>${esc(res.guest.name)}</h3><p>Check-in ${res.guest.checkedInCount} orang berhasil. Selamat datang!</p>`);
+        renderResult('ok', `<div class="big-count">✓</div><h3>${esc(res.guest.name)}</h3><p>Check-in ${res.guest.checkedInCount} orang berhasil. Selamat datang!</p>${res.guest.tableName ? `<p class="checkin-table">${icon('table')} ${esc(res.guest.tableName)}</p>` : ''}`);
         current = null;
         $('#codeInput').value = '';
         $('#codeInput').focus();
