@@ -227,4 +227,5 @@ To rebuild the GitHub Pages demo after changing the invitation design: `python t
   on iPhone, type the code or search by name
 
 ## License
-MIT © Juwen Lie
+
+Released under the [MIT License](LICENSE) © 2026 Juwen Lie. Contributions are welcome under the same license; see the [contributing guide](https://github.com/juw12/.github/blob/main/CONTRIBUTING.md) and [Code of Conduct](https://github.com/juw12/.github/blob/main/CODE_OF_CONDUCT.md).
