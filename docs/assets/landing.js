@@ -8,6 +8,9 @@
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
+  if (document.querySelector('meta[name="undanu-static"]')) {
+    return; // GitHub Pages build: no review API, keep the section hidden without a 404
+  }
   try {
     const response = await fetch('/api/reviews/public', { headers: { 'X-Requested-With': 'fetch' } });
     if (!response.ok) {
@@ -65,7 +68,9 @@
 
   function updateDemo() {
     if (frame) {
-      frame.src = demoUrl(frame.getAttribute('src'), { agama, switcher: '0' });
+      // The iframe ships with data-src so the demo loads once, already in the right language.
+      const base = frame.dataset.src || frame.getAttribute('src');
+      frame.src = demoUrl(base, { agama, switcher: '0' });
     }
     if (demoLink) {
       demoLink.href = demoUrl(demoLink.getAttribute('href'), { agama });
@@ -103,5 +108,7 @@
   const initial = storedLang() || ((navigator.language || 'id').toLowerCase().startsWith('id') ? 'id' : 'en');
   if (initial === 'en') {
     setLang('en', { remember: false });
+  } else {
+    updateDemo();
   }
 })();

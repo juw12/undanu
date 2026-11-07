@@ -63,6 +63,7 @@ def build_landing():
         'Ini demo statis di GitHub Pages — coba <a href="app/">dashboard pasangan</a> (data tersimpan di browser Anda). '
         "Aplikasi lengkap berjalan di server Anda sendiri — gratis dan open source.</p>",
     )
+    html = html.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n  <meta name="undanu-static" content="1">', 1)
     (DOCS / "index.html").write_text(html, encoding="utf-8")
 
 
